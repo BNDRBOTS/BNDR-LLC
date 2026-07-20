@@ -1338,16 +1338,15 @@
 
       function render(t) {
         var sc = (holding ? 1.025 : 1) * clamp(1 + pos.z / 1250, 0.9, 1.18);
-        var idleRoll = Math.sin((t - t0) * 0.00013) * 2.2;
-        orb.style.transform = "translate3d(" + (pos.x - homeX).toFixed(2) + "px," + (pos.y - homeY).toFixed(2) + "px," + pos.z.toFixed(2) + "px) rotateX(" + rotation.x.toFixed(2) + "deg) rotateY(" + rotation.y.toFixed(2) + "deg) rotateZ(" + (rotation.z + idleRoll).toFixed(2) + "deg) scale(" + sc.toFixed(4) + ")";
+        /* No rotateX/rotateY/rotateZ: tilting a flat circle in perspective
+           renders an ellipse. A sphere's silhouette is rotation-invariant,
+           so the element only translates and scales. */
+        orb.style.transform = "translate3d(" + (pos.x - homeX).toFixed(2) + "px," + (pos.y - homeY).toFixed(2) + "px," + pos.z.toFixed(2) + "px) scale(" + sc.toFixed(4) + ")";
         var fluidX = clamp(-vel.x * 1.18, -28, 28);
         var fluidY = clamp(-vel.y * 1.18 + vel.z * 0.3, -28, 28);
-        var fluidRot = clamp(Math.atan2(vel.y, vel.x || 0.001) * 180 / Math.PI + 90, -180, 180);
         orb.style.setProperty("--fluid-x", fluidX.toFixed(2) + "px");
         orb.style.setProperty("--fluid-y", fluidY.toFixed(2) + "px");
-        orb.style.setProperty("--fluid-rot", fluidRot.toFixed(2) + "deg");
         orb.style.setProperty("--fluid-scale", clamp(1 + Math.hypot(vel.x, vel.y, vel.z) / 190, 1, 1.16).toFixed(3));
-        orb.style.setProperty("--shine-rot", (-rotation.z * 0.28 - rotation.y * 0.14).toFixed(2) + "deg");
         /* shadow: rides under the orb, stretches with speed, thins with lift */
         var sp = Math.hypot(vel.x, vel.y, vel.z);
         var liftN = clamp(((homeY - pos.y) + Math.max(0, pos.z) * 0.52) / 300, 0, 1);
