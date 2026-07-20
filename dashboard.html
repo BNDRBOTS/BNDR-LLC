@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0" />
+  <title>Owner Console — BNDR</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#0a0a0b" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=351" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=351" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,800;1,900&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/bndr.css?v=3.5.1" />
+  <style>
+    .shake { animation: bndr-shake .4s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes bndr-shake {
+      10%, 90% { transform: translateX(-1px); }
+      20%, 80% { transform: translateX(2px); }
+      30%, 50%, 70% { transform: translateX(-4px); }
+      40%, 60% { transform: translateX(4px); }
+    }
+  </style>
+</head>
+<body class="dash">
+
+  <div class="gate" id="gate">
+    <div class="gate-card">
+      <img src="assets/bndr-logo.png" alt="BNDR"
+           onerror="this.outerHTML='&lt;span class=&quot;brand-word&quot;&gt;BNDR™&lt;/span&gt;'" />
+      <h1>Owner Console</h1>
+      <p id="gate-copy">This door only opens for the person with the keys.</p>
+      <form id="gate-form" autocomplete="off">
+        <input id="gate-pass" type="password" maxlength="256" autocomplete="current-password" placeholder="Owner passphrase" aria-label="Owner passphrase" autofocus />
+        <button id="gate-submit" type="submit">Enter →</button>
+        <p class="gate-err" id="gate-err" role="alert"></p>
+      </form>
+      <div class="gate-divider"><span>Temporary professional access</span></div>
+      <form id="operator-form" autocomplete="off">
+        <input id="operator-code" type="password" autocomplete="off" placeholder="Paste access code or link" aria-label="Temporary access code or link" />
+        <button class="gate-alt-button" type="submit">Use access code</button>
+        <p class="gate-err" id="operator-err" role="alert"></p>
+      </form>
+    </div>
+  </div>
+
+  <div class="dash-shell" id="dash-shell">
+    <div>
+      <header class="dash-top">
+        <img src="assets/bndr-logo.png" alt=""
+             onerror="this.style.display='none'" />
+        <span class="dash-title">BNDR Owner Console</span>
+        <span class="access-badge" id="access-badge"></span>
+        <span class="spacer"></span>
+        <button id="pv-toggle" class="dash-btn" type="button">Preview</button>
+        <button id="btn-save" class="dash-btn" type="button">Save draft</button>
+        <button id="btn-publish" class="dash-btn primary" type="button">Publish → export content.js</button>
+      </header>
+      <nav class="dash-tabs" aria-label="Console sections">
+        <button data-pane="copy" class="on" type="button">Site copy</button>
+        <button data-pane="builder" type="button">Builder page</button>
+        <button data-pane="blog" type="button">Blog</button>
+        <button data-pane="galleries" type="button">Galleries + templates</button>
+        <button data-pane="footer" type="button">Footer</button>
+        <button data-pane="intake" type="button">Intake</button>
+        <button data-pane="analytics" type="button">Analytics</button>
+        <button data-pane="seo" type="button">SEO</button>
+        <button data-pane="settings" type="button">Settings</button>
+      </nav>
+    </div>
+
+    <div class="dash-main">
+      <div class="dash-work">
+        <div class="dash-pane on" id="pane-copy"></div>
+        <div class="dash-pane" id="pane-builder"></div>
+        <div class="dash-pane" id="pane-blog"></div>
+        <div class="dash-pane" id="pane-galleries"></div>
+        <div class="dash-pane" id="pane-footer"></div>
+        <div class="dash-pane" id="pane-intake"></div>
+        <div class="dash-pane" id="pane-analytics"></div>
+        <div class="dash-pane" id="pane-seo"></div>
+        <div class="dash-pane" id="pane-settings"></div>
+      </div>
+      <aside class="dash-preview" id="dash-preview">
+        <div class="preview-bar">
+          <span class="dock-label">LIVE · DRAFT</span>
+          <select id="pv-route" aria-label="Preview page"></select>
+          <button id="pv-reload" class="dash-btn" type="button" title="Reload preview">↻</button>
+          <span class="spacer"></span>
+          <span class="pv-size">
+            <button data-w="1440" class="on" type="button">1440</button>
+            <button data-w="390" type="button">390</button>
+          </span>
+        </div>
+        <div class="preview-stage" id="pv-stage"><iframe id="pv-frame" title="Live site preview"></iframe></div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/content.js?v=3.5.1"></script>
+  <script src="js/md.js?v=3.5.1"></script>
+  <script src="js/facts.js?v=3.5.1"></script>
+  <script src="js/dashboard.js?v=3.5.1" defer></script>
+</body>
+</html>
