@@ -1,0 +1,12 @@
+{
+  "name": "bndr-site",
+  "version": "3.5.3",
+  "private": true,
+  "description": "BNDR static site with hardened, env-configured owner console sign-in.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server.mjs",
+    "audit": "node tests/source-audit.mjs"
+  }
+}
