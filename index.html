@@ -1,0 +1,790 @@
+IMPLEMENT THIS IN DREAM MACHINE. DO NOT REDESIGN, REPLACE, OR REGRESS EXISTING WORK.
+
+FIRST: inspect the current repository and trace the entire existing ingestion → parsing → normalization → deduplication → reconciliation → corpus-storage flow.
+
+If equivalent functionality already exists, EXTEND AND HARDEN IT in place. Do not create a competing second pipeline. Reuse existing types, storage, APIs, workers, queues, UI patterns, provenance structures, and naming wherever they already solve the requirement correctly.
+
+If any instruction below would damage a working feature, preserve the working feature and implement the requirement compatibly around it. Do not silently remove functionality to simplify implementation.
+
+GOAL
+
+Dream Machine must be able to ingest extremely messy source containers—including ChatGPT JSON exports where individual message strings themselves contain attachments, filenames, JSON, NDJSON, YAML, Markdown, code, copied conversations, source inventories, schemas, prior AI analysis, court/evidence references, URLs, IDs, and additional embedded datasets—and turn them into a clean, provenance-preserving canonical corpus automatically.
+
+CORE PIPELINE
+
+RAW INPUT
+→ SOURCE PRESERVATION
+→ CONTAINER PARSING
+→ RECURSIVE ARTIFACT EXTRACTION
+→ DETERMINISTIC NORMALIZATION
+→ STRUCTURAL DEDUPLICATION
+→ SEMANTIC RECONCILIATION
+→ REFERENCE RESOLUTION
+→ CANONICAL CORPUS
+→ DOWNSTREAM ANALYSIS
+
+NON-NEGOTIABLE RULE
+
+EXPLODE FIRST. RECONCILE SECOND. DELETE NOTHING.
+
+Every recoverable structure inside an input becomes a provenance-bound object.
+
+Exact duplicates may collapse into one canonical object while retaining every occurrence reference.
+
+Semantic matches may merge only after relationship classification.
+
+Ambiguity remains explicitly unresolved.
+
+The original source bytes and original source text must remain recoverable exactly as ingested.
+
+────────────────────
+
+1. IMMUTABLE SOURCE PRESERVATION
+   ────────────────────
+
+For every uploaded/imported source:
+
+* Preserve untouched original bytes.
+* Compute SHA-256.
+* Assign stable source ID.
+* Record:
+
+  * original filename
+  * MIME/type
+  * byte size
+  * ingestion timestamp
+  * source/import origin if known
+  * parser version
+  * checksum
+* Never overwrite the original during cleanup.
+* Every downstream record must be traceable back to the exact source location that produced it.
+
+Maintain logical layers equivalent to:
+
+/originals
+/normalized
+/canonical
+
+Use the repository's current storage model if one already exists rather than literally creating these directories.
+
+────────────────────
+2. CONTAINER DETECTION + PARSING
+────────────────────
+
+Detect structured container types before invoking semantic reasoning.
+
+At minimum support:
+
+* ChatGPT exports
+* generic JSON
+* JSON arrays
+* JSON objects
+* JSONL / NDJSON
+* Markdown
+* TXT
+* HTML
+* CSV
+* YAML
+* email-like exports
+* Messenger/social-message exports
+* mixed text containing embedded structured blocks
+
+For ChatGPT-style exports:
+
+* extract metadata
+* extract messages[]
+* preserve message order
+* preserve role
+* preserve timestamp
+* preserve prompt/response relationships where inferable deterministically
+* assign stable message IDs
+* retain the entire raw message string
+
+Never flatten the whole conversation into one anonymous text blob.
+
+────────────────────
+3. RECURSIVE ARTIFACT EXTRACTION
+────────────────────
+
+This is the major requirement.
+
+A single message/string may contain many independent artifacts. Recursively inspect its contents and extract child objects without removing them from the parent.
+
+Recognize at minimum:
+
+* attachment markers
+  Example:
+  [Attachment: Letter to Dad.pdf]
+
+* filenames and file references
+
+* absolute/relative paths
+
+* Google Drive URLs
+
+* Google Drive IDs
+
+* Gmail message IDs
+
+* Notion URLs/IDs
+
+* ordinary URLs
+
+* source inventories
+
+* file manifests
+
+* JSON objects
+
+* arrays
+
+* NDJSON sequences
+
+* JSON Schema
+
+* YAML blocks
+
+* Markdown tables
+
+* fenced code
+
+* SQL
+
+* source-code fragments
+
+* schemas
+
+* event records
+
+* timeline entries
+
+* evidence records
+
+* claim records
+
+* court-order references
+
+* police-report references
+
+* email references
+
+* copied email bodies
+
+* copied social/Messenger exports
+
+* nested chat transcripts
+
+* prompts
+
+* system instructions
+
+* AI-generated analysis
+
+* narrative notes
+
+* quoted primary-source material
+
+* previously generated summaries
+
+* task lists
+
+* structured inventories
+
+* IDs/hashes/case numbers when recognizable
+
+RECURSIVE means that if a message contains a JSON object whose field contains another serialized JSON dataset, continue inspecting that child to the configured safe depth.
+
+Prevent infinite recursion with:
+
+* depth limit
+* content hash detection
+* already-visited node tracking
+
+Do not lose the nesting relationship.
+
+Example hierarchy:
+
+source
+→ conversation
+→ message
+→ embedded JSON block
+→ event record
+→ attachment reference
+→ Drive reference
+→ narrative block
+→ code block
+
+────────────────────
+4. SPAN-LEVEL PROVENANCE
+────────────────────
+
+Every extracted child artifact must carry provenance sufficient to locate its exact origin.
+
+Equivalent data model:
+
+{
+"artifact_id": "stable-id",
+"source_id": "...",
+"source_file": "...",
+"parent_artifact_id": "...",
+"message_id": "...",
+"message_index": 17,
+"message_role": "Prompt",
+"message_timestamp": "...",
+"char_start": 18422,
+"char_end": 21904,
+"content_hash": "...",
+"normalized_hash": "...",
+"artifact_type": "...",
+"raw_text": "...",
+"normalized": {},
+"parser": "...",
+"confidence": 1.0
+}
+
+Adapt this to the existing schema instead of duplicating fields already present.
+
+A canonical record must be able to show EVERY original occurrence from which it was constructed.
+
+────────────────────
+5. DETERMINISTIC NORMALIZATION
+────────────────────
+
+Perform mechanical cleanup in code before LLM reconciliation.
+
+Normalize safely:
+
+* timestamps
+* timezone forms
+* line endings
+* whitespace where semantically irrelevant
+* Unicode escapes/mojibake where recoverable
+* role labels
+* file extensions
+* paths
+* URLs
+* known external IDs
+* Markdown fences
+* attachment syntax
+* duplicated formatting wrappers
+* JSON formatting
+* NDJSON boundaries
+* known schemas
+
+For malformed structured content:
+
+* attempt bounded repair
+* preserve original block unchanged
+* store repaired representation separately
+* record that repair occurred
+* record parser errors/warnings
+* never silently manufacture missing values
+
+Do not use an LLM for operations that can be parsed deterministically.
+
+────────────────────
+6. ARTIFACT CLASSIFICATION
+────────────────────
+
+Assign extracted objects typed categories.
+
+Do not force uncertain content into an incorrect type.
+
+Support types equivalent to:
+
+SOURCE
+CONVERSATION
+MESSAGE
+ATTACHMENT_REFERENCE
+FILE_REFERENCE
+DRIVE_REFERENCE
+GMAIL_REFERENCE
+NOTION_REFERENCE
+URL_REFERENCE
+DOCUMENT_INVENTORY
+EVENT
+CLAIM
+EVIDENCE
+QUOTE
+TIMELINE_ENTRY
+COURT_RECORD_REFERENCE
+POLICE_RECORD_REFERENCE
+EMAIL
+SOCIAL_MESSAGE
+PERSON
+ORGANIZATION
+CASE_REFERENCE
+SCHEMA
+JSON_BLOCK
+NDJSON_BLOCK
+YAML_BLOCK
+CODE
+PROMPT
+SYSTEM_INSTRUCTION
+AI_ANALYSIS
+NARRATIVE_NOTE
+TASK
+TABLE
+UNKNOWN_STRUCTURED
+UNKNOWN_TEXT
+
+Use/extensively map into existing project taxonomy if present.
+
+UNKNOWN is preferable to a fabricated classification.
+
+────────────────────
+7. STRUCTURAL DEDUPLICATION
+────────────────────
+
+Before semantic reasoning, detect deterministic duplicates using multiple signals:
+
+* exact content hash
+* normalized content hash
+* stable external ID
+* Gmail message ID
+* Drive ID
+* Notion ID
+* attachment filename + metadata
+* source checksum
+* quoted-text fingerprints
+* normalized JSON object equality
+* event IDs
+* case/document identifiers
+* strongly matching filename/date combinations
+
+Do not simply discard duplicate occurrences.
+
+Create one canonical candidate with occurrence/provenance links back to every duplicate source.
+
+Track why records were matched.
+
+Example:
+
+canonical_record
+occurrences:
+- source A / message 17 / chars 100-500
+- source B / message 8 / chars 210-610
+- source C / embedded object 4
+
+────────────────────
+8. SEMANTIC RECONCILIATION
+────────────────────
+
+Only after deterministic extraction and dedupe, compare plausible semantic matches.
+
+Classify relationships using this controlled relation set:
+
+SAME
+DUPLICATE
+PARTIAL_DUPLICATE
+SUPERSEDES
+SUPERSEDED_BY
+CONTRADICTS
+SUPPORTS
+REFERENCES
+DERIVED_FROM
+POSSIBLY_SAME
+UNRESOLVED
+
+Do not collapse records solely because embeddings are close.
+
+Before merging semantic candidates, compare available:
+
+* actors/entities
+* event date/time
+* source date/time
+* subject
+* identifiers
+* quoted text
+* action/event
+* location
+* document/source
+* surrounding chronology
+* version language
+* known parent record
+
+If there is material uncertainty:
+
+POSSIBLY_SAME or UNRESOLVED.
+
+Do not merge.
+
+Preserve both records.
+
+────────────────────
+9. VERSION / SUPERSESSION LOGIC
+────────────────────
+
+Detect when the corpus contains successive versions of:
+
+* schemas
+* prompts
+* reports
+* legal modules
+* timelines
+* inventories
+* drafts
+* generated analyses
+* structured records
+
+Represent supersession rather than deleting old versions.
+
+A newer artifact is not automatically authoritative solely because it is newer.
+
+Store:
+
+* version chain
+* detected changes
+* provenance
+* reason for proposed supersession
+* confidence
+* active canonical version where determinable
+* unresolved version conflicts where not determinable
+
+────────────────────
+10. REFERENCE REGISTRY
+────────────────────
+
+Convert references found inside content into addressable registry nodes.
+
+Statuses:
+
+FOUND
+MISSING
+SUPERSEDED
+DUPLICATED
+REFERENCE_ONLY
+EMBEDDED_CONTENT
+UNRESOLVED
+
+Examples:
+
+"Letter to Dad.pdf"
+→ FILE_REFERENCE
+→ search current corpus
+→ link if located
+→ otherwise MISSING
+
+Google Drive ID
+→ DRIVE_REFERENCE
+
+Gmail message ID
+→ GMAIL_REFERENCE
+
+A filename listed inside an old inventory but absent from imported files
+→ REFERENCE_ONLY / MISSING
+
+Do not imply that referenced content was actually ingested when only its name/reference exists.
+
+────────────────────
+11. PRIMARY SOURCE VS DERIVED MATERIAL
+────────────────────
+
+Maintain lineage between:
+
+* original evidence/source material
+* user-authored notes
+* extracted quotations
+* AI-generated summaries
+* AI-generated analysis
+* later rewritten/synthesized material
+
+Do not allow a generated analysis to silently become equivalent to primary evidence.
+
+Every derived artifact needs DERIVED_FROM links.
+
+A quote embedded inside an AI answer is not automatically verified as a source quote.
+
+────────────────────
+12. CANONICAL CORPUS
+────────────────────
+
+Build a single canonical corpus/graph used by downstream Dream Machine/Judgment Day processes.
+
+Canonical records must retain:
+
+* raw source lineage
+* normalized representation
+* occurrences
+* relationships
+* version chain
+* contradictions
+* unresolved candidates
+* missing references
+* confidence
+* extraction/parser history
+
+Downstream reasoning must consume the canonical representation while retaining the ability to open the original source span.
+
+────────────────────
+13. IMPORT/CLEANUP REPORT
+────────────────────
+
+After every ingestion, produce a real report based on actual processing counts.
+
+Example shape:
+
+SOURCE CONTAINERS: N
+MESSAGES: N
+SUBSTANTIVE DROPS: N
+EXTRACTED ARTIFACTS: N
+ATTACHMENT REFERENCES: N
+FILE REFERENCES: N
+DRIVE REFERENCES: N
+GMAIL REFERENCES: N
+STRUCTURED DATA BLOCKS: N
+EVENTS: N
+CLAIMS: N
+EVIDENCE OBJECTS: N
+EXACT DUPLICATES: N
+STRUCTURAL DUPLICATES: N
+SEMANTIC DUPLICATES: N
+SUPERSEDED RECORDS: N
+CONTRADICTIONS: N
+POSSIBLE MATCHES: N
+UNRESOLVED COLLISIONS: N
+MISSING REFERENCES: N
+PARSE/REPAIR WARNINGS: N
+CANONICAL RECORDS: N
+
+Do not display fabricated placeholder counts.
+
+────────────────────
+14. REVIEW QUEUES
+────────────────────
+
+Create review surfaces/queues for cases automation cannot safely resolve:
+
+POSSIBLE MATCHES
+CONTRADICTIONS
+VERSION CONFLICTS
+MISSING SOURCES
+PARSE FAILURES
+AMBIGUOUS TYPES
+AMBIGUOUS DATES
+AMBIGUOUS ENTITIES
+
+Each review item must show the competing records side-by-side with provenance.
+
+Human review changes canonical state without altering source originals.
+
+────────────────────
+15. UI
+────────────────────
+
+Do not redesign the application.
+
+Integrate into the current corpus/import UI.
+
+Expose the minimum controls necessary to understand processing:
+
+* Corpus
+* Duplicates
+* Possible Matches
+* Contradictions
+* Missing Sources
+* Superseded
+* Parse Warnings
+
+For a canonical object, provide a way to inspect:
+
+* normalized content
+* source occurrences
+* original raw text/span
+* relationship history
+
+Reuse existing components/styles.
+
+────────────────────
+16. TEST FIXTURE — USE THE PROVIDED DROP ARCHIVE
+────────────────────
+
+Use the supplied file:
+
+ChatGPT-ALL DROPS GO HERE UNTIL FULL-20260830-0800.json
+
+as a required integration/acceptance fixture.
+
+Known container-level facts that must be recovered deterministically:
+
+* ChatGPT JSON export
+* metadata section
+* messages[] section
+* 49 message entries total
+* 25 Prompt entries
+* 24 Response entries
+
+The parser must recognize that substantive messages contain additional embedded structures.
+
+Examples present in this fixture include:
+
+* attachment markers such as:
+  [Attachment: 11-10-25 Letter to Scott.docx]
+  [Attachment: Letter to Dad.pdf]
+
+* portable artifact/locator NDJSON
+
+* Gmail message IDs
+
+* Drive-file references
+
+* court-order references
+
+* police-report references
+
+* event JSON
+
+* coercion-lattice YAML-like structures
+
+* JSON Schema
+
+* legal/research Q&A objects
+
+* source inventories
+
+* copied Messenger export data
+
+* file paths to Messenger images
+
+* source-code/pipeline examples
+
+* prompt/system templates
+
+* prior AI-generated analysis
+
+* repeated blocks
+
+* superseding/revised material
+
+IMPORTANT TEST:
+
+The fixture contains an old prose statement claiming a mounted corpus had "24 files total," while the inventory text underneath enumerates 26 items.
+
+The parser must preserve BOTH:
+
+1. the literal historical claim "24 files total"
+2. the independently extracted 26 inventory entries
+
+It must not rewrite the historical claim to 26.
+
+Represent that as data that can later be reconciled/flagged as an inconsistency.
+
+This demonstrates the rule:
+EXTRACT WHAT THE SOURCE SAYS; RECONCILE AFTERWARD.
+
+────────────────────
+17. REQUIRED TESTS
+────────────────────
+
+Add unit and integration tests covering:
+
+1. ChatGPT export recognition.
+2. Message extraction/order.
+3. Recursive JSON inside message strings.
+4. NDJSON extraction.
+5. malformed JSON preservation + bounded repair.
+6. attachment-reference extraction.
+7. Drive/Gmail/reference extraction.
+8. nested Messenger-style dataset extraction.
+9. exact dedupe retaining all occurrences.
+10. semantic candidate generation without automatic unsafe merge.
+11. version/supersession relationships.
+12. contradiction preservation.
+13. missing-reference registration.
+14. raw-span provenance.
+15. canonical-to-original round trip.
+16. recursion depth/cycle protection.
+17. deterministic reprocessing/idempotency.
+18. no duplicate records created when the same source is re-imported.
+19. import report counts generated from actual database state.
+20. fixture regression test using the supplied ALL DROPS JSON.
+
+IDEMPOTENCY REQUIREMENT:
+
+Importing the exact same file twice must not double the canonical corpus.
+
+It may create/reconcile an additional import occurrence if the existing product semantics require that, but canonical records and source identity must remain deterministic.
+
+────────────────────
+18. FAILURE BEHAVIOR
+────────────────────
+
+One malformed embedded block must not fail the entire import.
+
+Isolate the failure.
+
+Preserve the raw block.
+
+Record the error.
+
+Continue processing everything else.
+
+No all-or-nothing parser failure for recoverable mixed-content files.
+
+────────────────────
+19. PERFORMANCE
+────────────────────
+
+Do not send an entire huge corpus through one LLM prompt.
+
+Use:
+
+* streaming parsing where appropriate
+* deterministic block segmentation
+* bounded concurrency
+* hashes/indexes for duplicate detection
+* candidate narrowing before semantic comparison
+* batch semantic reconciliation
+* persistence/checkpointing for large imports
+
+The system must be designed for corpora substantially larger than this 351 KB fixture.
+
+────────────────────
+20. NO REGRESSION GATE
+────────────────────
+
+Before changing code:
+
+* identify current ingestion behavior
+* identify current corpus schema
+* identify existing provenance/dedupe/reconciliation features
+* identify tests covering them
+
+After implementation:
+
+* run existing tests
+* run new parser tests
+* run the provided fixture end-to-end
+* verify existing supported uploads still work
+* verify no working UI or analysis pipeline was replaced
+* fix regressions before considering this complete
+
+Do not weaken existing behavior to make new tests pass.
+
+────────────────────
+DEFINITION OF DONE
+────────────────────
+
+This is complete only when I can upload the supplied ugly ChatGPT drop archive and Dream Machine automatically:
+
+1. preserves the original,
+2. understands the outer conversation structure,
+3. recursively discovers the structures buried inside message strings,
+4. converts those structures into typed provenance-bound objects,
+5. normalizes deterministic mess,
+6. identifies duplicate occurrences,
+7. distinguishes duplicates from contradictions/versions/possible matches,
+8. resolves or registers file/external references,
+9. preserves uncertainty instead of guessing,
+10. creates/updates one canonical corpus,
+11. exposes unresolved cleanup items,
+12. gives me an accurate processing report,
+13. lets every canonical fact/object trace back to its original source span,
+14. can be rerun without corpus duplication,
+15. passes the supplied fixture and all regression tests.
+
+Do the implementation. Do not stop at an architecture document, recommendations, TODO list, mock UI, or pseudocode.
+
+Inspect → implement → migrate only if required → test → fix → run the supplied fixture → report exactly what changed, which files changed, tests run, actual fixture results, unresolved limitations, and any requirement that could not be completed.
+
+Do not claim completion for anything that was not executed and verified.
