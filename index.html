@@ -1,790 +1,3590 @@
-IMPLEMENT THIS IN DREAM MACHINE. DO NOT REDESIGN, REPLACE, OR REGRESS EXISTING WORK.
-
-FIRST: inspect the current repository and trace the entire existing ingestion → parsing → normalization → deduplication → reconciliation → corpus-storage flow.
-
-If equivalent functionality already exists, EXTEND AND HARDEN IT in place. Do not create a competing second pipeline. Reuse existing types, storage, APIs, workers, queues, UI patterns, provenance structures, and naming wherever they already solve the requirement correctly.
-
-If any instruction below would damage a working feature, preserve the working feature and implement the requirement compatibly around it. Do not silently remove functionality to simplify implementation.
-
-GOAL
-
-Dream Machine must be able to ingest extremely messy source containers—including ChatGPT JSON exports where individual message strings themselves contain attachments, filenames, JSON, NDJSON, YAML, Markdown, code, copied conversations, source inventories, schemas, prior AI analysis, court/evidence references, URLs, IDs, and additional embedded datasets—and turn them into a clean, provenance-preserving canonical corpus automatically.
-
-CORE PIPELINE
-
-RAW INPUT
-→ SOURCE PRESERVATION
-→ CONTAINER PARSING
-→ RECURSIVE ARTIFACT EXTRACTION
-→ DETERMINISTIC NORMALIZATION
-→ STRUCTURAL DEDUPLICATION
-→ SEMANTIC RECONCILIATION
-→ REFERENCE RESOLUTION
-→ CANONICAL CORPUS
-→ DOWNSTREAM ANALYSIS
-
-NON-NEGOTIABLE RULE
-
-EXPLODE FIRST. RECONCILE SECOND. DELETE NOTHING.
-
-Every recoverable structure inside an input becomes a provenance-bound object.
-
-Exact duplicates may collapse into one canonical object while retaining every occurrence reference.
-
-Semantic matches may merge only after relationship classification.
-
-Ambiguity remains explicitly unresolved.
-
-The original source bytes and original source text must remain recoverable exactly as ingested.
-
-────────────────────
-
-1. IMMUTABLE SOURCE PRESERVATION
-   ────────────────────
-
-For every uploaded/imported source:
-
-* Preserve untouched original bytes.
-* Compute SHA-256.
-* Assign stable source ID.
-* Record:
-
-  * original filename
-  * MIME/type
-  * byte size
-  * ingestion timestamp
-  * source/import origin if known
-  * parser version
-  * checksum
-* Never overwrite the original during cleanup.
-* Every downstream record must be traceable back to the exact source location that produced it.
-
-Maintain logical layers equivalent to:
-
-/originals
-/normalized
-/canonical
-
-Use the repository's current storage model if one already exists rather than literally creating these directories.
-
-────────────────────
-2. CONTAINER DETECTION + PARSING
-────────────────────
-
-Detect structured container types before invoking semantic reasoning.
-
-At minimum support:
-
-* ChatGPT exports
-* generic JSON
-* JSON arrays
-* JSON objects
-* JSONL / NDJSON
-* Markdown
-* TXT
-* HTML
-* CSV
-* YAML
-* email-like exports
-* Messenger/social-message exports
-* mixed text containing embedded structured blocks
-
-For ChatGPT-style exports:
-
-* extract metadata
-* extract messages[]
-* preserve message order
-* preserve role
-* preserve timestamp
-* preserve prompt/response relationships where inferable deterministically
-* assign stable message IDs
-* retain the entire raw message string
-
-Never flatten the whole conversation into one anonymous text blob.
-
-────────────────────
-3. RECURSIVE ARTIFACT EXTRACTION
-────────────────────
-
-This is the major requirement.
-
-A single message/string may contain many independent artifacts. Recursively inspect its contents and extract child objects without removing them from the parent.
-
-Recognize at minimum:
-
-* attachment markers
-  Example:
-  [Attachment: Letter to Dad.pdf]
-
-* filenames and file references
-
-* absolute/relative paths
-
-* Google Drive URLs
-
-* Google Drive IDs
-
-* Gmail message IDs
-
-* Notion URLs/IDs
-
-* ordinary URLs
-
-* source inventories
-
-* file manifests
-
-* JSON objects
-
-* arrays
-
-* NDJSON sequences
-
-* JSON Schema
-
-* YAML blocks
-
-* Markdown tables
-
-* fenced code
-
-* SQL
-
-* source-code fragments
-
-* schemas
-
-* event records
-
-* timeline entries
-
-* evidence records
-
-* claim records
-
-* court-order references
-
-* police-report references
-
-* email references
-
-* copied email bodies
-
-* copied social/Messenger exports
-
-* nested chat transcripts
-
-* prompts
-
-* system instructions
-
-* AI-generated analysis
-
-* narrative notes
-
-* quoted primary-source material
-
-* previously generated summaries
-
-* task lists
-
-* structured inventories
-
-* IDs/hashes/case numbers when recognizable
-
-RECURSIVE means that if a message contains a JSON object whose field contains another serialized JSON dataset, continue inspecting that child to the configured safe depth.
-
-Prevent infinite recursion with:
-
-* depth limit
-* content hash detection
-* already-visited node tracking
-
-Do not lose the nesting relationship.
-
-Example hierarchy:
-
-source
-→ conversation
-→ message
-→ embedded JSON block
-→ event record
-→ attachment reference
-→ Drive reference
-→ narrative block
-→ code block
-
-────────────────────
-4. SPAN-LEVEL PROVENANCE
-────────────────────
-
-Every extracted child artifact must carry provenance sufficient to locate its exact origin.
-
-Equivalent data model:
-
-{
-"artifact_id": "stable-id",
-"source_id": "...",
-"source_file": "...",
-"parent_artifact_id": "...",
-"message_id": "...",
-"message_index": 17,
-"message_role": "Prompt",
-"message_timestamp": "...",
-"char_start": 18422,
-"char_end": 21904,
-"content_hash": "...",
-"normalized_hash": "...",
-"artifact_type": "...",
-"raw_text": "...",
-"normalized": {},
-"parser": "...",
-"confidence": 1.0
-}
-
-Adapt this to the existing schema instead of duplicating fields already present.
-
-A canonical record must be able to show EVERY original occurrence from which it was constructed.
-
-────────────────────
-5. DETERMINISTIC NORMALIZATION
-────────────────────
-
-Perform mechanical cleanup in code before LLM reconciliation.
-
-Normalize safely:
-
-* timestamps
-* timezone forms
-* line endings
-* whitespace where semantically irrelevant
-* Unicode escapes/mojibake where recoverable
-* role labels
-* file extensions
-* paths
-* URLs
-* known external IDs
-* Markdown fences
-* attachment syntax
-* duplicated formatting wrappers
-* JSON formatting
-* NDJSON boundaries
-* known schemas
-
-For malformed structured content:
-
-* attempt bounded repair
-* preserve original block unchanged
-* store repaired representation separately
-* record that repair occurred
-* record parser errors/warnings
-* never silently manufacture missing values
-
-Do not use an LLM for operations that can be parsed deterministically.
-
-────────────────────
-6. ARTIFACT CLASSIFICATION
-────────────────────
-
-Assign extracted objects typed categories.
-
-Do not force uncertain content into an incorrect type.
-
-Support types equivalent to:
-
-SOURCE
-CONVERSATION
-MESSAGE
-ATTACHMENT_REFERENCE
-FILE_REFERENCE
-DRIVE_REFERENCE
-GMAIL_REFERENCE
-NOTION_REFERENCE
-URL_REFERENCE
-DOCUMENT_INVENTORY
-EVENT
-CLAIM
-EVIDENCE
-QUOTE
-TIMELINE_ENTRY
-COURT_RECORD_REFERENCE
-POLICE_RECORD_REFERENCE
-EMAIL
-SOCIAL_MESSAGE
-PERSON
-ORGANIZATION
-CASE_REFERENCE
-SCHEMA
-JSON_BLOCK
-NDJSON_BLOCK
-YAML_BLOCK
-CODE
-PROMPT
-SYSTEM_INSTRUCTION
-AI_ANALYSIS
-NARRATIVE_NOTE
-TASK
-TABLE
-UNKNOWN_STRUCTURED
-UNKNOWN_TEXT
-
-Use/extensively map into existing project taxonomy if present.
-
-UNKNOWN is preferable to a fabricated classification.
-
-────────────────────
-7. STRUCTURAL DEDUPLICATION
-────────────────────
-
-Before semantic reasoning, detect deterministic duplicates using multiple signals:
-
-* exact content hash
-* normalized content hash
-* stable external ID
-* Gmail message ID
-* Drive ID
-* Notion ID
-* attachment filename + metadata
-* source checksum
-* quoted-text fingerprints
-* normalized JSON object equality
-* event IDs
-* case/document identifiers
-* strongly matching filename/date combinations
-
-Do not simply discard duplicate occurrences.
-
-Create one canonical candidate with occurrence/provenance links back to every duplicate source.
-
-Track why records were matched.
-
-Example:
-
-canonical_record
-occurrences:
-- source A / message 17 / chars 100-500
-- source B / message 8 / chars 210-610
-- source C / embedded object 4
-
-────────────────────
-8. SEMANTIC RECONCILIATION
-────────────────────
-
-Only after deterministic extraction and dedupe, compare plausible semantic matches.
-
-Classify relationships using this controlled relation set:
-
-SAME
-DUPLICATE
-PARTIAL_DUPLICATE
-SUPERSEDES
-SUPERSEDED_BY
-CONTRADICTS
-SUPPORTS
-REFERENCES
-DERIVED_FROM
-POSSIBLY_SAME
-UNRESOLVED
-
-Do not collapse records solely because embeddings are close.
-
-Before merging semantic candidates, compare available:
-
-* actors/entities
-* event date/time
-* source date/time
-* subject
-* identifiers
-* quoted text
-* action/event
-* location
-* document/source
-* surrounding chronology
-* version language
-* known parent record
-
-If there is material uncertainty:
-
-POSSIBLY_SAME or UNRESOLVED.
-
-Do not merge.
-
-Preserve both records.
-
-────────────────────
-9. VERSION / SUPERSESSION LOGIC
-────────────────────
-
-Detect when the corpus contains successive versions of:
-
-* schemas
-* prompts
-* reports
-* legal modules
-* timelines
-* inventories
-* drafts
-* generated analyses
-* structured records
-
-Represent supersession rather than deleting old versions.
-
-A newer artifact is not automatically authoritative solely because it is newer.
-
-Store:
-
-* version chain
-* detected changes
-* provenance
-* reason for proposed supersession
-* confidence
-* active canonical version where determinable
-* unresolved version conflicts where not determinable
-
-────────────────────
-10. REFERENCE REGISTRY
-────────────────────
-
-Convert references found inside content into addressable registry nodes.
-
-Statuses:
-
-FOUND
-MISSING
-SUPERSEDED
-DUPLICATED
-REFERENCE_ONLY
-EMBEDDED_CONTENT
-UNRESOLVED
-
-Examples:
-
-"Letter to Dad.pdf"
-→ FILE_REFERENCE
-→ search current corpus
-→ link if located
-→ otherwise MISSING
-
-Google Drive ID
-→ DRIVE_REFERENCE
-
-Gmail message ID
-→ GMAIL_REFERENCE
-
-A filename listed inside an old inventory but absent from imported files
-→ REFERENCE_ONLY / MISSING
-
-Do not imply that referenced content was actually ingested when only its name/reference exists.
-
-────────────────────
-11. PRIMARY SOURCE VS DERIVED MATERIAL
-────────────────────
-
-Maintain lineage between:
-
-* original evidence/source material
-* user-authored notes
-* extracted quotations
-* AI-generated summaries
-* AI-generated analysis
-* later rewritten/synthesized material
-
-Do not allow a generated analysis to silently become equivalent to primary evidence.
-
-Every derived artifact needs DERIVED_FROM links.
-
-A quote embedded inside an AI answer is not automatically verified as a source quote.
-
-────────────────────
-12. CANONICAL CORPUS
-────────────────────
-
-Build a single canonical corpus/graph used by downstream Dream Machine/Judgment Day processes.
-
-Canonical records must retain:
-
-* raw source lineage
-* normalized representation
-* occurrences
-* relationships
-* version chain
-* contradictions
-* unresolved candidates
-* missing references
-* confidence
-* extraction/parser history
-
-Downstream reasoning must consume the canonical representation while retaining the ability to open the original source span.
-
-────────────────────
-13. IMPORT/CLEANUP REPORT
-────────────────────
-
-After every ingestion, produce a real report based on actual processing counts.
-
-Example shape:
-
-SOURCE CONTAINERS: N
-MESSAGES: N
-SUBSTANTIVE DROPS: N
-EXTRACTED ARTIFACTS: N
-ATTACHMENT REFERENCES: N
-FILE REFERENCES: N
-DRIVE REFERENCES: N
-GMAIL REFERENCES: N
-STRUCTURED DATA BLOCKS: N
-EVENTS: N
-CLAIMS: N
-EVIDENCE OBJECTS: N
-EXACT DUPLICATES: N
-STRUCTURAL DUPLICATES: N
-SEMANTIC DUPLICATES: N
-SUPERSEDED RECORDS: N
-CONTRADICTIONS: N
-POSSIBLE MATCHES: N
-UNRESOLVED COLLISIONS: N
-MISSING REFERENCES: N
-PARSE/REPAIR WARNINGS: N
-CANONICAL RECORDS: N
-
-Do not display fabricated placeholder counts.
-
-────────────────────
-14. REVIEW QUEUES
-────────────────────
-
-Create review surfaces/queues for cases automation cannot safely resolve:
-
-POSSIBLE MATCHES
-CONTRADICTIONS
-VERSION CONFLICTS
-MISSING SOURCES
-PARSE FAILURES
-AMBIGUOUS TYPES
-AMBIGUOUS DATES
-AMBIGUOUS ENTITIES
-
-Each review item must show the competing records side-by-side with provenance.
-
-Human review changes canonical state without altering source originals.
-
-────────────────────
-15. UI
-────────────────────
-
-Do not redesign the application.
-
-Integrate into the current corpus/import UI.
-
-Expose the minimum controls necessary to understand processing:
-
-* Corpus
-* Duplicates
-* Possible Matches
-* Contradictions
-* Missing Sources
-* Superseded
-* Parse Warnings
-
-For a canonical object, provide a way to inspect:
-
-* normalized content
-* source occurrences
-* original raw text/span
-* relationship history
-
-Reuse existing components/styles.
-
-────────────────────
-16. TEST FIXTURE — USE THE PROVIDED DROP ARCHIVE
-────────────────────
-
-Use the supplied file:
-
-ChatGPT-ALL DROPS GO HERE UNTIL FULL-20260830-0800.json
-
-as a required integration/acceptance fixture.
-
-Known container-level facts that must be recovered deterministically:
-
-* ChatGPT JSON export
-* metadata section
-* messages[] section
-* 49 message entries total
-* 25 Prompt entries
-* 24 Response entries
-
-The parser must recognize that substantive messages contain additional embedded structures.
-
-Examples present in this fixture include:
-
-* attachment markers such as:
-  [Attachment: 11-10-25 Letter to Scott.docx]
-  [Attachment: Letter to Dad.pdf]
-
-* portable artifact/locator NDJSON
-
-* Gmail message IDs
-
-* Drive-file references
-
-* court-order references
-
-* police-report references
-
-* event JSON
-
-* coercion-lattice YAML-like structures
-
-* JSON Schema
-
-* legal/research Q&A objects
-
-* source inventories
-
-* copied Messenger export data
-
-* file paths to Messenger images
-
-* source-code/pipeline examples
-
-* prompt/system templates
-
-* prior AI-generated analysis
-
-* repeated blocks
-
-* superseding/revised material
-
-IMPORTANT TEST:
-
-The fixture contains an old prose statement claiming a mounted corpus had "24 files total," while the inventory text underneath enumerates 26 items.
-
-The parser must preserve BOTH:
-
-1. the literal historical claim "24 files total"
-2. the independently extracted 26 inventory entries
-
-It must not rewrite the historical claim to 26.
-
-Represent that as data that can later be reconciled/flagged as an inconsistency.
-
-This demonstrates the rule:
-EXTRACT WHAT THE SOURCE SAYS; RECONCILE AFTERWARD.
-
-────────────────────
-17. REQUIRED TESTS
-────────────────────
-
-Add unit and integration tests covering:
-
-1. ChatGPT export recognition.
-2. Message extraction/order.
-3. Recursive JSON inside message strings.
-4. NDJSON extraction.
-5. malformed JSON preservation + bounded repair.
-6. attachment-reference extraction.
-7. Drive/Gmail/reference extraction.
-8. nested Messenger-style dataset extraction.
-9. exact dedupe retaining all occurrences.
-10. semantic candidate generation without automatic unsafe merge.
-11. version/supersession relationships.
-12. contradiction preservation.
-13. missing-reference registration.
-14. raw-span provenance.
-15. canonical-to-original round trip.
-16. recursion depth/cycle protection.
-17. deterministic reprocessing/idempotency.
-18. no duplicate records created when the same source is re-imported.
-19. import report counts generated from actual database state.
-20. fixture regression test using the supplied ALL DROPS JSON.
-
-IDEMPOTENCY REQUIREMENT:
-
-Importing the exact same file twice must not double the canonical corpus.
-
-It may create/reconcile an additional import occurrence if the existing product semantics require that, but canonical records and source identity must remain deterministic.
-
-────────────────────
-18. FAILURE BEHAVIOR
-────────────────────
-
-One malformed embedded block must not fail the entire import.
-
-Isolate the failure.
-
-Preserve the raw block.
-
-Record the error.
-
-Continue processing everything else.
-
-No all-or-nothing parser failure for recoverable mixed-content files.
-
-────────────────────
-19. PERFORMANCE
-────────────────────
-
-Do not send an entire huge corpus through one LLM prompt.
-
-Use:
-
-* streaming parsing where appropriate
-* deterministic block segmentation
-* bounded concurrency
-* hashes/indexes for duplicate detection
-* candidate narrowing before semantic comparison
-* batch semantic reconciliation
-* persistence/checkpointing for large imports
-
-The system must be designed for corpora substantially larger than this 351 KB fixture.
-
-────────────────────
-20. NO REGRESSION GATE
-────────────────────
-
-Before changing code:
-
-* identify current ingestion behavior
-* identify current corpus schema
-* identify existing provenance/dedupe/reconciliation features
-* identify tests covering them
-
-After implementation:
-
-* run existing tests
-* run new parser tests
-* run the provided fixture end-to-end
-* verify existing supported uploads still work
-* verify no working UI or analysis pipeline was replaced
-* fix regressions before considering this complete
-
-Do not weaken existing behavior to make new tests pass.
-
-────────────────────
-DEFINITION OF DONE
-────────────────────
-
-This is complete only when I can upload the supplied ugly ChatGPT drop archive and Dream Machine automatically:
-
-1. preserves the original,
-2. understands the outer conversation structure,
-3. recursively discovers the structures buried inside message strings,
-4. converts those structures into typed provenance-bound objects,
-5. normalizes deterministic mess,
-6. identifies duplicate occurrences,
-7. distinguishes duplicates from contradictions/versions/possible matches,
-8. resolves or registers file/external references,
-9. preserves uncertainty instead of guessing,
-10. creates/updates one canonical corpus,
-11. exposes unresolved cleanup items,
-12. gives me an accurate processing report,
-13. lets every canonical fact/object trace back to its original source span,
-14. can be rerun without corpus duplication,
-15. passes the supplied fixture and all regression tests.
-
-Do the implementation. Do not stop at an architecture document, recommendations, TODO list, mock UI, or pseudocode.
-
-Inspect → implement → migrate only if required → test → fix → run the supplied fixture → report exactly what changed, which files changed, tests run, actual fixture results, unresolved limitations, and any requirement that could not be completed.
-
-Do not claim completion for anything that was not executed and verified.
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="description" content="BNDR LLC — web, games, systems, live builds, and selected digital work.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#050505">
+  <link rel="canonical" href="https://bndr-or-identityfxtm-or-canvascode-production.up.railway.app/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="BNDR LLC — Web. Games. Systems.">
+  <meta property="og:description" content="Live builds, games, web apps, interaction studies, and website examples by BNDR LLC.">
+  <meta property="og:url" content="https://bndr-or-identityfxtm-or-canvascode-production.up.railway.app/">
+  <meta name="twitter:card" content="summary">
+
+  <title>BNDR LLC — Web. Games. Systems.</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://r2-uploader-production.up.railway.app" crossorigin>
+
+  <style>
+    :root {
+      /* Identity */
+      --rgb-bg: 5 5 5;
+      --rgb-text: 247 247 247;
+      --rgb-white: 255 255 255;
+      --rgb-black: 0 0 0;
+      --rgb-ink: 16 16 16;
+      --rgb-warm: 216 201 185;
+      --rgb-warm-hi: 235 224 213;
+      --rgb-warm-mid: 197 181 166;
+      --rgb-accent: 255 90 0;
+      --rgb-fx-base: 2 2 3;
+      --rgb-fx-mid: 22 21 20;
+      --rgb-fx-line: 163 156 145;
+
+      --color-bg: rgb(var(--rgb-bg));
+      --color-text: rgb(var(--rgb-text));
+      --color-white: rgb(var(--rgb-white));
+      --color-black: rgb(var(--rgb-black));
+      --color-ink: rgb(var(--rgb-ink));
+      --color-accent: rgb(var(--rgb-accent));
+      --color-warm: rgb(var(--rgb-warm));
+      --color-warm-hi: rgb(var(--rgb-warm-hi));
+      --color-warm-mid: rgb(var(--rgb-warm-mid));
+      --color-fx-base: rgb(var(--rgb-fx-base));
+      --color-fx-mid: rgb(var(--rgb-fx-mid));
+      --color-fx-line: rgb(var(--rgb-fx-line));
+
+      --text-strong: rgb(var(--rgb-white) / .96);
+      --text-nav: rgb(var(--rgb-white) / .76);
+      --text-body: rgb(var(--rgb-white) / .56);
+      --text-soft: rgb(var(--rgb-white) / .48);
+      --text-faint: rgb(var(--rgb-white) / .34);
+      --line: rgb(var(--rgb-white) / .13);
+      --line-strong: rgb(var(--rgb-white) / .22);
+      --surface: rgb(var(--rgb-white) / .024);
+      --surface-hover: rgb(var(--rgb-white) / .045);
+      --surface-view: rgb(var(--rgb-bg) / .86);
+
+      /* Gradients */
+      --gradient-page:
+        radial-gradient(62% 68% at 72% 42%, rgb(var(--rgb-white) / .034), transparent 71%),
+        radial-gradient(46% 56% at 24% 58%, rgb(var(--rgb-white) / .016), transparent 76%),
+        linear-gradient(145deg, rgb(8 8 8), rgb(3 3 3) 72%, rgb(1 1 1));
+      --gradient-view:
+        radial-gradient(42rem 32rem at 14% 4%, rgb(var(--rgb-white) / .032), transparent 70%),
+        radial-gradient(34rem 28rem at 88% 18%, rgb(var(--rgb-white) / .018), transparent 72%),
+        rgb(var(--rgb-bg) / .93);
+      --gradient-primary: linear-gradient(145deg, rgb(var(--rgb-warm-hi) / .90), rgb(var(--rgb-warm-mid) / .75));
+      --gradient-card: linear-gradient(145deg, rgb(var(--rgb-white) / .032), rgb(var(--rgb-white) / .008) 55%);
+
+      /* Typography */
+      --font-sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --weight-light: 300;
+      --weight-book: 370;
+      --weight-regular: 430;
+      --weight-medium: 520;
+      --weight-semibold: 590;
+
+      /* Geometry */
+      --content-max: 1180px;
+      --page-pad: 20px;
+      --touch: 44px;
+      --radius-sm: 14px;
+      --radius-md: 18px;
+      --radius-lg: 22px;
+      --radius-xl: 28px;
+      --radius-pill: 999px;
+
+      /* Space */
+      --s1: 8px;
+      --s2: 12px;
+      --s3: 16px;
+      --s4: 20px;
+      --s5: 24px;
+      --s6: 32px;
+      --s7: 40px;
+      --s8: 48px;
+      --s9: 64px;
+      --s10: 88px;
+
+      /* Motion */
+      --ease: cubic-bezier(.22,.8,.2,1);
+      --fast: 180ms;
+      --ui: 280ms;
+      --slow: 520ms;
+      --view: 620ms;
+
+      /* Effects */
+      --shadow-text: 0 0 18px rgb(var(--rgb-white) / .072), 0 0 54px rgb(var(--rgb-white) / .028);
+      --shadow-control: inset 0 1px 0 rgb(var(--rgb-white) / .055), 0 18px 46px rgb(var(--rgb-black) / .20);
+      --shadow-primary: inset 0 1px 0 rgb(var(--rgb-white) / .58), 0 14px 38px rgb(var(--rgb-black) / .25);
+      --shadow-preview: inset 0 0 0 1px rgb(var(--rgb-white) / .025), 0 20px 54px rgb(var(--rgb-black) / .22), 0 0 42px rgb(var(--rgb-white) / .018);
+      --glow-white: 0 0 18px rgb(var(--rgb-white) / .066), 0 0 42px rgb(var(--rgb-white) / .020);
+
+      /* Layering */
+      --z-fx: 0;
+      --z-home: 5;
+      --z-view: 30;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--color-bg); color-scheme: dark; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100svh;
+      overflow: hidden;
+      background: var(--gradient-page);
+      color: var(--color-text);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a, button { font: inherit; -webkit-tap-highlight-color: transparent; }
+    button { color: inherit; }
+    img, iframe, canvas { display: block; }
+    :focus-visible { outline: 2px solid var(--color-white); outline-offset: 4px; }
+
+    #fx {
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-fx);
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .home {
+      position: relative;
+      z-index: var(--z-home);
+      width: min(100%, calc(var(--content-max) + (var(--page-pad) * 2)));
+      height: 100svh;
+      min-height: 620px;
+      margin: 0 auto;
+      padding: max(var(--page-pad), env(safe-area-inset-top)) max(var(--page-pad), env(safe-area-inset-right)) max(var(--page-pad), env(safe-area-inset-bottom)) max(var(--page-pad), env(safe-area-inset-left));
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .site-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: var(--s5);
+      min-height: var(--touch);
+    }
+
+    .social-cluster {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: var(--touch);
+      width: fit-content;
+    }
+
+    .social-link {
+      --icon-size: 18px;
+      --brand-rgb: var(--rgb-white);
+      width: 28px;
+      height: var(--touch);
+      display: inline-grid;
+      place-items: center;
+      color: rgb(var(--rgb-text) / .84);
+      text-decoration: none;
+      filter:
+        drop-shadow(0 0 2px rgb(var(--rgb-white) / .05))
+        drop-shadow(0 0 8px rgb(var(--brand-rgb) / .08));
+      transition:
+        color var(--ui) var(--ease),
+        filter var(--ui) var(--ease),
+        transform var(--ui) var(--ease);
+    }
+
+    .social-link.substack { --brand-rgb: 255 103 25; }
+    .social-link.coffee { --brand-rgb: 255 221 0; }
+    .social-link.facebook { --brand-rgb: 24 119 242; }
+    .social-link.instagram { --brand-rgb: 245 96 64; }
+    .social-link.email { --brand-rgb: 200 255 112; }
+    .social-link.proppz { --brand-rgb: 255 144 168; }
+
+    .social-link svg {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      overflow: visible;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.45;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .social-link:hover,
+    .social-link:focus-visible {
+      color: rgb(var(--brand-rgb));
+      filter:
+        drop-shadow(0 0 4px rgb(var(--rgb-white) / .12))
+        drop-shadow(0 0 10px rgb(var(--brand-rgb) / .34))
+        drop-shadow(0 0 22px rgb(var(--brand-rgb) / .18));
+      transform: translateY(-1px);
+    }
+
+    .social-link path,
+    .social-link rect,
+    .social-link circle,
+    .social-link line,
+    .social-link polyline {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition:
+        transform var(--ui) var(--ease),
+        opacity var(--ui) var(--ease),
+        stroke var(--ui) var(--ease),
+        fill var(--ui) var(--ease);
+    }
+
+    .social-link.instagram .ig-gradient-group {
+      opacity: 0;
+      transition: opacity var(--ui) var(--ease);
+    }
+    .social-link.instagram .ig-base-group {
+      opacity: 1;
+      transition: opacity var(--ui) var(--ease);
+    }
+    .social-link.instagram:hover .ig-gradient-group,
+    .social-link.instagram:focus-visible .ig-gradient-group { opacity: 1; }
+    .social-link.instagram:hover .ig-base-group,
+    .social-link.instagram:focus-visible .ig-base-group { opacity: 0; }
+
+    /* One restrained, platform-specific motion signature per icon. */
+    .social-link.substack:hover .stack-top,
+    .social-link.substack:focus-visible .stack-top { transform: translateY(-1.2px); }
+    .social-link.substack:hover .stack-bottom,
+    .social-link.substack:focus-visible .stack-bottom { transform: translateY(1.2px); }
+
+    .social-link.coffee:hover .steam-a,
+    .social-link.coffee:focus-visible .steam-a { animation: steamA .78s var(--ease) infinite alternate; }
+    .social-link.coffee:hover .steam-b,
+    .social-link.coffee:focus-visible .steam-b { animation: steamB .92s var(--ease) infinite alternate; }
+
+    .social-link.facebook:hover .fb-stem,
+    .social-link.facebook:focus-visible .fb-stem { transform: translateY(-.65px) scaleY(1.045); }
+    .social-link.facebook:hover .fb-cross,
+    .social-link.facebook:focus-visible .fb-cross { transform: translateX(.85px); }
+
+    .social-link.instagram:hover .insta-ring,
+    .social-link.instagram:focus-visible .insta-ring { transform: rotate(7deg) scale(1.045); }
+    .social-link.instagram:hover .insta-dot,
+    .social-link.instagram:focus-visible .insta-dot { transform: scale(1.32); }
+
+    .social-link.email:hover .mail-flap,
+    .social-link.email:focus-visible .mail-flap { transform: translateY(-1px) scaleY(.92); }
+    .social-link.email:hover .mail-body,
+    .social-link.email:focus-visible .mail-body { transform: scaleX(1.025); }
+
+    .social-link.proppz:hover .prop-orbit,
+    .social-link.proppz:focus-visible .prop-orbit { transform: rotate(16deg); }
+    .social-link.proppz:hover .prop-dot,
+    .social-link.proppz:focus-visible .prop-dot { transform: translateX(1.15px) scale(1.08); }
+
+    @keyframes steamA {
+      from { transform: translateY(.8px); opacity: .72; }
+      to { transform: translateY(-1.6px); opacity: 1; }
+    }
+    @keyframes steamB {
+      from { transform: translateY(1.2px); opacity: .58; }
+      to { transform: translateY(-1.1px); opacity: .95; }
+    }
+
+    .primary-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .primary-nav a {
+      position: relative;
+      min-height: var(--touch);
+      display: inline-flex;
+      align-items: center;
+      color: var(--text-nav);
+      text-decoration: none;
+      font-size: .53rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .085em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: color var(--fast) ease;
+    }
+
+    .primary-nav a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: .26em;
+      bottom: 5px;
+      height: 1px;
+      background: currentColor;
+      opacity: .55;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform var(--ui) var(--ease);
+    }
+
+    .primary-nav a:hover,
+    .primary-nav a:focus-visible { color: var(--color-white); }
+    .primary-nav a:hover::after,
+    .primary-nav a:focus-visible::after { transform: scaleX(1); transform-origin: left; }
+
+    .hero {
+      align-self: center;
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      align-items: center;
+      transform: translateY(-1.5vh);
+    }
+
+    .hero-copy {
+      grid-column: 1 / -1;
+      width: min(100%, 520px);
+    }
+
+    .hero-about-link {
+      display: block;
+      width: fit-content;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .hero-brand {
+      width: fit-content;
+      min-height: 38px;
+      margin: 0 0 var(--s3);
+      display: grid;
+      align-items: center;
+    }
+
+    .hero-logo {
+      width: auto;
+      height: 30px;
+      max-width: 120px;
+      object-fit: contain;
+      object-position: left center;
+      filter: grayscale(1) brightness(0) invert(1) drop-shadow(0 0 10px rgb(var(--rgb-white) / .10)) drop-shadow(0 0 26px rgb(var(--rgb-white) / .028));
+      opacity: .96;
+    }
+
+    .logo-fallback {
+      display: none;
+      color: var(--text-strong);
+      font-size: .72rem;
+      font-weight: var(--weight-semibold);
+      letter-spacing: .26em;
+      text-transform: uppercase;
+    }
+    .hero-brand.logo-failed .hero-logo { display: none; }
+    .hero-brand.logo-failed .logo-fallback { display: inline-block; }
+
+    h1 {
+      margin: 0;
+      max-width: 8.6ch;
+      color: var(--text-strong);
+      font-size: clamp(3.2rem, 15.5vw, 4.7rem);
+      font-weight: var(--weight-light);
+      line-height: .91;
+      letter-spacing: -.064em;
+      text-wrap: balance;
+      text-shadow: var(--shadow-text);
+    }
+
+    .subline {
+      margin: var(--s3) 0 0;
+      color: var(--text-body);
+      font-size: clamp(.98rem, 1.25vw, 1.15rem);
+      font-weight: var(--weight-book);
+      letter-spacing: -.015em;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      gap: var(--s2);
+      margin-top: var(--s5);
+    }
+
+    .action {
+      --mx: 50%;
+      --my: 50%;
+      position: relative;
+      width: min(100%, 350px);
+      min-width: 0;
+      min-height: 56px;
+      padding: 0 var(--s5);
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s4);
+      background: linear-gradient(180deg, rgb(var(--rgb-white) / .018), rgb(var(--rgb-white) / .006));
+      box-shadow: var(--shadow-control);
+      color: rgb(var(--rgb-white) / .90);
+      text-decoration: none;
+      font-size: .84rem;
+      font-weight: var(--weight-medium);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: transform var(--slow) var(--ease), border-color var(--ui) ease, box-shadow var(--slow) var(--ease);
+    }
+
+    .action::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      pointer-events: none;
+      background: radial-gradient(150px circle at var(--mx) var(--my), rgb(var(--rgb-white) / .10), transparent 60%);
+      opacity: 0;
+      transition: opacity var(--ui) ease;
+    }
+    .action:hover { transform: translateY(-2px); border-color: rgb(var(--rgb-white) / .36); }
+    .action:hover::before { opacity: 1; }
+
+    .action.primary {
+      border-color: rgb(var(--rgb-warm) / .40);
+      background: var(--gradient-primary);
+      box-shadow: var(--shadow-primary);
+      color: var(--color-ink);
+    }
+    .action.primary::before { background: radial-gradient(170px circle at var(--mx) var(--my), rgb(var(--rgb-white) / .38), transparent 60%); }
+
+    .arrow { font-size: 1.25rem; font-weight: var(--weight-light); transition: transform var(--ui) var(--ease); }
+    .action:hover .arrow { transform: translateX(5px); }
+
+    .home-footer {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      color: var(--text-strong);
+      font-size: .56rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .legal-line {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      white-space: nowrap;
+      color: inherit;
+    }
+
+    .footer-link,
+    .copyright {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .footer-link {
+      opacity: .82;
+      transition:
+        color var(--fast) ease,
+        opacity var(--fast) ease,
+        text-shadow var(--fast) ease;
+    }
+
+    .copyright { opacity: .58; }
+
+    .legal-separator {
+      opacity: .28;
+      transform: translateY(-.02em);
+    }
+
+    .footer-link:hover,
+    .footer-link:focus-visible {
+      color: var(--color-accent);
+      opacity: 1;
+      text-shadow: 0 0 10px rgb(var(--rgb-accent) / .22);
+    }
+
+    .view {
+      position: fixed;
+      inset: 0;
+      z-index: var(--z-view);
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(14px) scale(.994);
+      pointer-events: none;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      background: var(--gradient-view);
+      backdrop-filter: blur(20px) saturate(.88);
+      -webkit-backdrop-filter: blur(20px) saturate(.88);
+      transition: opacity var(--slow) var(--ease), transform var(--view) var(--ease), visibility 0s linear var(--view);
+    }
+    .view.open {
+      visibility: visible;
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+      transition-delay: 0s;
+    }
+
+    .view-shell {
+      width: min(100%, calc(var(--content-max) + (var(--page-pad) * 2)));
+      min-height: 100%;
+      margin: 0 auto;
+      padding: max(var(--page-pad), env(safe-area-inset-top)) max(var(--page-pad), env(safe-area-inset-right)) max(var(--page-pad), env(safe-area-inset-bottom)) max(var(--page-pad), env(safe-area-inset-left));
+    }
+
+    .view-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      gap: var(--s5);
+      margin-bottom: var(--s7);
+    }
+
+    .view-kicker {
+      margin: 0 0 var(--s2);
+      color: var(--text-soft);
+      font-size: .64rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .24em;
+      text-transform: uppercase;
+    }
+
+    .view-title {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: clamp(2.7rem, 6vw, 5.6rem);
+      font-weight: var(--weight-light);
+      line-height: .94;
+      letter-spacing: -.055em;
+      text-shadow: var(--shadow-text);
+    }
+
+    .view-intro {
+      max-width: 670px;
+      margin: var(--s3) 0 0;
+      color: var(--text-body);
+      font-size: clamp(.98rem, 1.35vw, 1.12rem);
+      line-height: 1.55;
+    }
+
+    .back {
+      min-height: var(--touch);
+      padding: 0 var(--s3);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-pill);
+      background: var(--surface);
+      color: var(--text-strong);
+      cursor: pointer;
+      font-size: .66rem;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      transition: background var(--fast) ease, border-color var(--fast) ease;
+    }
+    .back:hover { background: var(--surface-hover); border-color: rgb(var(--rgb-white) / .36); }
+
+    .build-category {
+      padding: var(--s7) 0 var(--s9);
+      border-top: 1px solid var(--line);
+    }
+    .build-category:first-of-type { padding-top: var(--s5); }
+
+    .category-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--s5);
+      align-items: end;
+      margin-bottom: var(--s5);
+    }
+
+    .category-title {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: clamp(1.45rem, 2.6vw, 2.3rem);
+      font-weight: var(--weight-book);
+      letter-spacing: -.035em;
+      text-shadow: var(--glow-white);
+    }
+    .category-count {
+      color: var(--text-faint);
+      font-size: .62rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--s4);
+    }
+
+    .project-card {
+      min-width: 0;
+      contain: layout paint style;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--gradient-card), var(--surface);
+      box-shadow: 0 18px 46px rgb(var(--rgb-black) / .15);
+      transition: transform var(--slow) var(--ease), border-color var(--ui) ease, background var(--ui) ease;
+    }
+    .project-card:hover { transform: translateY(-2px); border-color: rgb(var(--rgb-white) / .22); background: var(--surface-hover); }
+
+    .project-preview {
+      position: relative;
+      margin: 0;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      background:
+        radial-gradient(60% 70% at 78% 22%, rgb(var(--rgb-white) / .035), transparent 74%),
+        rgb(var(--rgb-black) / .30);
+      box-shadow: var(--shadow-preview);
+    }
+
+    .project-preview iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: var(--color-bg);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--ui) ease;
+    }
+    .project-preview iframe.loaded { opacity: 1; }
+
+    .preview-status {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: var(--s4);
+      color: var(--text-faint);
+      font-size: .61rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .13em;
+      text-align: center;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+    .project-preview:has(iframe.loaded) .preview-status { opacity: 0; }
+
+    .project-info {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--s4);
+      align-items: end;
+      padding: var(--s4);
+    }
+    .project-type {
+      margin: 0 0 7px;
+      color: var(--text-soft);
+      font-size: .60rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .project-name {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: clamp(1.05rem, 1.8vw, 1.34rem);
+      font-weight: var(--weight-medium);
+      letter-spacing: -.025em;
+      text-shadow: 0 0 20px rgb(var(--rgb-white) / .025);
+    }
+    .project-note {
+      margin: 8px 0 0;
+      max-width: 46ch;
+      color: var(--text-soft);
+      font-size: .78rem;
+      line-height: 1.45;
+    }
+    .project-link {
+      min-width: var(--touch);
+      min-height: var(--touch);
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-pill);
+      color: var(--text-strong);
+      text-decoration: none;
+      font-size: 1rem;
+      transition: border-color var(--fast) ease, background var(--fast) ease, transform var(--fast) ease;
+    }
+    .project-link:hover { border-color: rgb(var(--rgb-white) / .36); background: var(--surface-hover); transform: translate(1px, -1px); }
+
+    .offer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--s4);
+      padding-top: var(--s5);
+      border-top: 1px solid var(--line);
+    }
+    .offer-card {
+      min-height: 250px;
+      padding: var(--s5);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--gradient-card);
+      box-shadow: 0 20px 58px rgb(var(--rgb-black) / .18);
+    }
+    .offer-index { color: var(--text-faint); font-size: .62rem; letter-spacing: .16em; }
+    .offer-card h3 {
+      margin: var(--s9) 0 var(--s2);
+      color: var(--text-strong);
+      font-size: clamp(1.4rem, 2.5vw, 2rem);
+      font-weight: var(--weight-book);
+      letter-spacing: -.04em;
+      text-shadow: var(--glow-white);
+    }
+    .offer-card p { margin: 0; color: var(--text-body); line-height: 1.55; }
+
+
+
+    /* QUICK-PICK PRICING — additive only; existing calculator below remains untouched */
+    .quick-pick-pricing {
+      display: grid;
+      gap: var(--s5);
+      margin-bottom: var(--s8);
+    }
+
+    .quick-pick-head {
+      display: grid;
+      gap: 8px;
+      padding-top: var(--s5);
+      border-top: 1px solid var(--line);
+    }
+
+    .quick-pick-kicker {
+      margin: 0;
+      color: var(--text-faint);
+      font-size: .62rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .quick-pick-title {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: clamp(1.55rem, 3.2vw, 2.5rem);
+      font-weight: var(--weight-book);
+      line-height: 1;
+      letter-spacing: -.045em;
+      text-shadow: var(--glow-white);
+    }
+
+    .quick-pick-lead {
+      max-width: 62ch;
+      margin: 0;
+      color: var(--text-body);
+      font-size: .92rem;
+      line-height: 1.55;
+    }
+
+    .quick-pick-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--s4);
+      align-items: stretch;
+    }
+
+    .quick-plan {
+      position: relative;
+      min-width: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: var(--s5);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      background:
+        radial-gradient(24rem 16rem at 18% 0%, rgb(var(--rgb-white) / .035), transparent 72%),
+        var(--gradient-card),
+        rgb(var(--rgb-white) / .012);
+      box-shadow:
+        inset 0 1px 0 rgb(var(--rgb-white) / .035),
+        0 20px 58px rgb(var(--rgb-black) / .20);
+      transition:
+        transform var(--ui) var(--ease),
+        border-color var(--ui) ease,
+        background var(--ui) ease,
+        box-shadow var(--ui) var(--ease);
+    }
+
+    .quick-plan::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(115deg, transparent 20%, rgb(var(--rgb-white) / .055) 48%, transparent 72%);
+      transform: translateX(-135%);
+      transition: transform 520ms var(--ease);
+    }
+
+    .quick-plan:hover {
+      transform: translateY(-3px);
+      border-color: rgb(var(--rgb-white) / .28);
+      box-shadow:
+        inset 0 1px 0 rgb(var(--rgb-white) / .055),
+        0 28px 70px rgb(var(--rgb-black) / .28);
+    }
+
+    .quick-plan:hover::after { transform: translateX(135%); }
+
+    .quick-plan:active {
+      transform: translateY(1px) scale(.995);
+      box-shadow:
+        inset 0 2px 7px rgb(var(--rgb-black) / .30),
+        0 10px 28px rgb(var(--rgb-black) / .22);
+    }
+
+    .quick-plan.is-selected {
+      border-color: rgb(var(--rgb-white) / .52);
+      background:
+        radial-gradient(22rem 15rem at 18% 0%, rgb(var(--rgb-white) / .055), transparent 72%),
+        linear-gradient(145deg, rgb(var(--rgb-white) / .050), rgb(var(--rgb-white) / .012) 58%),
+        rgb(var(--rgb-white) / .018);
+      box-shadow:
+        inset 0 1px 0 rgb(var(--rgb-white) / .075),
+        0 0 0 1px rgb(var(--rgb-white) / .04),
+        0 28px 78px rgb(var(--rgb-black) / .30);
+    }
+
+    .quick-plan-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s3);
+      margin-bottom: var(--s5);
+    }
+
+    .quick-plan-index,
+    .quick-plan-badge {
+      color: var(--text-faint);
+      font-size: .60rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .quick-plan-badge {
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-pill);
+      color: var(--text-nav);
+      background: rgb(var(--rgb-white) / .025);
+      white-space: nowrap;
+    }
+
+    .quick-plan h3 {
+      margin: 0 0 var(--s2);
+      color: var(--text-strong);
+      font-size: clamp(1.45rem, 2.5vw, 2rem);
+      font-weight: var(--weight-book);
+      line-height: 1;
+      letter-spacing: -.04em;
+      text-shadow: var(--glow-white);
+    }
+
+    .quick-plan-spec {
+      margin: 0 0 var(--s5);
+      color: var(--text-body);
+      font-size: .84rem;
+      line-height: 1.5;
+    }
+
+    .quick-price {
+      display: grid;
+      gap: 5px;
+      margin-bottom: var(--s4);
+    }
+
+    .quick-price-regular {
+      color: var(--text-faint);
+      font-size: .78rem;
+      line-height: 1;
+    }
+
+    .quick-price-regular s {
+      text-decoration-thickness: 2px;
+      text-decoration-color: rgb(var(--rgb-white) / .55);
+    }
+
+    .quick-price-current {
+      color: var(--text-strong);
+      font-size: clamp(2rem, 4vw, 3.15rem);
+      font-weight: var(--weight-book);
+      line-height: .95;
+      letter-spacing: -.055em;
+      text-shadow: var(--glow-white);
+    }
+
+    .quick-price-caption {
+      color: var(--text-soft);
+      font-size: .69rem;
+      line-height: 1.35;
+    }
+
+    .quick-sequence {
+      display: grid;
+      gap: 7px;
+      margin: 0 0 var(--s5);
+      padding: var(--s3);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgb(var(--rgb-white) / .015);
+    }
+
+    .quick-sequence-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: var(--s3);
+      color: var(--text-soft);
+      font-size: .72rem;
+      line-height: 1.35;
+    }
+
+    .quick-sequence-row strong {
+      color: var(--text-nav);
+      font-weight: var(--weight-medium);
+    }
+
+    .quick-sequence-row.is-current {
+      color: var(--text-strong);
+    }
+
+    .quick-sequence-row.is-current strong {
+      color: var(--text-strong);
+    }
+
+    .quick-plan-cta {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      min-height: 50px;
+      margin-top: auto;
+      padding: 0 var(--s4);
+      border: 1px solid rgb(var(--rgb-white) / .30);
+      border-radius: var(--radius-pill);
+      background:
+        linear-gradient(180deg, rgb(var(--rgb-white) / .96), rgb(var(--rgb-white) / .84));
+      color: rgb(8 8 8);
+      cursor: pointer;
+      font-size: .78rem;
+      font-weight: var(--weight-semibold);
+      box-shadow:
+        inset 0 1px 0 rgb(var(--rgb-white) / .85),
+        0 11px 26px rgb(var(--rgb-black) / .30);
+      transition:
+        transform var(--fast) var(--ease),
+        box-shadow var(--fast) var(--ease),
+        background var(--fast) ease;
+    }
+
+    .quick-plan-cta:hover,
+    .quick-plan-cta:focus-visible {
+      background: rgb(var(--rgb-white));
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 1px 0 rgb(var(--rgb-white)),
+        0 17px 34px rgb(var(--rgb-black) / .34);
+    }
+
+    .quick-plan-cta:active {
+      transform: translateY(1px);
+      box-shadow:
+        inset 0 3px 6px rgb(var(--rgb-black) / .20),
+        0 7px 16px rgb(var(--rgb-black) / .25);
+    }
+
+    .quick-terms {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--s3);
+    }
+
+    .quick-term {
+      padding: var(--s4);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: rgb(var(--rgb-white) / .016);
+      box-shadow: inset 0 1px 0 rgb(var(--rgb-white) / .02);
+    }
+
+    .quick-term strong {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--text-strong);
+      font-size: .9rem;
+      font-weight: var(--weight-medium);
+    }
+
+    .quick-term p {
+      margin: 0;
+      color: var(--text-body);
+      font-size: .78rem;
+      line-height: 1.5;
+    }
+
+    .quick-care-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px 9px;
+      margin-top: 10px;
+    }
+
+    .quick-care-list span {
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-pill);
+      color: var(--text-soft);
+      background: rgb(var(--rgb-white) / .012);
+      font-size: .66rem;
+      line-height: 1;
+    }
+
+    .quick-term-checkout {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      margin-top: var(--s3);
+      padding: 0 var(--s3);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-pill);
+      background: rgb(var(--rgb-white) / .035);
+      color: var(--text-nav);
+      text-decoration: none;
+      font-size: .70rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .02em;
+      box-shadow: inset 0 1px 0 rgb(var(--rgb-white) / .025);
+      transition:
+        transform var(--fast) var(--ease),
+        border-color var(--fast) ease,
+        background var(--fast) ease,
+        color var(--fast) ease;
+    }
+
+    .quick-term-checkout:hover,
+    .quick-term-checkout:focus-visible {
+      transform: translateY(-1px);
+      border-color: rgb(var(--rgb-white) / .32);
+      background: rgb(var(--rgb-white) / .06);
+      color: var(--text-strong);
+    }
+
+    .quick-term-checkout:active {
+      transform: translateY(1px);
+    }
+
+    .quick-sale-copy {
+      display: grid;
+      gap: var(--s5);
+      padding: var(--s5) 0 var(--s3);
+      border: 0;
+      border-top: 1px solid var(--line);
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
+    }
+
+    .quick-sale-copy-head {
+      display: grid;
+      gap: 8px;
+      max-width: 68ch;
+    }
+
+    .quick-sale-copy-kicker {
+      margin: 0;
+      color: var(--text-faint);
+      font-size: .62rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .quick-sale-copy h3 {
+      margin: 0;
+      color: rgb(var(--rgb-text));
+      font-size: clamp(1.55rem, 3.2vw, 2.5rem);
+      font-weight: var(--weight-book);
+      line-height: 1;
+      letter-spacing: -.045em;
+      text-shadow: var(--glow-white);
+    }
+
+    .quick-sale-copy-lead {
+      margin: 0;
+      max-width: 68ch;
+      color: var(--text-nav);
+      font-size: .92rem;
+      line-height: 1.55;
+    }
+
+    .quick-sale-copy-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--s4);
+      max-width: 900px;
+    }
+
+    .quick-sale-copy-group {
+      display: grid;
+      gap: 7px;
+      padding-top: var(--s3);
+      border-top: 1px solid var(--line);
+    }
+
+    .quick-sale-copy-group strong {
+      color: rgb(var(--rgb-text));
+      font-size: .78rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .02em;
+    }
+
+    .quick-sale-copy-group span {
+      color: var(--text-body);
+      font-size: .82rem;
+      line-height: 1.55;
+    }
+
+    .quick-sale-copy-body {
+      display: grid;
+      gap: var(--s3);
+      max-width: 74ch;
+    }
+
+    .quick-sale-copy-body p {
+      margin: 0;
+      color: var(--text-body);
+      font-size: .88rem;
+      line-height: 1.65;
+    }
+
+    .quick-sale-copy-body .sale-line {
+      color: rgb(var(--rgb-text));
+    }
+
+    @media (min-width: 721px) {
+      .quick-sale-copy-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .quick-pick-contact {
+      display: none;
+      padding: clamp(var(--s5), 4vw, var(--s7));
+      border: 1px solid rgb(var(--rgb-white) / .30);
+      border-radius: var(--radius-xl);
+      background:
+        radial-gradient(28rem 18rem at 12% 0%, rgb(var(--rgb-white) / .04), transparent 70%),
+        rgb(7 7 7 / .92);
+      box-shadow:
+        inset 0 1px 0 rgb(var(--rgb-white) / .04),
+        0 24px 68px rgb(var(--rgb-black) / .24);
+    }
+
+    .quick-pick-contact.is-open { display: block; }
+
+    .quick-pick-summary {
+      display: grid;
+      gap: 5px;
+      margin-bottom: var(--s5);
+      padding-bottom: var(--s4);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .quick-pick-summary-label {
+      color: var(--text-faint);
+      font-size: .60rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .quick-pick-summary strong {
+      color: var(--text-strong);
+      font-size: clamp(1.25rem, 2.4vw, 1.8rem);
+      font-weight: var(--weight-book);
+      letter-spacing: -.035em;
+    }
+
+    .quick-pick-summary span {
+      color: var(--text-body);
+      font-size: .78rem;
+      line-height: 1.45;
+    }
+
+    .quick-contact-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--s3);
+    }
+
+    .quick-contact-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .quick-contact-field label {
+      color: var(--text-soft);
+      font-size: .64rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .quick-contact-field input,
+    .quick-contact-field textarea {
+      width: 100%;
+      min-height: 50px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgb(var(--rgb-white) / .018);
+      color: var(--text-strong);
+      caret-color: var(--text-strong);
+      outline: none;
+      font: inherit;
+      font-size: .92rem;
+      line-height: 1.4;
+      transition:
+        border-color var(--fast) ease,
+        background var(--fast) ease,
+        box-shadow var(--fast) ease;
+    }
+
+    .quick-contact-field textarea { min-height: 88px; resize: vertical; }
+
+    .quick-contact-field input:focus,
+    .quick-contact-field textarea:focus {
+      border-color: rgb(var(--rgb-white) / .42);
+      background: rgb(var(--rgb-white) / .030);
+      box-shadow: 0 0 0 3px rgb(var(--rgb-white) / .025);
+    }
+
+    .quick-contact-submit {
+      width: 100%;
+      min-height: 54px;
+      margin-top: var(--s4);
+      padding: 0 var(--s4);
+      border: 1px solid rgb(var(--rgb-white) / .34);
+      border-radius: var(--radius-pill);
+      background: rgb(var(--rgb-white) / .92);
+      color: rgb(8 8 8);
+      cursor: pointer;
+      font-size: .82rem;
+      font-weight: var(--weight-semibold);
+      box-shadow:
+        inset 0 1px 0 rgb(var(--rgb-white) / .72),
+        0 14px 36px rgb(var(--rgb-black) / .20);
+      transition:
+        transform var(--fast) var(--ease),
+        background var(--fast) ease,
+        box-shadow var(--fast) var(--ease),
+        opacity var(--fast) ease;
+    }
+
+    .quick-contact-submit:hover,
+    .quick-contact-submit:focus-visible {
+      background: rgb(var(--rgb-white));
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 1px 0 rgb(var(--rgb-white)),
+        0 19px 40px rgb(var(--rgb-black) / .28);
+    }
+
+    .quick-contact-submit:active {
+      transform: translateY(1px);
+      box-shadow:
+        inset 0 3px 6px rgb(var(--rgb-black) / .18),
+        0 8px 18px rgb(var(--rgb-black) / .22);
+    }
+
+    .quick-contact-submit:disabled { opacity: .52; cursor: default; }
+
+    .quick-contact-note,
+    .quick-contact-status {
+      margin: 10px 0 0;
+      color: var(--text-faint);
+      font-size: .72rem;
+      line-height: 1.45;
+    }
+
+    .quick-contact-status { color: var(--text-body); }
+    .quick-contact-status a { color: var(--text-strong); text-underline-offset: .18em; }
+    .quick-contact-status[data-state="ok"] { color: var(--text-nav); }
+
+    .quick-honeypot {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      overflow: hidden !important;
+      clip: rect(0 0 0 0) !important;
+      white-space: nowrap !important;
+    }
+
+    .custom-calculator-divider {
+      display: grid;
+      gap: 7px;
+      margin: var(--s3) 0 var(--s5);
+      padding-top: var(--s5);
+      border-top: 1px solid var(--line);
+    }
+
+    .custom-calculator-divider strong {
+      color: var(--text-strong);
+      font-size: 1rem;
+      font-weight: var(--weight-medium);
+    }
+
+    .custom-calculator-divider span {
+      max-width: 62ch;
+      color: var(--text-body);
+      font-size: .78rem;
+      line-height: 1.5;
+    }
+
+    @media (min-width: 721px) {
+      .quick-pick-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .quick-terms { grid-template-columns: 1.4fr .8fr; }
+      .quick-contact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .quick-contact-field.is-wide { grid-column: 1 / -1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .quick-plan,
+      .quick-plan::after,
+      .quick-plan-cta,
+      .quick-contact-submit { transition: none; }
+      .quick-plan:hover,
+      .quick-plan:active,
+      .quick-plan-cta:hover,
+      .quick-plan-cta:active,
+      .quick-contact-submit:hover,
+      .quick-contact-submit:active { transform: none; }
+    }
+
+    /* GET A WEBSITE — exact BNDR estimator flow, conformed to this site's existing visual system */
+    #website {
+      --text-strong: rgb(var(--rgb-white) / .96);
+      --text-nav: rgb(var(--rgb-white) / .88);
+      --text-body: rgb(var(--rgb-white) / .78);
+      --text-soft: rgb(var(--rgb-white) / .68);
+      --text-faint: rgb(var(--rgb-white) / .60);
+      --line: rgb(var(--rgb-white) / .18);
+      --line-strong: rgb(var(--rgb-white) / .30);
+      background:
+        radial-gradient(44rem 34rem at 15% 5%, rgb(var(--rgb-white) / .024), transparent 72%),
+        radial-gradient(36rem 30rem at 88% 16%, rgb(var(--rgb-white) / .012), transparent 74%),
+        linear-gradient(180deg, rgb(23 25 27), rgb(10 11 12));
+      backdrop-filter: blur(20px) saturate(0);
+      -webkit-backdrop-filter: blur(20px) saturate(0);
+    }
+
+    #website .view-intro { max-width: 58ch; }
+
+    .estimate-flow {
+      display: grid;
+      gap: var(--s4);
+      padding-top: var(--s5);
+      border-top: 1px solid var(--line);
+    }
+
+    .estimate-progress {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s4);
+      min-height: 22px;
+      color: var(--text-faint);
+      font-size: .62rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .estimate-progress-track {
+      position: relative;
+      flex: 1 1 auto;
+      height: 1px;
+      overflow: hidden;
+      background: var(--line);
+    }
+
+    .estimate-progress-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 14.2857%;
+      background: rgb(var(--rgb-white) / .64);
+      transition: width .36s var(--ease);
+    }
+
+    .estimate-panel {
+      position: relative;
+      min-height: 300px;
+      padding: clamp(var(--s5), 4vw, var(--s7));
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(145deg, rgb(var(--rgb-white) / .030), rgb(var(--rgb-white) / .008) 58%),
+        rgb(7 7 7 / .92);
+      box-shadow:
+        inset 0 1px 0 rgb(var(--rgb-white) / .025),
+        0 22px 64px rgb(var(--rgb-black) / .18);
+      overflow: hidden;
+    }
+
+    .estimate-step {
+      display: none;
+      min-height: 100%;
+    }
+
+    .estimate-step.is-active {
+      display: block;
+      animation: estimate-in .34s var(--ease) both;
+    }
+
+    @keyframes estimate-in {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .estimate-step-head {
+      display: grid;
+      gap: 8px;
+      margin-bottom: var(--s5);
+    }
+
+    .estimate-step-index {
+      color: var(--text-faint);
+      font-size: .62rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .estimate-step h3 {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: clamp(1.55rem, 3.2vw, 2.5rem);
+      font-weight: var(--weight-book);
+      line-height: 1;
+      letter-spacing: -.045em;
+      text-shadow: var(--glow-white);
+    }
+
+    .estimate-step-sub {
+      max-width: 58ch;
+      margin: 0;
+      color: var(--text-body);
+      font-size: .92rem;
+      line-height: 1.5;
+    }
+
+    .estimate-options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .estimate-option {
+      width: 100%;
+      min-height: 52px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: var(--s3);
+      padding: 13px var(--s3);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgb(var(--rgb-white) / .018);
+      color: var(--text-nav);
+      text-align: left;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgb(var(--rgb-white) / .018);
+      transition:
+        border-color var(--fast) ease,
+        background var(--fast) ease,
+        color var(--fast) ease,
+        box-shadow var(--fast) ease;
+    }
+
+    .estimate-option:hover,
+    .estimate-option:focus-visible {
+      border-color: rgb(var(--rgb-white) / .26);
+      background: rgb(var(--rgb-white) / .036);
+      color: var(--text-strong);
+    }
+
+    .estimate-option[aria-pressed="true"] {
+      border-color: rgb(var(--rgb-white) / .48);
+      background: rgb(var(--rgb-white) / .065);
+      color: var(--text-strong);
+      box-shadow:
+        inset 0 1px 0 rgb(var(--rgb-white) / .055),
+        0 0 24px rgb(var(--rgb-white) / .018);
+    }
+
+    .estimate-option-main {
+      min-width: 0;
+      font-size: .9rem;
+      font-weight: var(--weight-medium);
+      line-height: 1.3;
+    }
+
+    .estimate-option-meta {
+      color: var(--text-soft);
+      font-size: .72rem;
+      line-height: 1.3;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .estimate-option-detail {
+      display: block;
+      margin-top: 4px;
+      color: var(--text-soft);
+      font-size: .75rem;
+      font-weight: var(--weight-regular);
+      line-height: 1.3;
+    }
+
+    .estimate-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--s3);
+      margin-top: var(--s5);
+    }
+
+    .estimate-control {
+      min-height: var(--touch);
+      padding: 0 var(--s3);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-pill);
+      background: var(--surface);
+      color: var(--text-nav);
+      cursor: pointer;
+      font-size: .68rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .05em;
+      transition: border-color var(--fast) ease, background var(--fast) ease, color var(--fast) ease;
+    }
+
+    .estimate-control:hover,
+    .estimate-control:focus-visible {
+      border-color: rgb(var(--rgb-white) / .34);
+      background: var(--surface-hover);
+      color: var(--text-strong);
+    }
+
+    .estimate-control[hidden] { display: none; }
+
+    .estimate-quote {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px var(--s4);
+      padding: var(--s4) 0 0;
+      border-top: 1px solid var(--line);
+      color: var(--text-soft);
+    }
+
+    .estimate-quote-label {
+      font-size: .62rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .estimate-quote-value {
+      color: var(--text-strong);
+      font-size: clamp(1.15rem, 2vw, 1.5rem);
+      font-weight: var(--weight-book);
+      letter-spacing: -.03em;
+      text-shadow: var(--glow-white);
+    }
+
+    .estimate-quote-note {
+      flex-basis: 100%;
+      margin: 0;
+      color: var(--text-faint);
+      font-size: .72rem;
+      line-height: 1.45;
+    }
+
+    .estimate-contact-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--s3);
+    }
+
+    .estimate-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .estimate-field label {
+      color: var(--text-soft);
+      font-size: .64rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .estimate-field input,
+    .estimate-field textarea {
+      width: 100%;
+      min-height: 50px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgb(var(--rgb-white) / .018);
+      color: var(--text-strong);
+      caret-color: var(--text-strong);
+      outline: none;
+      font: inherit;
+      font-size: .92rem;
+      line-height: 1.4;
+      transition: border-color var(--fast) ease, background var(--fast) ease, box-shadow var(--fast) ease;
+    }
+
+    .estimate-field textarea { min-height: 96px; resize: vertical; }
+
+    .estimate-field input:focus,
+    .estimate-field textarea:focus {
+      border-color: rgb(var(--rgb-white) / .42);
+      background: rgb(var(--rgb-white) / .030);
+      box-shadow: 0 0 0 3px rgb(var(--rgb-white) / .025);
+    }
+
+    .estimate-submit {
+      width: 100%;
+      min-height: 54px;
+      margin-top: var(--s4);
+      padding: 0 var(--s4);
+      border: 1px solid rgb(var(--rgb-white) / .34);
+      border-radius: var(--radius-md);
+      background: rgb(var(--rgb-white) / .92);
+      color: rgb(8 8 8);
+      cursor: pointer;
+      font-size: .84rem;
+      font-weight: var(--weight-semibold);
+      box-shadow:
+        inset 0 1px 0 rgb(var(--rgb-white) / .72),
+        0 14px 36px rgb(var(--rgb-black) / .20);
+      transition: background var(--fast) ease, transform var(--fast) ease, opacity var(--fast) ease;
+    }
+
+    .estimate-submit:hover,
+    .estimate-submit:focus-visible { background: rgb(var(--rgb-white)); }
+    .estimate-submit:disabled { opacity: .52; cursor: default; }
+
+    .estimate-email-note,
+    .estimate-status {
+      margin: 10px 0 0;
+      color: var(--text-faint);
+      font-size: .72rem;
+      line-height: 1.45;
+    }
+
+    .estimate-status { color: var(--text-body); }
+    .estimate-status a { color: var(--text-strong); text-underline-offset: .18em; }
+    .estimate-status[data-state="ok"] { color: var(--text-nav); }
+
+    .estimate-honeypot {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      overflow: hidden !important;
+      clip: rect(0 0 0 0) !important;
+      white-space: nowrap !important;
+    }
+
+    @media (min-width: 721px) {
+      .estimate-panel { min-height: 350px; }
+      .estimate-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .estimate-contact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .estimate-field.is-wide { grid-column: 1 / -1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .estimate-step.is-active { animation: none; }
+      .estimate-progress-fill { transition: none; }
+    }
+
+
+    .about-layout {
+      display: grid;
+      gap: var(--s5);
+      padding-top: var(--s5);
+      border-top: 1px solid var(--line);
+    }
+    .about-media {
+      width: min(100%, 760px);
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--gradient-card), var(--surface);
+      box-shadow: var(--shadow-preview);
+    }
+    .about-media[hidden] { display: none; }
+    .about-media img {
+      width: 100%;
+      height: auto;
+      max-height: 68svh;
+      object-fit: cover;
+    }
+    .about-markdown {
+      width: min(100%, 760px);
+      color: var(--text-body);
+      font-size: clamp(.98rem, 1.35vw, 1.08rem);
+      line-height: 1.68;
+    }
+    .about-markdown:empty { display: none; }
+    .about-markdown > :first-child { margin-top: 0; }
+    .about-markdown h3,
+    .about-markdown h4 {
+      color: var(--text-strong);
+      font-weight: var(--weight-book);
+      letter-spacing: -.025em;
+      text-shadow: var(--glow-white);
+    }
+    .about-markdown h3 { font-size: 1.45rem; margin: var(--s6) 0 var(--s3); }
+    .about-markdown h4 { font-size: 1.14rem; margin: var(--s5) 0 var(--s2); }
+    .about-markdown p { margin: 0 0 var(--s4); }
+    .about-markdown ul { margin: 0 0 var(--s4); padding-left: 1.15rem; }
+    .about-markdown a { color: var(--text-strong); text-underline-offset: .18em; }
+
+    .fade-up { opacity: 0; transform: translateY(14px); animation: enter .82s var(--ease) forwards; }
+    .fade-up:nth-child(2) { animation-delay: .05s; }
+    .fade-up:nth-child(3) { animation-delay: .10s; }
+    @keyframes enter { to { opacity: 1; transform: none; } }
+
+    @media (min-width: 721px) {
+      :root { --page-pad: clamp(24px, 4vw, 56px); }
+      .site-header { gap: var(--s5); }
+      .social-cluster { gap: 8px; }
+      .social-link { width: 30px; --icon-size: 19px; }
+      .primary-nav { gap: clamp(var(--s3), 3vw, var(--s7)); }
+      .primary-nav a { font-size: .68rem; letter-spacing: .26em; }
+      .hero-copy { grid-column: 1 / span 7; width: min(100%, 610px); }
+      .hero-brand { margin-bottom: var(--s4); }
+      .hero-logo { height: clamp(34px, 3.1vw, 42px); max-width: 180px; }
+      h1 { max-width: 9.2ch; font-size: clamp(3.8rem, 8vw, 5.8rem); line-height: .92; }
+      .subline { margin-top: var(--s4); }
+      .hero-actions { flex-direction: row; gap: var(--s3); margin-top: var(--s6); }
+      .action { width: auto; min-width: 212px; min-height: 60px; border-radius: var(--radius-md); }
+      .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .view-title { font-size: clamp(3rem, 6vw, 5.6rem); }
+    }
+
+    @media (min-width: 901px) {
+      .hero-copy { grid-column: 1 / span 6; }
+      h1 { font-size: clamp(4rem, 6.35vw, 6.7rem); }
+      .offer-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+      .social-link * { animation: none !important; }
+      #fx { opacity: .82; }
+    }
+
+
+    /* GRIPPY CURSOR — isolated global effect */
+    #grip-cursor-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483647;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+    #grip-cursor-layer[hidden] {
+      display: none;
+    }
+    .grip-cursor-positioner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      will-change: transform;
+    }
+    #grip-cursor-dot {
+      width: 8px;
+      height: 8px;
+      margin-left: -4px;
+      margin-top: -4px;
+      border-radius: 9999px;
+      background: #fff;
+      transition:
+        transform .18s cubic-bezier(.34, 1.56, .64, 1),
+        opacity .2s ease;
+    }
+    #grip-cursor-dot[data-down="true"] {
+      transform: scale(.4);
+    }
+    #grip-cursor-ring {
+      width: 30px;
+      height: 30px;
+      margin-left: -15px;
+      margin-top: -15px;
+      border-radius: 9999px;
+      border: 1.5px solid rgb(255 255 255 / .75);
+      background: rgb(255 255 255 / .04);
+      mix-blend-mode: difference;
+      box-shadow: 0 0 0 0 rgb(255 255 255 / 0);
+      transition:
+        width .32s cubic-bezier(.16, 1, .3, 1),
+        height .32s cubic-bezier(.16, 1, .3, 1),
+        margin .32s cubic-bezier(.16, 1, .3, 1),
+        border-radius .32s cubic-bezier(.16, 1, .3, 1),
+        background-color .32s ease,
+        border-color .32s ease,
+        box-shadow .32s ease,
+        transform .25s cubic-bezier(.34, 1.56, .64, 1);
+    }
+    #grip-cursor-ring[data-down="true"] {
+      transform: scale(.85);
+    }
+    @media (pointer: fine) {
+      html.grip-cursor-active,
+      html.grip-cursor-active body,
+      html.grip-cursor-active a,
+      html.grip-cursor-active button,
+      html.grip-cursor-active input,
+      html.grip-cursor-active select,
+      html.grip-cursor-active textarea,
+      html.grip-cursor-active summary,
+      html.grip-cursor-active [role="button"],
+      html.grip-cursor-active [role="link"],
+      html.grip-cursor-active [role="tab"],
+      html.grip-cursor-active [role="menuitem"],
+      html.grip-cursor-active [tabindex] {
+        cursor: none !important;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #grip-cursor-dot,
+      #grip-cursor-ring {
+        transition: none !important;
+      }
+    }
+
+  </style>
+
+
+  <!--
+    GOOGLE ANALYTICS 4
+    Replace G-XXXXXXXXXX below with your GA4 Measurement ID.
+    This site uses History API routing. In GA4, keep Enhanced Measurement >
+    Page views > "Page changes based on browser history events" enabled.
+  -->
+  <script>
+    window.BNDR_GA_MEASUREMENT_ID = 'G-XXXXXXXXXX';
+    (() => {
+      const id = window.BNDR_GA_MEASUREMENT_ID;
+      if (!/^G-[A-Z0-9]+$/i.test(id) || id.includes('XXXX')) return;
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = window.gtag || function(){ dataLayer.push(arguments); };
+      gtag('js', new Date());
+      gtag('config', id);
+      const tag = document.createElement('script');
+      tag.async = true;
+      tag.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
+      document.head.appendChild(tag);
+    })();
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "BNDR LLC",
+    "url": "https://bndr-or-identityfxtm-or-canvascode-production.up.railway.app/",
+    "description": "Web, games, systems, and selected digital work."
+  }
+  </script>
+</head>
+<body>
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <main id="content">
+  <section class="home" id="home" aria-labelledby="hero-title">
+    <header class="site-header fade-up">
+      <nav class="social-cluster" aria-label="BNDR LLC social links">
+        <a class="social-link substack" href="https://substack.com/@bndrllc" target="_blank" rel="noopener noreferrer" aria-label="BNDR LLC on Substack">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <line class="stack-top" x1="5" y1="6.2" x2="19" y2="6.2"/>
+            <line x1="5" y1="9.4" x2="19" y2="9.4"/>
+            <path class="stack-bottom" d="M6.8 12.7h10.4v5.8L12 15.5l-5.2 3z"/>
+          </svg>
+        </a>
+        <a class="social-link coffee" href="https://buymeacoffee.com/bndr" target="_blank" rel="noopener noreferrer" aria-label="Support BNDR on Buy Me a Coffee">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path class="mail-body" d="M6.4 10.2h9.8v5.1a3 3 0 0 1-3 3H9.4a3 3 0 0 1-3-3z"/>
+            <path d="M16.2 11.5h1.25a2.25 2.25 0 0 1 0 4.5H16.2"/>
+            <path class="steam-a" d="M9 8.2c-1-1 .8-1.55 0-2.65"/>
+            <path class="steam-b" d="M12.6 8.2c-1-1 .8-1.55 0-2.65"/>
+          </svg>
+        </a>
+        <a class="social-link facebook" href="https://www.facebook.com/BNDRLLC" target="_blank" rel="noopener noreferrer" aria-label="BNDR LLC on Facebook">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path class="fb-stem" d="M13.7 19V11.3c0-2.35 1.05-4.15 3.7-4.15h1"/>
+            <path class="fb-cross" d="M10.7 11.6h6.2"/>
+          </svg>
+        </a>
+        <a class="social-link instagram" href="https://www.instagram.com/bndrllc" target="_blank" rel="noopener noreferrer" aria-label="BNDR LLC on Instagram">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id="ig-brand-gradient" x1="4" y1="20" x2="20" y2="4" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#FEDA75"/>
+                <stop offset="28%" stop-color="#FA7E1E"/>
+                <stop offset="52%" stop-color="#D62976"/>
+                <stop offset="76%" stop-color="#962FBF"/>
+                <stop offset="100%" stop-color="#4F5BD5"/>
+              </linearGradient>
+            </defs>
+            <g class="ig-base-group">
+              <rect x="5.2" y="5.2" width="13.6" height="13.6" rx="4"/>
+              <circle class="insta-ring" cx="12" cy="12" r="3.15"/>
+              <circle class="insta-dot" cx="16.55" cy="7.55" r=".72" fill="currentColor" stroke="none"/>
+            </g>
+            <g class="ig-gradient-group">
+              <rect x="5.2" y="5.2" width="13.6" height="13.6" rx="4" stroke="url(#ig-brand-gradient)"/>
+              <circle class="insta-ring" cx="12" cy="12" r="3.15" stroke="url(#ig-brand-gradient)"/>
+              <circle class="insta-dot" cx="16.55" cy="7.55" r=".72" fill="url(#ig-brand-gradient)" stroke="none"/>
+            </g>
+          </svg>
+        </a>
+        <a class="social-link email" href="mailto:bndr.labs@gmail.com" aria-label="Email BNDR LLC">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect class="mail-body" x="4.7" y="6.8" width="14.6" height="10.4" rx="2"/>
+            <polyline class="mail-flap" points="5.4,8 12,12.8 18.6,8"/>
+          </svg>
+        </a>
+        <a class="social-link proppz" href="https://propps.me/bndrllc" target="_blank" rel="noopener noreferrer" aria-label="BNDR LLC on Proppz">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8.2 18.5V6.2h4.6a3.75 3.75 0 1 1 0 7.5H8.2"/>
+            <path class="prop-orbit" d="M14.9 8.2c2.8.45 4.3 2 4.3 4.15 0 2.4-1.9 4.25-5.25 4.55"/>
+            <circle class="prop-dot" cx="18.8" cy="7.4" r=".75" fill="currentColor" stroke="none"/>
+          </svg>
+        </a>
+      </nav>
+      <nav class="primary-nav" aria-label="Primary navigation">
+        <a href="#builds" data-open="builds">My Builds</a>
+        <a href="#website" data-open="website">Get a Website</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <article class="hero-copy">
+        <a class="hero-about-link" href="#about" data-open="about" aria-label="About Me">
+          <figure class="hero-brand fade-up" aria-label="BNDR logo">
+            <img class="hero-logo" src="https://r2-uploader-production.up.railway.app/files/74b098c0-e73b-4df0-915a-4db4176a683c.webp" alt="BNDR LLC logo" decoding="async" fetchpriority="high">
+            <span class="logo-fallback" aria-hidden="true">BNDR LLC</span>
+          </figure>
+        </a>
+        <h1 id="hero-title" class="fade-up">Web. Games.<br>Systems.</h1>
+        <p class="subline fade-up">Built Different.</p>
+        <nav class="hero-actions fade-up" aria-label="Featured actions">
+          <a class="action" href="#builds" data-open="builds"><span>My Builds</span><span class="arrow" aria-hidden="true">→</span></a>
+          <a class="action primary" href="#website" data-open="website"><span>Get a Website</span><span class="arrow" aria-hidden="true">→</span></a>
+        </nav>
+      </article>
+    </section>
+
+    <footer class="home-footer fade-up">
+      <nav class="legal-line" aria-label="Legal">
+        <a class="footer-link" href="https://www.dropbox.com/scl/fi/kojw24oymxcuku5r2nupj/terms.html?rlkey=zlta95mcdxzqd9qjkbk38alhl&st=ugdtvjaf&dl=0" target="_blank" rel="noopener noreferrer">privacy</a>
+        <span class="legal-separator" aria-hidden="true">|</span>
+        <span class="copyright">© BNDR LLC</span>
+        <span class="legal-separator" aria-hidden="true">|</span>
+        <a class="footer-link" href="https://www.dropbox.com/scl/fi/um6xi0vfzj0w03kgxtrq2/privacy.html?rlkey=6ylhioa276mrynqylvxc19u7v&st=6fkv1uaf&dl=0" target="_blank" rel="noopener noreferrer">terms</a>
+      </nav>
+    </footer>
+  </section>
+
+  <section class="view" id="builds" aria-hidden="true" aria-labelledby="builds-title">
+    <section class="view-shell">
+      <header class="view-header">
+        <section>
+          <p class="view-kicker">Selected work / live previews</p>
+          <h2 class="view-title" id="builds-title">My Builds</h2>
+          <p class="view-intro">Games, working systems, pilots, and focused examples. Previews load as they enter view to keep the page fast.</p>
+        </section>
+        <button class="back" type="button" data-close>← Back</button>
+      </header>
+
+      <section class="build-category" aria-labelledby="games-title">
+        <header class="category-head">
+          <h3 class="category-title" id="games-title">Games &amp; Interactive</h3>
+          <span class="category-count">05 builds</span>
+        </header>
+        <section class="project-grid" aria-label="Games and interactive builds">
+          <article class="project-card">
+            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="MindCan live preview" data-src="https://mindcan-production-1ba2.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+            <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">MindCan™</h4></section><a class="project-link" href="https://mindcan-production-1ba2.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open MindCan live">↗</a></header>
+          </article>
+          <article class="project-card">
+            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="BMDR live preview" data-src="https://bmdrtm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+            <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">BMDR™</h4></section><a class="project-link" href="https://bmdrtm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BMDR live">↗</a></header>
+          </article>
+          <article class="project-card">
+            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="BNDR LifeMatrix live preview" data-src="https://bndr-lifematrix-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+            <header class="project-info"><section><p class="project-type">Game / System</p><h4 class="project-name">BNDR LifeMatrix</h4></section><a class="project-link" href="https://bndr-lifematrix-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BNDR LifeMatrix live">↗</a></header>
+          </article>
+          <article class="project-card">
+            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Rogue Rita live preview" data-src="https://rogue-ritatm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+            <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Rogue Rita™</h4></section><a class="project-link" href="https://rogue-ritatm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Rogue Rita live">↗</a></header>
+          </article>
+          <article class="project-card">
+            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Hyper Drive live preview" data-src="https://hyperdrive-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+            <header class="project-info"><section><p class="project-type">Interactive / Game-adjacent</p><h4 class="project-name">Hyper Drive</h4></section><a class="project-link" href="https://hyperdrive-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Hyper Drive live">↗</a></header>
+          </article>
+        </section>
+      </section>
+
+      <section class="build-category" aria-labelledby="apps-title">
+        <header class="category-head">
+          <h3 class="category-title" id="apps-title">Web Apps &amp; Pilots</h3>
+          <span class="category-count">01 build</span>
+        </header>
+        <section class="project-grid" aria-label="Web apps and pilots">
+          <article class="project-card">
+            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="QR Resets live preview" data-src="https://qr-resets-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+            <header class="project-info"><section><p class="project-type">Web App / Pilot</p><h4 class="project-name">QR Resets</h4><p class="project-note">Pilot concept — not an active program.</p></section><a class="project-link" href="https://qr-resets-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open QR Resets live">↗</a></header>
+          </article>
+        </section>
+      </section>
+
+      <section class="build-category" aria-labelledby="examples-title">
+        <header class="category-head">
+          <h3 class="category-title" id="examples-title">Website &amp; Design Examples</h3>
+          <span class="category-count">04 examples</span>
+        </header>
+        <section class="project-grid" aria-label="Website and design examples">
+          <article class="project-card">
+            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Jackson's live preview" data-src="https://jacksons-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+            <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Jackson's</h4></section><a class="project-link" href="https://jacksons-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Jackson's live">↗</a></header>
+          </article>
+          <article class="project-card">
+            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Liquid Glass live preview" data-src="https://liquidglass-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+            <header class="project-info"><section><p class="project-type">Interaction Example</p><h4 class="project-name">Liquid Glass</h4></section><a class="project-link" href="https://liquidglass-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Liquid Glass live">↗</a></header>
+          </article>
+          <article class="project-card">
+            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Forma live preview" data-src="https://forma-production-8f79.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+            <header class="project-info"><section><p class="project-type">Design Example</p><h4 class="project-name">Forma</h4></section><a class="project-link" href="https://forma-production-8f79.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Forma live">↗</a></header>
+          </article>
+          <article class="project-card">
+            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Editorial Studio live preview" data-src="https://cecy7-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+            <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Editorial Studio</h4></section><a class="project-link" href="https://cecy7-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Editorial Studio live">↗</a></header>
+          </article>
+        </section>
+      </section>
+    </section>
+  </section>
+
+  <section class="view" id="website" aria-hidden="true" aria-labelledby="website-title">
+    <section class="view-shell">
+      <header class="view-header">
+        <section>
+          <p class="view-kicker">Instant Estimate</p>
+          <h2 class="view-title" id="website-title">Get a Website</h2>
+          <p class="view-intro">Tap through a few options and the number updates live. Flat pricing, known before you say yes — no sales call, no email chain, no surprises.</p>
+        </section>
+        <button class="back" type="button" data-close>← Back</button>
+      </header>
+
+            <section class="quick-pick-pricing" id="quick-pick-pricing" aria-labelledby="quick-pick-title">
+        <header class="quick-pick-head">
+          <p class="quick-pick-kicker">Quick-Pick Plans</p>
+          <h3 class="quick-pick-title" id="quick-pick-title">Pick the size that fits.</h3>
+          <p class="quick-pick-lead">Three fixed-scope options for straightforward builds. If your project needs something outside these packages, the full custom calculator stays right below them.</p>
+        </header>
+
+        <div class="quick-pick-grid" role="group" aria-label="Quick-pick website plans">
+          <article class="quick-plan" data-quick-plan="BNDR Lander" data-pages="1" data-revisions="1" data-regular="2500" data-c1="750" data-c2="1000" data-c3="1500"
+            data-stripe-product="prod_VARDTC10BAGL7I"
+            data-stripe-c1-price="price_1UA6MAGuY1oGAyYSYTGCH0xf"
+            data-stripe-c1-link="https://buy.stripe.com/aFacN560340ackkgze0oM0y"
+            data-stripe-c2-price="price_1UA6MEGuY1oGAyYS1dCawM9g"
+            data-stripe-c2-link="https://buy.stripe.com/6oU6oH4VZ54e8445UA0oM0z"
+            data-stripe-c3-price="price_1UA6MLGuY1oGAyYSh6wQSvxR"
+            data-stripe-c3-link="https://buy.stripe.com/00wbJ188bgMWesser60oM0A"
+            data-deposit="1250"
+            data-stripe-deposit-link="https://buy.stripe.com/4gM28rgEHcwGgAAdn20oM0M">
+            <div class="quick-plan-top">
+              <span class="quick-plan-index">01</span>
+              <span class="quick-plan-badge">1 page · 1 revision</span>
+            </div>
+            <h3>BNDR Lander</h3>
+            <p class="quick-plan-spec">1 page · Included revisions: 1</p>
+            <div class="quick-price">
+              <span class="quick-price-regular">Regular <s>$2,500</s></span>
+              <strong class="quick-price-current">$750</strong>
+              <span class="quick-price-caption">Customer 1 · 70% off</span>
+            </div>
+            <div class="quick-sequence" aria-label="BNDR Lander promotional sequence">
+              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$750</strong></div>
+              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$1,000</strong></div>
+              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$1,500</strong></div>
+              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$1,250</strong></div>
+            </div>
+            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Lander →</button>
+          </article>
+
+          <article class="quick-plan" data-quick-plan="BNDR Standard" data-pages="3" data-revisions="2" data-regular="5000" data-c1="1500" data-c2="2000" data-c3="3000"
+            data-stripe-product="prod_VAREbYCe0EnD4s"
+            data-stripe-c1-price="price_1UA6MRGuY1oGAyYS3JwOmg9G"
+            data-stripe-c1-link="https://buy.stripe.com/3cI6oH3RVgMW1FGgze0oM0C"
+            data-stripe-c2-price="price_1UA6MZGuY1oGAyYS7CARMPV2"
+            data-stripe-c2-link="https://buy.stripe.com/cNi28rdsv40adoo82I0oM0D"
+            data-stripe-c3-price="price_1UA6MeGuY1oGAyYS5egsbpqp"
+            data-stripe-c3-link="https://buy.stripe.com/aFa6oHfADeEO3NOer60oM0E"
+            data-deposit="2500"
+            data-stripe-deposit-link="https://buy.stripe.com/5kQ28r2NR1S2gAA4Qw0oM0O">
+            <div class="quick-plan-top">
+              <span class="quick-plan-index">02</span>
+              <span class="quick-plan-badge">3 pages · 2 revisions</span>
+            </div>
+            <h3>BNDR Standard</h3>
+            <p class="quick-plan-spec">3 pages · Included revisions: 2</p>
+            <div class="quick-price">
+              <span class="quick-price-regular">Regular <s>$5,000</s></span>
+              <strong class="quick-price-current">$1,500</strong>
+              <span class="quick-price-caption">Customer 1 · 70% off</span>
+            </div>
+            <div class="quick-sequence" aria-label="BNDR Standard promotional sequence">
+              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$1,500</strong></div>
+              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$2,000</strong></div>
+              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$3,000</strong></div>
+              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$2,500</strong></div>
+            </div>
+            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Standard →</button>
+          </article>
+
+          <article class="quick-plan" data-quick-plan="BNDR Expanded" data-pages="5" data-revisions="3" data-regular="7500" data-c1="2250" data-c2="3000" data-c3="4500"
+            data-stripe-product="prod_VAREvmRTYNRwQi"
+            data-stripe-c1-price="price_1UA6MkGuY1oGAyYSrSMJ4EJu"
+            data-stripe-c1-link="https://buy.stripe.com/bJefZh9cf2W61FGgze0oM0G"
+            data-stripe-c2-price="price_1UA6MuGuY1oGAyYSjGQwigKb"
+            data-stripe-c2-link="https://buy.stripe.com/4gM28rdsvfIS7003Ms0oM0H"
+            data-stripe-c3-price="price_1UA6N2GuY1oGAyYS6kTB4ip3"
+            data-stripe-c3-link="https://buy.stripe.com/dRm5kD7471S2doo5UA0oM0I"
+            data-deposit="3750"
+            data-stripe-deposit-link="https://buy.stripe.com/00w28r1JN68i4RS82I0oM0Q">
+            <div class="quick-plan-top">
+              <span class="quick-plan-index">03</span>
+              <span class="quick-plan-badge">5 pages · 3 revisions</span>
+            </div>
+            <h3>BNDR Expanded</h3>
+            <p class="quick-plan-spec">5 pages · Included revisions: 3</p>
+            <div class="quick-price">
+              <span class="quick-price-regular">Regular <s>$7,500</s></span>
+              <strong class="quick-price-current">$2,250</strong>
+              <span class="quick-price-caption">Customer 1 · 70% off</span>
+            </div>
+            <div class="quick-sequence" aria-label="BNDR Expanded promotional sequence">
+              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$2,250</strong></div>
+              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$3,000</strong></div>
+              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$4,500</strong></div>
+              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$3,750</strong></div>
+            </div>
+            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Expanded →</button>
+          </article>
+        </div>
+
+        <section class="quick-terms" aria-label="Service terms">
+          <article class="quick-term">
+            <strong>Managed Hosting + Care: $75/month</strong>
+            <p>Covers Hosting, SSL, Deployment, Uptime monitoring, Basic maintenance, and Keeping the site live.</p>
+            <div class="quick-care-list" aria-hidden="true">
+              <span>Hosting</span><span>SSL</span><span>Deployment</span><span>Uptime monitoring</span><span>Basic maintenance</span><span>Keeping the site live</span>
+            </div>
+            <a class="quick-term-checkout" href="https://buy.stripe.com/7sYcN50FJ7cm5VW4Qw0oM0K" target="_blank" rel="noopener noreferrer"
+               data-stripe-product="prod_VAREXVLWaaO8qh"
+               data-stripe-price="price_1UA6LxGuY1oGAyYSAqxp58kX"
+               data-stripe-payment-link="plink_1UACA5GuY1oGAyYSYviAmJHs">Start Managed Hosting + Care →</a>
+          </article>
+          <article class="quick-term">
+            <strong>Additional work: $75/hour</strong>
+            <p>Additional work outside included scope is quoted first, then billed at $75/hour for the approved number of hours.</p>
+          </article>
+        </section>
+
+        <section class="quick-sale-copy" aria-label="Promotional pricing details">
+          <header class="quick-sale-copy-head">
+            <p class="quick-sale-copy-kicker">Launch Pricing</p>
+            <h3>Three spots. Then back to normal.</h3>
+            <p class="quick-sale-copy-lead">I’m opening three custom website spots at stupid-low prices to get some fresh builds out the door.</p>
+          </header>
+
+          <div class="quick-sale-copy-grid">
+            <div class="quick-sale-copy-group">
+              <strong>Regular pricing</strong>
+              <span>$2,500 — one-page custom site<br>$5,000 — three-page custom site<br>$7,500 — five-page custom site</span>
+            </div>
+            <div class="quick-sale-copy-group">
+              <strong>First three customers</strong>
+              <span>First customer — 70% off<br>Second customer — 60% off<br>Third customer — 40% off<br>On every package.</span>
+            </div>
+          </div>
+
+          <div class="quick-sale-copy-body">
+            <p class="sale-line">After those three spots are gone, pricing goes back to normal. Regular-price builds start with 50% upfront, with the remaining 50% due before launch or handoff. The discounted checkout links only stay available while the spot is available. If the link still works when you click it, you got it.</p>
+            <p>Every site is a custom build around your business, mobile-ready, and handled directly by me from the design conversation through the build. This is specifically not an “agency” handoff. I keep the project count limited so each site gets the time and attention it deserves.</p>
+            <p>I take a lot of pride in the work and build heavily through referrals — I pay for referrals too.</p>
+            <p class="sale-line">If price is the reason you’ve been putting off getting your site done, this is probably the cheapest I’m ever going to do it.</p>
+          </div>
+        </section>
+
+        <form class="quick-pick-contact" id="quick-pick-contact-form" novalidate aria-label="Quick-pick website request">
+          <div class="quick-pick-summary">
+            <span class="quick-pick-summary-label">Selected quick-pick</span>
+            <strong id="quick-pick-summary-name">Choose a plan above</strong>
+            <span id="quick-pick-summary-detail"></span>
+          </div>
+          <div class="quick-contact-grid">
+            <div class="quick-contact-field"><label for="quick-name">Name *</label><input id="quick-name" name="name" maxlength="120" autocomplete="name" required></div>
+            <div class="quick-contact-field"><label for="quick-business">Business name</label><input id="quick-business" name="business" maxlength="160" autocomplete="organization"></div>
+            <div class="quick-contact-field"><label for="quick-email">Email *</label><input id="quick-email" name="email" type="email" maxlength="200" autocomplete="email" required></div>
+            <div class="quick-contact-field"><label for="quick-phone">Phone (optional)</label><input id="quick-phone" name="phone" type="tel" maxlength="40" autocomplete="tel"></div>
+            <div class="quick-contact-field is-wide"><label for="quick-notes">Anything else? (optional)</label><textarea id="quick-notes" name="notes" rows="3" maxlength="900"></textarea></div>
+          </div>
+          <div class="quick-honeypot" aria-hidden="true"><label for="quick-hp">Leave this field empty</label><input id="quick-hp" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
+          <button class="quick-contact-submit" type="submit">Claim this plan →</button>
+          <p class="quick-contact-note">This sends the selected plan and your contact details directly to bndr.labs@gmail.com so the current promotional spot can be confirmed.</p>
+          <div class="quick-contact-status" id="quick-contact-status" role="status" aria-live="polite"></div>
+        </form>
+
+        <div class="custom-calculator-divider">
+          <strong>Need a custom build or something outside these plans?</strong>
+          <span>Use the existing custom pricing calculator below. It remains the path for special requirements and custom scope.</span>
+        </div>
+      </section>
+
+<form class="estimate-flow" id="website-estimate-form" novalidate aria-label="Website project estimate">
+        <div class="estimate-progress" aria-hidden="true">
+          <span id="estimate-progress-label">01 / 07</span>
+          <span class="estimate-progress-track"><span class="estimate-progress-fill" id="estimate-progress-fill"></span></span>
+        </div>
+
+        <section class="estimate-panel" aria-live="polite">
+          <section class="estimate-step is-active" data-estimate-step="0">
+            <header class="estimate-step-head">
+              <span class="estimate-step-index">01</span>
+              <h3>What kind of business?</h3>
+              <p class="estimate-step-sub">This tunes the advice you get back — nothing else.</p>
+            </header>
+            <div class="estimate-options" role="group" aria-label="Business type">
+              <button class="estimate-option" type="button" data-estimate-key="biz" data-value="Home services / trades"><span class="estimate-option-main">Home services / trades</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="biz" data-value="Med spa / salon / aesthetics"><span class="estimate-option-main">Med spa / salon / aesthetics</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="biz" data-value="Law / professional practice"><span class="estimate-option-main">Law / professional practice</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="biz" data-value="Restaurant / food"><span class="estimate-option-main">Restaurant / food</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="biz" data-value="Local shop / retail"><span class="estimate-option-main">Local shop / retail</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="biz" data-value="Personal brand / creative"><span class="estimate-option-main">Personal brand / creative</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="biz" data-value="Something else"><span class="estimate-option-main">Something else</span></button>
+            </div>
+          </section>
+
+          <section class="estimate-step" data-estimate-step="1" hidden>
+            <header class="estimate-step-head">
+              <span class="estimate-step-index">02</span>
+              <h3>What do you need?</h3>
+            </header>
+            <div class="estimate-options" role="group" aria-label="Website need">
+              <button class="estimate-option" type="button" data-estimate-key="need" data-value="Brand-new site — nothing exists yet"><span class="estimate-option-main">Brand-new site — nothing exists yet</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="need" data-value="Redesign — my current site embarrasses me"><span class="estimate-option-main">Redesign — my current site embarrasses me</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="need" data-value="Landing page for a campaign or launch"><span class="estimate-option-main">Landing page for a campaign or launch</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="need" data-value="Not sure — tell me what I need"><span class="estimate-option-main">Not sure — tell me what I need</span></button>
+            </div>
+          </section>
+
+          <section class="estimate-step" data-estimate-step="2" hidden>
+            <header class="estimate-step-head">
+              <span class="estimate-step-index">03</span>
+              <h3>Pick a size</h3>
+              <p class="estimate-step-sub">Flat prices — the number you see is the number you pay.</p>
+            </header>
+            <div class="estimate-options" role="group" aria-label="Website size">
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Launch Site Special" data-price="599"><span class="estimate-option-main">Launch Site Special<span class="estimate-option-detail">One sharp page, fast</span></span><span class="estimate-option-meta">$599</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="One-Page Lander™" data-price="2500"><span class="estimate-option-main">One-Page Lander™<span class="estimate-option-detail">A single page engineered to convert</span></span><span class="estimate-option-meta">$2,500</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Three-Page Custom™" data-price="4500"><span class="estimate-option-main">Three-Page Custom™<span class="estimate-option-detail">Home, work, contact — the full pitch</span></span><span class="estimate-option-meta">$4,500</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Small Business Site™" data-price="6500"><span class="estimate-option-main">Small Business Site™<span class="estimate-option-detail">The complete presence</span></span><span class="estimate-option-meta">$6,500</span></button>
+            </div>
+          </section>
+
+          <section class="estimate-step" data-estimate-step="3" hidden>
+            <header class="estimate-step-head">
+              <span class="estimate-step-index">04</span>
+              <h3>Add-ons</h3>
+              <p class="estimate-step-sub">Optional. Tap any that apply.</p>
+            </header>
+            <div class="estimate-options" role="group" aria-label="Website add-ons">
+              <button class="estimate-option" type="button" data-estimate-key="addons" data-label="Blog / field notes" data-price="500" aria-pressed="false"><span class="estimate-option-main">Blog / field notes</span><span class="estimate-option-meta">+ $500</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="addons" data-label="Photo or work gallery" data-price="400" aria-pressed="false"><span class="estimate-option-main">Photo or work gallery</span><span class="estimate-option-meta">+ $400</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="addons" data-label="Copywriting help" data-price="450" aria-pressed="false"><span class="estimate-option-main">Copywriting help</span><span class="estimate-option-meta">+ $450</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="addons" data-label="Logo / brand touch-up" data-price="600" aria-pressed="false"><span class="estimate-option-main">Logo / brand touch-up</span><span class="estimate-option-meta">+ $600</span></button>
+            </div>
+            <div class="estimate-controls">
+              <button class="estimate-control" type="button" data-estimate-back>← Back</button>
+              <button class="estimate-control" type="button" data-estimate-next>Continue →</button>
+            </div>
+          </section>
+
+          <section class="estimate-step" data-estimate-step="4" hidden>
+            <header class="estimate-step-head">
+              <span class="estimate-step-index">05</span>
+              <h3>When do you want it live?</h3>
+            </header>
+            <div class="estimate-options" role="group" aria-label="Timeline">
+              <button class="estimate-option" type="button" data-estimate-key="timeline" data-value="ASAP"><span class="estimate-option-main">ASAP</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="timeline" data-value="Within a month"><span class="estimate-option-main">Within a month</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="timeline" data-value="This quarter"><span class="estimate-option-main">This quarter</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="timeline" data-value="Just looking"><span class="estimate-option-main">Just looking</span></button>
+            </div>
+          </section>
+
+          <section class="estimate-step" data-estimate-step="5" hidden>
+            <header class="estimate-step-head">
+              <span class="estimate-step-index">06</span>
+              <h3>Budget comfort zone</h3>
+              <p class="estimate-step-sub">So the recommendation fits reality — nothing is gated on it.</p>
+            </header>
+            <div class="estimate-options" role="group" aria-label="Budget comfort zone">
+              <button class="estimate-option" type="button" data-estimate-key="budget" data-value="Under $1k"><span class="estimate-option-main">Under $1k</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="budget" data-value="$1k – $3k"><span class="estimate-option-main">$1k – $3k</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="budget" data-value="$3k – $6k"><span class="estimate-option-main">$3k – $6k</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="budget" data-value="$6k+"><span class="estimate-option-main">$6k+</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="budget" data-value="Not sure yet"><span class="estimate-option-main">Not sure yet</span></button>
+            </div>
+          </section>
+
+          <section class="estimate-step" data-estimate-step="6" hidden>
+            <header class="estimate-step-head">
+              <span class="estimate-step-index">07</span>
+              <h3>Where do I send the reply?</h3>
+              <p class="estimate-step-sub">That's the whole form — the reply comes from the person who builds it.</p>
+            </header>
+            <div class="estimate-contact-grid">
+              <div class="estimate-field"><label for="estimate-name">Name *</label><input id="estimate-name" name="name" maxlength="120" autocomplete="name" required></div>
+              <div class="estimate-field"><label for="estimate-business">Business name</label><input id="estimate-business" name="business" maxlength="160" autocomplete="organization"></div>
+              <div class="estimate-field"><label for="estimate-email">Email *</label><input id="estimate-email" name="email" type="email" maxlength="200" autocomplete="email" required></div>
+              <div class="estimate-field"><label for="estimate-phone">Phone (optional)</label><input id="estimate-phone" name="phone" type="tel" maxlength="40" autocomplete="tel"></div>
+              <div class="estimate-field is-wide"><label for="estimate-notes">Anything else? (optional)</label><textarea id="estimate-notes" name="notes" rows="3" maxlength="900"></textarea></div>
+            </div>
+            <div class="estimate-honeypot" aria-hidden="true"><label for="estimate-hp">Leave this field empty</label><input id="estimate-hp" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
+            <button class="estimate-submit" type="submit">Send it — get your reply direct →</button>
+            <p class="estimate-email-note">No spam, no list, no drip campaign. This goes straight to the builder's inbox and nowhere else.</p>
+            <div class="estimate-status" id="estimate-status" role="status" aria-live="polite"></div>
+          </section>
+        </section>
+
+        <aside class="estimate-quote" aria-live="polite">
+          <span class="estimate-quote-label">Your flat price</span>
+          <strong class="estimate-quote-value" id="estimate-total">Choose a size</strong>
+          <p class="estimate-quote-note">Flat build price. Managed Hosting + Care is $75/month separate — covered in the FAQ on BNDRLLC.com.</p>
+        </aside>
+      </form>
+    </section>
+  </section>
+
+
+  <!--
+    STRIPE SERVICE METADATA — exact supplied values.
+    Managed Hosting + Care
+      Product: prod_VAREXVLWaaO8qh
+      Price: price_1UA6LxGuY1oGAyYSAqxp58kX
+      Payment Link: plink_1UACA5GuY1oGAyYSYviAmJHs
+      Checkout: https://buy.stripe.com/7sYcN50FJ7cm5VW4Qw0oM0K
+      $75/month recurring · no trial
+    Additional Work
+      Product: prod_VAWxLxG0MTIFHR
+      Price: price_1UABtJGuY1oGAyYSbyKbVOhb
+      $75 one-time per approved hour
+      Public checkout intentionally omitted; quote approved quantity first.
+  -->
+
+  <section class="view" id="about" aria-hidden="true" aria-labelledby="about-title">
+    <section class="view-shell">
+      <header class="view-header">
+        <section>
+          <p class="view-kicker">BNDR LLC</p>
+          <h2 class="view-title" id="about-title">About Me</h2>
+        </section>
+        <button class="back" type="button" data-close>← Back</button>
+      </header>
+
+      <section class="about-layout">
+        <!-- ABOUT IMAGE: set data-src to the exact image URL/path when supplied. -->
+        <figure class="about-media" id="about-media" hidden>
+          <img id="about-image" data-src="" alt="" loading="lazy" decoding="async">
+        </figure>
+
+        <!-- ABOUT MARKDOWN: paste the exact approved Markdown between these tags later. -->
+        <script type="text/markdown" id="about-markdown-source"></script>
+        <article class="about-markdown" id="about-markdown" aria-label="About me"></article>
+      </section>
+    </section>
+  </section>
+  </main>
+
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.min.js';
+
+    const CONFIG = Object.freeze({
+      fx: {
+        mobileBreakpoint: 800,
+        dprMobile: 1.25,
+        dprDesktop: 1.7,
+        pointerEase: .042,
+        reducedPointerEase: .018,
+        motion: 1,
+        reducedMotion: .16
+      },
+      previewRootMargin: '180px 0px'
+    });
+
+    const css = getComputedStyle(document.documentElement);
+    const token = name => css.getPropertyValue(name).trim();
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', token('--color-bg'));
+
+    const logoWrap = document.querySelector('.hero-brand');
+    const logo = document.querySelector('.hero-logo');
+    const markLogoFailed = () => logoWrap?.classList.add('logo-failed');
+    logo?.addEventListener('error', markLogoFailed);
+    if (logo?.complete && !logo.naturalWidth) markLogoFailed();
+
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const canvas = document.getElementById('fx');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance' });
+    const activeDpr = () => Math.min(devicePixelRatio || 1, innerWidth < CONFIG.fx.mobileBreakpoint ? CONFIG.fx.dprMobile : CONFIG.fx.dprDesktop);
+    renderer.setPixelRatio(activeDpr());
+    renderer.setSize(innerWidth, innerHeight, false);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    /*
+      FX LAW:
+      - Geometry/motion equation and time coefficients below are copied from the supplied
+        Identity Infrastructure FX reference.
+      - Reference material colors are exact: #111111 base / #ff3300 heat / #050505 field.
+      - Site DOM, typography, spacing, buttons, content, orange UI gradient and transitions
+        remain untouched outside this isolated WebGL block.
+    */
+    const uniforms = {
+      uTime: { value: 0 },
+      uResolution: { value: new THREE.Vector2(innerWidth, innerHeight) },
+      uMouse: { value: new THREE.Vector2(0, 0) },
+      uMouseTarget: { value: new THREE.Vector2(0, 0) },
+      uColorBg: { value: new THREE.Color('#050505') },
+      uColorBase: { value: new THREE.Color('#111111') },
+      uColorHeat: { value: new THREE.Color('#ff3300') },
+      uReveal: { value: 1.0 }
+    };
+
+    const material = new THREE.ShaderMaterial({
+      transparent: true,
+      depthTest: false,
+      depthWrite: false,
+      uniforms,
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        precision highp float;
+
+        uniform float uTime;
+        uniform vec2 uResolution;
+        uniform vec2 uMouse;
+        uniform vec3 uColorBg;
+        uniform vec3 uColorBase;
+        uniform vec3 uColorHeat;
+        uniform float uReveal;
+
+        varying vec2 vUv;
+
+        float smin(float a, float b, float k) {
+          float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+          return mix(b, a, h) - k * h * (1.0 - h);
+        }
+
+        /*
+          Supplied reference mechanism, unchanged:
+          core radius 1.2
+          cursor node radius .7
+          smin 1.4
+          displacement amplitudes/frequencies/timing .5 / .4 / .15
+        */
+        float map(vec3 p) {
+          float d1 = length(p) - 1.2;
+
+          vec3 mousePos = vec3(uMouse.x * 6.0, uMouse.y * 6.0, 0.0);
+          float d2 = length(p - mousePos) - 0.7;
+
+          float d = smin(d1, d2, 1.4);
+
+          float disp =
+            sin(p.x * 2.0 + uTime * 0.5) *
+            sin(p.y * 2.2 + uTime * 0.4) *
+            sin(p.z * 2.0) * 0.15;
+
+          return d + disp;
+        }
+
+        vec3 calcNormal(vec3 p) {
+          const vec2 e = vec2(0.002, 0.0);
+          return normalize(vec3(
+            map(p + e.xyy) - map(p - e.xyy),
+            map(p + e.yxy) - map(p - e.yxy),
+            map(p + e.yyx) - map(p - e.yyx)
+          ));
+        }
+
+        /* Lighting-only depth enhancement; geometry and motion are untouched. */
+        float ambientOcclusion(vec3 p, vec3 n) {
+          float occ = 0.0;
+          float weight = 1.0;
+          for (int i = 1; i <= 4; i++) {
+            float h = 0.055 * float(i);
+            float d = map(p + n * h);
+            occ += (h - d) * weight;
+            weight *= 0.58;
+          }
+          return clamp(1.0 - occ * 1.55, 0.36, 1.0);
+        }
+
+        void main() {
+          vec2 uv = (vUv - 0.5) * 2.0;
+          float aspect = uResolution.x / uResolution.y;
+          uv.x *= aspect;
+
+          /*
+            Preserve the established portfolio composition:
+            same viewport placement and responsive right-side framing.
+            This affects framing only, not blob geometry/motion.
+          */
+          float portrait = 1.0 - smoothstep(0.95, 1.28, aspect);
+          float xShift = mix(0.50, 0.18, portrait);
+          float yShift = mix(0.02, -0.18, portrait);
+
+          vec3 ro = vec3(0.0, 0.0, 4.7);
+          vec3 rd = normalize(vec3(uv.x - xShift, uv.y - yShift, -2.32));
+
+          float travel = 0.0;
+          bool hit = false;
+          vec3 p = ro;
+
+          for (int i = 0; i < 60; i++) {
+            p = ro + rd * travel;
+            float d = map(p);
+            if (d < 0.004) {
+              hit = true;
+              break;
+            }
+            travel += max(d * 0.74, 0.006);
+            if (travel > 9.0) break;
+          }
+
+          /*
+            Neutral gray field enhancement only:
+            no hue is introduced here, and the existing page gradient remains beneath
+            because the canvas stays transparent.
+          */
+          vec2 fieldUv = vUv - 0.5;
+          float fieldRadius = length(fieldUv * vec2(1.15, 0.92));
+          float fieldLift = (1.0 - smoothstep(0.06, 0.78, fieldRadius));
+          float rightDepth = exp(-length((vUv - vec2(0.72, 0.48)) * vec2(1.05, 0.88)) * 2.25);
+          float edgeShade = smoothstep(0.38, 0.84, fieldRadius);
+
+          vec3 neutralGray = uColorBg
+            + vec3(0.020) * fieldLift
+            + vec3(0.017) * rightDepth
+            - vec3(0.010) * edgeShade;
+
+          vec3 col = neutralGray;
+          float alpha = clamp(0.19 + fieldLift * 0.10 + rightDepth * 0.08, 0.17, 0.34);
+
+          if (hit) {
+            vec3 n = calcNormal(p);
+
+            /* Reference key light remains the governing light direction. */
+            vec3 lightDir = normalize(vec3(1.0, 2.0, 1.5));
+            float diff = max(dot(n, lightDir), 0.0);
+            float fresnel = pow(1.0 - max(dot(n, -rd), 0.0), 3.0);
+
+            /* Exact reference heat-distance mechanism and exact #ff3300 heat color. */
+            vec3 mousePos = vec3(uMouse.x * 6.0, uMouse.y * 6.0, 0.0);
+            float distToMouse = length(p.xy - mousePos.xy);
+            float heatFactor = smoothstep(2.5, 0.0, distToMouse);
+
+            /* Exact reference base/heat gradient construction. */
+            vec3 matBase = mix(uColorBase, vec3(1.0), diff * 0.15);
+            vec3 matHeat = mix(uColorBase, uColorHeat, heatFactor);
+            col = mix(matBase, matHeat, fresnel + heatFactor * 0.6);
+
+            /*
+              Additional depth is multiplicative/neutral:
+              it changes spatial reading, not the supplied hue relationship.
+            */
+            float ao = ambientOcclusion(p, n);
+            vec3 fillDir = normalize(vec3(-1.45, -0.65, 2.15));
+            float fill = max(dot(n, fillDir), 0.0);
+            float facing = max(dot(n, -rd), 0.0);
+            float rim = pow(1.0 - facing, 2.2);
+            vec3 halfVec = normalize(lightDir - rd);
+            float spec = pow(max(dot(n, halfVec), 0.0), 42.0);
+
+            float depthLight = 0.56 + diff * 0.35 + fill * 0.11;
+            float curvature = smoothstep(0.18, 0.92, 1.0 - abs(dot(n, normalize(p))));
+            float thickness = pow(clamp(facing, 0.0, 1.0), 0.72);
+            col *= depthLight * ao;
+            col *= mix(0.90, 1.055, thickness);
+            col *= mix(0.975, 1.018, curvature);
+            col += vec3(1.0) * spec * 0.085;
+            col += vec3(1.0) * rim * 0.032;
+
+            /* Soft contact separation gives thickness without altering silhouette. */
+            float depthFade = smoothstep(8.3, 2.7, travel);
+            col *= mix(0.88, 1.03, depthFade);
+
+            alpha = clamp(0.82 + fresnel * 0.13 + rim * 0.035, 0.82, 0.985);
+          }
+
+          col = mix(uColorBg, col, uReveal);
+
+          /* Neutral sub-pixel dither: suppresses banding without changing hue or silhouette. */
+          float dither = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
+          col += vec3(dither / 510.0);
+
+          /* Same linear-to-gamma output transform as the supplied reference. */
+          col = pow(max(col, vec3(0.0)), vec3(1.0 / 2.2));
+          gl_FragColor = vec4(col, alpha);
+        }
+      `
+    });
+
+    scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
+
+    const updatePointer = (clientX, clientY) => {
+      uniforms.uMouseTarget.value.set(
+        (clientX / innerWidth) * 2 - 1,
+        -((clientY / innerHeight) * 2 - 1)
+      );
+    };
+
+    addEventListener('mousemove', e => updatePointer(e.clientX, e.clientY), { passive: true });
+    addEventListener('touchmove', e => {
+      if (e.touches[0]) updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+
+    const started = performance.now();
+    const tick = now => {
+      /* Seconds-based time matches the supplied reference ticker time scale. */
+      uniforms.uTime.value = (now - started) / 1000;
+
+      /*
+        Exact supplied cursor interpolation coefficient: 0.05.
+        Reduced-motion retains accessibility while normal operation is exact.
+      */
+      uniforms.uMouse.value.lerp(
+        uniforms.uMouseTarget.value,
+        reduceMotion ? 0.018 : 0.05
+      );
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+
+    addEventListener('resize', () => {
+      renderer.setPixelRatio(activeDpr());
+      renderer.setSize(innerWidth, innerHeight, false);
+      uniforms.uResolution.value.set(innerWidth, innerHeight);
+    }, { passive: true });
+
+    document.querySelectorAll('.action').forEach(action=>{
+      action.addEventListener('pointermove',e=>{
+        const box=action.getBoundingClientRect();
+        action.style.setProperty('--mx',`${e.clientX-box.left}px`);
+        action.style.setProperty('--my',`${e.clientY-box.top}px`);
+      },{passive:true});
+    });
+
+    const home=document.getElementById('home');
+    const views={
+      builds:document.getElementById('builds'),
+      website:document.getElementById('website'),
+      about:document.getElementById('about')
+    };
+    let activeView=null;
+    let lastTrigger=null;
+
+    /*
+      Live-preview budget:
+      - desktop/tablet: max 2 app runtimes alive
+      - mobile: max 1
+      - unload offscreen frames and all frames when Builds closes
+      This keeps previews live while preventing every app from executing at once.
+      Direct project links remain the authoritative fallback for apps that disallow iframe embedding.
+    */
+    const previewLimit=matchMedia('(max-width: 720px)').matches ? 1 : 2;
+    const activePreviews=[];
+    const unloadTimers=new WeakMap();
+    const previewVersions=new WeakMap();
+
+    const statusFor=card=>card.querySelector('.preview-status');
+    const frameFor=card=>card.querySelector('iframe[data-src]');
+
+    const removeActivePreview=card=>{
+      const index=activePreviews.indexOf(card);
+      if(index>=0) activePreviews.splice(index,1);
+    };
+
+    const nextPreviewVersion=frame=>{
+      const version=(previewVersions.get(frame) || 0) + 1;
+      previewVersions.set(frame,version);
+      return version;
+    };
+
+    const unloadPreview=card=>{
+      const timer=unloadTimers.get(card);
+      if(timer){ clearTimeout(timer); unloadTimers.delete(card); }
+      const frame=frameFor(card);
+      if(!frame) return;
+
+      /*
+        Invalidate any in-flight remote load BEFORE clearing the iframe.
+        This prevents an about:blank unload from satisfying a stale load
+        listener and falsely hiding the preview status over an empty frame.
+      */
+      nextPreviewVersion(frame);
+      frame.classList.remove('loaded');
+
+      if(frame.hasAttribute('src')){
+        frame.src='about:blank';
+        frame.removeAttribute('src');
+      }
+
+      const status=statusFor(card);
+      if(status) status.textContent='Live preview';
+      removeActivePreview(card);
+    };
+
+    const enforcePreviewBudget=nextCard=>{
+      while(activePreviews.length>=previewLimit){
+        const victim=activePreviews.find(card=>card!==nextCard) || activePreviews[0];
+        if(!victim) break;
+        unloadPreview(victim);
+      }
+    };
+
+    const loadPreview=card=>{
+      const timer=unloadTimers.get(card);
+      if(timer){ clearTimeout(timer); unloadTimers.delete(card); }
+
+      const frame=frameFor(card);
+      if(!frame || frame.hasAttribute('src')) return;
+
+      enforcePreviewBudget(card);
+
+      const status=statusFor(card);
+      if(status) status.textContent='Loading live preview';
+
+      frame.classList.remove('loaded');
+      frame.loading='lazy';
+      frame.setAttribute('fetchpriority','low');
+
+      const expectedURL=frame.dataset.src;
+      const version=nextPreviewVersion(frame);
+      let settled=false;
+
+      const timeout=setTimeout(()=>{
+        if(
+          settled ||
+          previewVersions.get(frame)!==version ||
+          !frame.hasAttribute('src')
+        ) return;
+        if(status) status.textContent='Open live ↗';
+      },5000);
+
+      frame.addEventListener('load',()=>{
+        if(
+          previewVersions.get(frame)!==version ||
+          !frame.hasAttribute('src') ||
+          frame.getAttribute('src')!==expectedURL
+        ) return;
+
+        settled=true;
+        clearTimeout(timeout);
+        frame.classList.add('loaded');
+      },{once:true});
+
+      frame.src=expectedURL;
+      activePreviews.push(card);
+    };
+
+    const previewObserver=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        const card=entry.target;
+        if(entry.isIntersecting){
+          loadPreview(card);
+          return;
+        }
+        if(!frameFor(card)?.hasAttribute('src')) return;
+        const timer=setTimeout(()=>unloadPreview(card),900);
+        unloadTimers.set(card,timer);
+      });
+    },{root:views.builds,rootMargin:'120px 0px',threshold:.08});
+
+    document.querySelectorAll('.project-card').forEach(card=>previewObserver.observe(card));
+
+    const unloadAllPreviews=()=>{
+      [...activePreviews].forEach(unloadPreview);
+    };
+
+    /* Minimal safe Markdown renderer for the future About copy. */
+    const escapeHTML=value=>value.replace(/[&<>"']/g,char=>({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[char]));
+    const inlineMarkdown=value=>escapeHTML(value)
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+      .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g,'<em>$1</em>');
+
+    const renderAbout=()=>{
+      const image=document.getElementById('about-image');
+      const media=document.getElementById('about-media');
+      const imageSrc=image?.dataset.src?.trim();
+      if(image && media && imageSrc){
+        image.src=imageSrc;
+        image.alt='BNDR LLC — About Me';
+        media.hidden=false;
+      }
+
+      const source=document.getElementById('about-markdown-source')?.textContent?.trim();
+      const target=document.getElementById('about-markdown');
+      if(!source || !target) return;
+      const fragment=document.createDocumentFragment();
+      let list=null;
+      const flushList=()=>{ if(list){ fragment.appendChild(list); list=null; } };
+      source.split(/\r?\n/).forEach(raw=>{
+        const line=raw.trim();
+        if(!line){ flushList(); return; }
+        let match;
+        if((match=line.match(/^###\s+(.+)/))){
+          flushList(); const el=document.createElement('h3'); el.innerHTML=inlineMarkdown(match[1]); fragment.appendChild(el); return;
+        }
+        if((match=line.match(/^####\s+(.+)/))){
+          flushList(); const el=document.createElement('h4'); el.innerHTML=inlineMarkdown(match[1]); fragment.appendChild(el); return;
+        }
+        if((match=line.match(/^[-*]\s+(.+)/))){
+          if(!list) list=document.createElement('ul');
+          const li=document.createElement('li'); li.innerHTML=inlineMarkdown(match[1]); list.appendChild(li); return;
+        }
+        flushList(); const p=document.createElement('p'); p.innerHTML=inlineMarkdown(line); fragment.appendChild(p);
+      });
+      flushList();
+      target.replaceChildren(fragment);
+    };
+    renderAbout();
+
+    const validRoute=name=>Object.prototype.hasOwnProperty.call(views,name) ? name : 'home';
+    const routeFromLocation=()=>validRoute(location.hash.replace(/^#/,'') || 'home');
+    const routeURL=name=>{
+      const base=`${location.pathname}${location.search}`;
+      return name==='home' ? base : `${base}#${name}`;
+    };
+
+    const renderRoute=(name,{focus=false}={})=>{
+      name=validRoute(name);
+      Object.entries(views).forEach(([key,view])=>{
+        const open=key===name;
+        view.classList.toggle('open',open);
+        view.setAttribute('aria-hidden',open?'false':'true');
+      });
+      activeView=name==='home' ? null : views[name];
+      home.inert=name!=='home';
+      if(name!=='builds') unloadAllPreviews();
+      if(activeView){
+        activeView.scrollTop=0;
+        if(focus) requestAnimationFrame(()=>activeView.querySelector('[data-close]')?.focus());
+      } else if(focus){
+        lastTrigger?.focus();
+      }
+    };
+
+    const navigate=name=>{
+      name=validRoute(name);
+      if(routeFromLocation()===name){ renderRoute(name,{focus:true}); return; }
+      history.pushState({view:name},'',routeURL(name));
+      renderRoute(name,{focus:true});
+    };
+
+    document.querySelectorAll('[data-open]').forEach(link=>{
+      link.addEventListener('click',event=>{
+        event.preventDefault();
+        lastTrigger=event.currentTarget;
+        navigate(event.currentTarget.dataset.open);
+      });
+    });
+
+    document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>navigate('home')));
+    addEventListener('keydown',event=>{ if(event.key==='Escape' && activeView) navigate('home'); });
+    addEventListener('popstate',()=>renderRoute(routeFromLocation(),{focus:false}));
+    addEventListener('pagehide',unloadAllPreviews);
+    document.addEventListener('visibilitychange',()=>{ if(document.hidden) unloadAllPreviews(); });
+
+    const initialRoute=routeFromLocation();
+    history.replaceState({view:initialRoute},'',routeURL(initialRoute));
+    renderRoute(initialRoute,{focus:false});
+  </script>
+
+
+
+  
+  <script>
+  (() => {
+    "use strict";
+    if (window.__BNDR_QUICK_PICK__) return;
+    window.__BNDR_QUICK_PICK__ = true;
+
+    const OWNER_EMAIL = "bndr.labs@gmail.com";
+    const CURRENT_PROMO_CUSTOMER = 1;
+    const form = document.getElementById("quick-pick-contact-form");
+    const cards = Array.from(document.querySelectorAll(".quick-plan"));
+    const summaryName = document.getElementById("quick-pick-summary-name");
+    const summaryDetail = document.getElementById("quick-pick-summary-detail");
+    const statusNode = document.getElementById("quick-contact-status");
+    if (!form || !cards.length) return;
+
+    const startedAt = Date.now();
+    let selected = null;
+    let sending = false;
+
+    const money = value => "$" + Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
+
+    function selectCard(card) {
+      const isRegularFallback = CURRENT_PROMO_CUSTOMER === 0;
+      const stripeSlot = `c${CURRENT_PROMO_CUSTOMER}`;
+      selected = {
+        name: card.dataset.quickPlan,
+        pages: Number(card.dataset.pages),
+        revisions: Number(card.dataset.revisions),
+        regular: Number(card.dataset.regular),
+        charge: isRegularFallback
+          ? Number(card.dataset.deposit)
+          : Number(card.dataset["c" + CURRENT_PROMO_CUSTOMER]),
+        paymentType: isRegularFallback ? "50% project deposit" : `Customer ${CURRENT_PROMO_CUSTOMER} promotional payment`,
+        stripeProductId: card.dataset.stripeProduct,
+        stripePriceId: isRegularFallback
+          ? ""
+          : card.dataset[`stripe${stripeSlot.charAt(0).toUpperCase() + stripeSlot.slice(1)}Price`],
+        stripeCheckoutUrl: isRegularFallback
+          ? card.dataset.stripeDepositLink
+          : card.dataset[`stripe${stripeSlot.charAt(0).toUpperCase() + stripeSlot.slice(1)}Link`]
+      };
+
+      cards.forEach(item => {
+        const active = item === card;
+        item.classList.toggle("is-selected", active);
+        const button = item.querySelector("[data-quick-select]");
+        button.setAttribute("aria-pressed", String(active));
+        button.textContent = active ? "Selected ✓" : `Select ${item.dataset.quickPlan} →`;
+      });
+
+      summaryName.textContent = selected.name;
+      summaryDetail.textContent =
+        `${selected.pages} page${selected.pages === 1 ? "" : "s"} · ${selected.revisions} included revision${selected.revisions === 1 ? "" : "s"} · ` +
+        (CURRENT_PROMO_CUSTOMER === 0
+          ? `Regular ${money(selected.regular)} total · 50% deposit ${money(selected.charge)} · remaining 50% due before launch/handoff · Managed Hosting + Care $75/month`
+          : `Customer ${CURRENT_PROMO_CUSTOMER}: ${money(selected.charge)} · Regular ${money(selected.regular)} · Managed Hosting + Care $75/month`);
+
+      form.classList.add("is-open");
+      form.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      requestAnimationFrame(() => form.querySelector("#quick-name")?.focus({ preventScroll: true }));
+    }
+
+    cards.forEach(card => {
+      card.querySelector("[data-quick-select]").addEventListener("click", () => selectCard(card));
+    });
+
+    function setStatus(message, state = "") {
+      statusNode.dataset.state = state;
+      statusNode.innerHTML = message;
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      if (sending) return;
+
+      if (!selected) {
+        setStatus("Choose BNDR Lander, BNDR Standard, or BNDR Expanded first.");
+        return;
+      }
+
+      const name = form.querySelector("#quick-name").value.trim();
+      const email = form.querySelector("#quick-email").value.trim();
+
+      if (form.querySelector("#quick-hp").value) {
+        setStatus("<strong>Got it — it's in my inbox.</strong>", "ok");
+        return;
+      }
+
+      if (Date.now() - startedAt < 4000) {
+        setStatus("That was superhumanly fast — take one more look, then hit send again.");
+        return;
+      }
+
+      if (!name) {
+        setStatus("Add your name, then hit send.");
+        form.querySelector("#quick-name").focus();
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        setStatus("Double-check the email address, then hit send.");
+        form.querySelector("#quick-email").focus();
+        return;
+      }
+
+      const business = form.querySelector("#quick-business").value.trim();
+      const phone = form.querySelector("#quick-phone").value.trim();
+      const notes = form.querySelector("#quick-notes").value.trim();
+      const summary = [
+        `Quick-pick plan: ${selected.name}`,
+        `Pages: ${selected.pages}`,
+        `Included revisions: ${selected.revisions}`,
+        `Regular total: ${money(selected.regular)}`,
+        `Payment type: ${selected.paymentType}`,
+        `Amount due now: ${money(selected.charge)}`,
+        ...(CURRENT_PROMO_CUSTOMER === 0 ? [`Remaining balance: ${money(selected.regular - selected.charge)} due before launch or handoff`] : []),
+        `Managed Hosting + Care: $75/month`,
+        `Additional work outside included scope: $75/hour`,
+        `Business: ${business || "—"}`,
+        `Name: ${name}`,
+        `Email: ${email}`,
+        `Phone: ${phone || "—"}`,
+        `Notes: ${notes || "—"}`
+      ].join("\n");
+
+      const payload = {
+        _subject: `[BNDR QUICK-PICK] ${selected.name} — ${selected.paymentType} — ${money(selected.charge)}`,
+        _template: "table",
+        _captcha: "false",
+        name,
+        business,
+        email,
+        phone,
+        plan: selected.name,
+        pages: String(selected.pages),
+        included_revisions: String(selected.revisions),
+        regular_total: money(selected.regular),
+        payment_type: selected.paymentType,
+        amount_due_now: money(selected.charge),
+        promotional_customer: CURRENT_PROMO_CUSTOMER === 0 ? "none — regular 50% deposit" : String(CURRENT_PROMO_CUSTOMER),
+        remaining_balance: CURRENT_PROMO_CUSTOMER === 0 ? money(selected.regular - selected.charge) : "—",
+        managed_hosting_care: "$75/month",
+        additional_work: "$75/hour",
+        stripe_product_id: selected.stripeProductId,
+        stripe_price_id: selected.stripePriceId,
+        stripe_checkout_url: selected.stripeCheckoutUrl,
+        notes,
+        page: location.href.split("?")[0]
+      };
+
+      const submit = form.querySelector(".quick-contact-submit");
+
+      function restore() {
+        sending = false;
+        submit.disabled = false;
+        submit.textContent = "Claim this plan →";
+      }
+
+      function fallback() {
+        const mail =
+          `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(payload._subject)}` +
+          `&body=${encodeURIComponent(summary)}`;
+        setStatus(`The form service didn't answer, but nothing is lost — <a href="${mail}">send the same request by email in one tap →</a>`);
+        restore();
+      }
+
+      sending = true;
+      submit.disabled = true;
+      submit.textContent = "Sending…";
+      setStatus("");
+
+      try {
+        fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify(payload)
+        })
+          .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json().catch(() => ({}));
+          })
+          .then(() => {
+            setStatus("<strong>Sent.</strong> Opening secure Stripe checkout…", "ok");
+            form.querySelectorAll("input,textarea,button").forEach(node => { node.disabled = true; });
+            if (window.gtag) {
+              try {
+                window.gtag("event", "generate_lead", {
+                  currency: "USD",
+                  value: selected.charge
+                });
+              } catch (_) {}
+            }
+            if (!/^https:\/\/buy\.stripe\.com\//.test(selected.stripeCheckoutUrl || "")) {
+              throw new Error("Missing Stripe checkout URL");
+            }
+            window.setTimeout(() => {
+              window.location.assign(selected.stripeCheckoutUrl);
+            }, 300);
+          })
+          .catch(fallback);
+      } catch (_) {
+        fallback();
+      }
+    });
+  })();
+  </script>
+
+<script>
+  (() => {
+    "use strict";
+    if (window.__BNDR_ESTIMATE_FLOW__) return;
+    window.__BNDR_ESTIMATE_FLOW__ = true;
+
+    const form = document.getElementById("website-estimate-form");
+    if (!form) return;
+
+    const steps = Array.from(form.querySelectorAll("[data-estimate-step]"));
+    const progressLabel = document.getElementById("estimate-progress-label");
+    const progressFill = document.getElementById("estimate-progress-fill");
+    const totalNode = document.getElementById("estimate-total");
+    const statusNode = document.getElementById("estimate-status");
+    const startedAt = Date.now();
+    const OWNER_EMAIL = "bndr.labs@gmail.com";
+
+    const pick = {
+      biz: null,
+      need: null,
+      size: null,
+      addons: [],
+      timeline: null,
+      budget: null
+    };
+
+    let activeStep = 0;
+    let sending = false;
+    let advanceTimer = 0;
+
+    const money = value => "$" + Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
+    const total = () => (pick.size?.price || 0) + pick.addons.reduce((sum, item) => sum + item.price, 0);
+
+    function updateQuote() {
+      totalNode.textContent = pick.size ? money(total()) : "Choose a size";
+    }
+
+    function showStep(index, { focus = true } = {}) {
+      activeStep = Math.max(0, Math.min(steps.length - 1, index));
+      steps.forEach((step, i) => {
+        const active = i === activeStep;
+        step.hidden = !active;
+        step.classList.toggle("is-active", active);
+      });
+      progressLabel.textContent = `${String(activeStep + 1).padStart(2, "0")} / 07`;
+      progressFill.style.width = `${((activeStep + 1) / 7) * 100}%`;
+      if (focus) requestAnimationFrame(() => steps[activeStep].querySelector("button,input,textarea")?.focus({ preventScroll: true }));
+    }
+
+    function goNext() { showStep(activeStep + 1); }
+    function goBack() { showStep(activeStep - 1); }
+
+    function selectSingle(button) {
+      const key = button.dataset.estimateKey;
+      button.closest(".estimate-options").querySelectorAll(".estimate-option").forEach(option => option.setAttribute("aria-pressed", "false"));
+      button.setAttribute("aria-pressed", "true");
+
+      if (key === "size") {
+        pick.size = { label: button.dataset.label, price: Number(button.dataset.price) || 0 };
+        updateQuote();
+      } else {
+        pick[key] = button.dataset.value;
+      }
+
+      clearTimeout(advanceTimer);
+      advanceTimer = window.setTimeout(goNext, 210);
+    }
+
+    form.querySelectorAll(".estimate-option").forEach(button => {
+      if (!button.hasAttribute("aria-pressed")) button.setAttribute("aria-pressed", "false");
+      button.addEventListener("click", () => {
+        const key = button.dataset.estimateKey;
+        if (key === "addons") {
+          const on = button.getAttribute("aria-pressed") !== "true";
+          button.setAttribute("aria-pressed", String(on));
+          const label = button.dataset.label;
+          const price = Number(button.dataset.price) || 0;
+          pick.addons = pick.addons.filter(item => item.label !== label);
+          if (on) pick.addons.push({ label, price });
+          updateQuote();
+          return;
+        }
+        selectSingle(button);
+      });
+    });
+
+    form.querySelectorAll("[data-estimate-next]").forEach(button => button.addEventListener("click", goNext));
+    form.querySelectorAll("[data-estimate-back]").forEach(button => button.addEventListener("click", goBack));
+
+    function summaryText() {
+      return [
+        "Business type: " + (pick.biz || "—"),
+        "Need: " + (pick.need || "—"),
+        "Size: " + (pick.size ? `${pick.size.label} (${money(pick.size.price)})` : "—"),
+        "Add-ons: " + (pick.addons.length ? pick.addons.map(item => `${item.label} (+${money(item.price)})`).join(", ") : "none"),
+        "Timeline: " + (pick.timeline || "—"),
+        "Budget comfort: " + (pick.budget || "—"),
+        "Estimate shown: " + (pick.size ? money(total()) : "not locked")
+      ].join("\n");
+    }
+
+    function setStatus(message, state = "") {
+      statusNode.dataset.state = state;
+      statusNode.innerHTML = message;
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      if (sending) return;
+
+      const name = form.querySelector("#estimate-name").value.trim();
+      const email = form.querySelector("#estimate-email").value.trim();
+
+      if (form.querySelector("#estimate-hp").value) {
+        setStatus("<strong>Got it — it's in my inbox.</strong> You'll hear back from me directly, usually same day.", "ok");
+        return;
+      }
+      if (Date.now() - startedAt < 4000) {
+        setStatus("That was superhumanly fast — take one more look, then hit send again.");
+        return;
+      }
+      if (!name) {
+        setStatus("Your name is the one thing I actually need — add it and hit send.");
+        form.querySelector("#estimate-name").focus();
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        setStatus("That email doesn't look deliverable — double-check it and hit send.");
+        form.querySelector("#estimate-email").focus();
+        return;
+      }
+
+      const submit = form.querySelector(".estimate-submit");
+      const payload = {
+        _subject: `[BNDR ESTIMATE] ${name} — ${pick.size ? money(total()) : "no size picked"}`,
+        _template: "table",
+        _captcha: "false",
+        name,
+        business: form.querySelector("#estimate-business").value.trim(),
+        email,
+        phone: form.querySelector("#estimate-phone").value.trim(),
+        project: summaryText(),
+        notes: form.querySelector("#estimate-notes").value.trim(),
+        page: location.href.split("?")[0]
+      };
+
+      const restore = () => {
+        sending = false;
+        submit.disabled = false;
+        submit.textContent = "Send it — get your reply direct →";
+      };
+
+      const fallback = () => {
+        const mail = `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(payload._subject)}&body=${encodeURIComponent(summaryText() + `\n\nName: ${name}\nBusiness: ${payload.business}\nEmail: ${email}\nPhone: ${payload.phone}\nNotes: ${payload.notes}`)}`;
+        setStatus(`The form service didn't answer, but nothing is lost — <a href="${mail}">send the same details by email in one tap →</a>`);
+        restore();
+      };
+
+      sending = true;
+      submit.disabled = true;
+      submit.textContent = "Sending…";
+      setStatus("");
+
+      try {
+        fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify(payload)
+        })
+          .then(response => {
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            return response.json().catch(() => ({}));
+          })
+          .then(() => {
+            setStatus("<strong>Got it — it's in my inbox.</strong> You'll hear back from me directly, usually same day. No secretary, no queue, no drip campaign.", "ok");
+            form.querySelectorAll("input,textarea,button").forEach(node => { node.disabled = true; });
+            if (window.gtag) {
+              try { window.gtag("event", "generate_lead", { currency: "USD", value: pick.size ? total() : 0 }); } catch (_) {}
+            }
+          })
+          .catch(fallback);
+      } catch (_) {
+        fallback();
+      }
+    });
+
+    showStep(0, { focus: false });
+    updateQuote();
+  })();
+  </script>
+
+  <script>
+  (() => {
+    "use strict";
+    if (window.__GRIPPY_CURSOR_INSTALLED__) return;
+    window.__GRIPPY_CURSOR_INSTALLED__ = true;
+    const DOT_SMOOTHING = 0.55;
+    const RING_SMOOTHING = 0.14;
+    const WRAP_PAD_X = 34;
+    const WRAP_PAD_Y = 22;
+    const finePointerQuery = window.matchMedia("(pointer: fine)");
+    const INTERACTIVE_SELECTOR = [
+      "a[href]",
+      "button",
+      "input:not([type='hidden'])",
+      "select",
+      "textarea",
+      "summary",
+      "[role='button']",
+      "[role='link']",
+      "[role='tab']",
+      "[role='menuitem']",
+      "[role='menuitemcheckbox']",
+      "[role='menuitemradio']",
+      "[role='option']",
+      "[role='checkbox']",
+      "[role='radio']",
+      "[role='switch']",
+      "[role='slider']",
+      "[role='combobox']",
+      "[onclick]",
+      "[tabindex]:not([tabindex='-1'])",
+      "[data-grip-cursor]"
+    ].join(",");
+    let layer = null;
+    let dotOuter = null;
+    let ringOuter = null;
+    let dotElement = null;
+    let ringElement = null;
+    const raw = { x: -100, y: -100 };
+    const dot = { x: -100, y: -100 };
+    const ring = { x: -100, y: -100 };
+    let primed = false;
+    let raf = 0;
+    let activeGripElement = null;
+    function createCursor() {
+      if (layer) return;
+      layer = document.createElement("div");
+      layer.id = "grip-cursor-layer";
+      layer.hidden = true;
+      layer.setAttribute("aria-hidden", "true");
+      dotOuter = document.createElement("div");
+      dotOuter.className = "grip-cursor-positioner";
+      dotElement = document.createElement("div");
+      dotElement.id = "grip-cursor-dot";
+      dotElement.dataset.down = "false";
+      ringOuter = document.createElement("div");
+      ringOuter.className = "grip-cursor-positioner";
+      ringElement = document.createElement("div");
+      ringElement.id = "grip-cursor-ring";
+      ringElement.dataset.down = "false";
+      dotOuter.appendChild(dotElement);
+      ringOuter.appendChild(ringElement);
+      layer.appendChild(dotOuter);
+      layer.appendChild(ringOuter);
+      document.body.appendChild(layer);
+    }
+    function targetIsUsable(element) {
+      if (!(element instanceof Element)) return false;
+      if (
+        element.matches(
+          "[disabled], [aria-disabled='true'], [hidden], [inert], [data-grip-cursor='off']"
+        )
+      ) {
+        return false;
+      }
+      const rect = element.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return false;
+      return true;
+    }
+    function findLogicalTarget(x, y) {
+      const hit = document.elementFromPoint(x, y);
+      if (!hit) return null;
+      const candidate = hit.closest(INTERACTIVE_SELECTOR);
+      if (!candidate || !targetIsUsable(candidate)) {
+        return null;
+      }
+      return candidate;
+    }
+    function clearGripStyles() {
+      ringElement.style.width = "";
+      ringElement.style.height = "";
+      ringElement.style.marginLeft = "";
+      ringElement.style.marginTop = "";
+      ringElement.style.borderRadius = "";
+      ringElement.style.backgroundColor = "";
+      ringElement.style.borderColor = "";
+      ringElement.style.mixBlendMode = "";
+      ringElement.style.boxShadow = "";
+    }
+    function applyGripStyles(rect) {
+      const width = rect.width + WRAP_PAD_X;
+      const height = rect.height + WRAP_PAD_Y;
+      ringElement.style.width = `${width}px`;
+      ringElement.style.height = `${height}px`;
+      ringElement.style.marginLeft = `${width / -2}px`;
+      ringElement.style.marginTop = `${height / -2}px`;
+      ringElement.style.borderRadius = "9999px";
+      ringElement.style.backgroundColor = "rgb(255 255 255 / .12)";
+      ringElement.style.borderColor = "rgb(255 255 255 / .82)";
+      ringElement.style.mixBlendMode = "normal";
+      ringElement.style.boxShadow =
+        "0 22px 48px -26px rgb(255 51 0 / .45), inset 0 0 0 1px rgb(255 255 255 / .08)";
+    }
+    function tick() {
+      let ringTargetX = raw.x;
+      let ringTargetY = raw.y;
+      const nextTarget = findLogicalTarget(raw.x, raw.y);
+      if (nextTarget) {
+        activeGripElement = nextTarget;
+      } else {
+        activeGripElement = null;
+      }
+      if (
+        activeGripElement &&
+        document.documentElement.contains(activeGripElement)
+      ) {
+        const rect = activeGripElement.getBoundingClientRect();
+        ringTargetX = rect.left + rect.width / 2;
+        ringTargetY = rect.top + rect.height / 2;
+        applyGripStyles(rect);
+      } else {
+        activeGripElement = null;
+        clearGripStyles();
+      }
+      dot.x += (raw.x - dot.x) * DOT_SMOOTHING;
+      dot.y += (raw.y - dot.y) * DOT_SMOOTHING;
+      ring.x += (ringTargetX - ring.x) * RING_SMOOTHING;
+      ring.y += (ringTargetY - ring.y) * RING_SMOOTHING;
+      dotOuter.style.transform =
+        `translate3d(${dot.x}px, ${dot.y}px, 0)`;
+      ringOuter.style.transform =
+        `translate3d(${ring.x}px, ${ring.y}px, 0)`;
+      raf = requestAnimationFrame(tick);
+    }
+    function handlePointerMove(event) {
+      raw.x = event.clientX;
+      raw.y = event.clientY;
+      if (!primed) {
+        dot.x = event.clientX;
+        dot.y = event.clientY;
+        ring.x = event.clientX;
+        ring.y = event.clientY;
+        primed = true;
+      }
+      layer.style.opacity = "1";
+    }
+    function handlePointerDown() {
+      dotElement.dataset.down = "true";
+      ringElement.dataset.down = "true";
+    }
+    function handlePointerUp() {
+      dotElement.dataset.down = "false";
+      ringElement.dataset.down = "false";
+    }
+    function handlePointerLeave() {
+      layer.style.opacity = "0";
+      activeGripElement = null;
+    }
+    function start() {
+      createCursor();
+      if (!finePointerQuery.matches) return;
+      layer.hidden = false;
+      document.documentElement.classList.add("grip-cursor-active");
+      window.addEventListener(
+        "pointermove",
+        handlePointerMove,
+        { passive: true }
+      );
+      window.addEventListener("pointerdown", handlePointerDown);
+      window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerUp);
+      document.addEventListener(
+        "mouseleave",
+        handlePointerLeave
+      );
+      raf = requestAnimationFrame(tick);
+    }
+    function stop() {
+      cancelAnimationFrame(raf);
+      window.removeEventListener(
+        "pointermove",
+        handlePointerMove
+      );
+      window.removeEventListener(
+        "pointerdown",
+        handlePointerDown
+      );
+      window.removeEventListener(
+        "pointerup",
+        handlePointerUp
+      );
+      window.removeEventListener(
+        "pointercancel",
+        handlePointerUp
+      );
+      document.removeEventListener(
+        "mouseleave",
+        handlePointerLeave
+      );
+      document.documentElement.classList.remove(
+        "grip-cursor-active"
+      );
+      if (layer) layer.hidden = true;
+      activeGripElement = null;
+      clearGripStyles();
+      primed = false;
+    }
+    createCursor();
+    if (finePointerQuery.matches) {
+      start();
+    }
+    finePointerQuery.addEventListener("change", event => {
+      if (event.matches) {
+        start();
+      } else {
+        stop();
+      }
+    });
+  })();
+  </script>
+
+</body>
+</html>
