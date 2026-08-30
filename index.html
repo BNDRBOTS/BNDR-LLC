@@ -3,18 +3,51 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="BNDR LLC — web, games, systems, live builds, and selected digital work.">
-  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#050505">
-  <link rel="canonical" href="https://bndr-or-identityfxtm-or-canvascode-production.up.railway.app/">
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
+  <meta name="author" content="Scott Bender, BNDR LLC">
+  <meta name="description" content="Custom-coded, mobile-first websites, web apps, and interactive builds by BNDR LLC in Phoenix, Arizona. Clean code, direct communication, and strong SEO foundations.">
+  <meta name="keywords" content="custom web design Phoenix, custom website development Phoenix, custom-coded websites Arizona, mobile-first web design, web apps Phoenix, interactive websites, small business website Phoenix, BNDR LLC">
+  <meta name="geo.region" content="US-AZ">
+  <meta name="geo.placename" content="Phoenix, Arizona">
+  <link rel="canonical" href="https://bndrllc.com/">
 
+  <!--
+    BROWSER ICON:
+    Temporary B-only favicon using the exact current amoeba heat orange #ff3300.
+    When the final exact BNDR B artwork is ready, replace ONLY this favicon href
+    (or point it to /assets/bndr-favicon.svg). No page styling needs to change.
+  -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23ff3300'/%3E%3Ctext%20x='32'%20y='46'%20text-anchor='middle'%20font-family='Arial%20Black,Arial,sans-serif'%20font-size='44'%20font-weight='900'%20fill='%23050505'%3EB%3C/text%3E%3C/svg%3E">
+  <link rel="alternate icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23ff3300'/%3E%3Ctext%20x='32'%20y='46'%20text-anchor='middle'%20font-family='Arial%20Black,Arial,sans-serif'%20font-size='44'%20font-weight='900'%20fill='%23050505'%3EB%3C/text%3E%3C/svg%3E">
+
+  <!--
+    SOCIAL / SMS / FACEBOOK SHARE IMAGE:
+    Put the finished 1200x630 PNG at EXACTLY:
+    /assets/bndr-share-1200x630.png
+    The metadata below is already wired. Replace the file, not the HTML.
+  -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="BNDR LLC — Web. Games. Systems.">
-  <meta property="og:description" content="Live builds, games, web apps, interaction studies, and website examples by BNDR LLC.">
-  <meta property="og:url" content="https://bndr-or-identityfxtm-or-canvascode-production.up.railway.app/">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:site_name" content="BNDR LLC">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://bndrllc.com/">
+  <meta property="og:title" content="BNDR LLC | Custom Web Design, Web Apps & Interactive Builds">
+  <meta property="og:description" content="Custom-coded, mobile-first websites, web apps, games, and interactive systems built directly with BNDR LLC.">
+  <meta property="og:image" content="https://bndrllc.com/assets/bndr-share-1200x630.png">
+  <meta property="og:image:secure_url" content="https://bndrllc.com/assets/bndr-share-1200x630.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="BNDR LLC — Web. Games. Systems. Built Different.">
 
-  <title>BNDR LLC — Web. Games. Systems.</title>
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BNDR LLC | Custom Web Design, Web Apps & Interactive Builds">
+  <meta name="twitter:description" content="Custom-coded, mobile-first websites, web apps, games, and interactive systems built directly with BNDR LLC.">
+  <meta name="twitter:image" content="https://bndrllc.com/assets/bndr-share-1200x630.png">
+  <meta name="twitter:image:alt" content="BNDR LLC — Web. Games. Systems. Built Different.">
+
+  <title>BNDR LLC | Custom Web Design, Web Apps & Interactive Builds | Phoenix, AZ</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://r2-uploader-production.up.railway.app" crossorigin>
 
@@ -713,6 +746,35 @@
       transition: border-color var(--fast) ease, background var(--fast) ease, transform var(--fast) ease;
     }
     .project-link:hover { border-color: rgb(var(--rgb-white) / .36); background: var(--surface-hover); transform: translate(1px, -1px); }
+
+    /* MY BUILDS — neutral charcoal hierarchy + render containment */
+    #builds {
+      --text-strong: rgb(var(--rgb-white) / .96);
+      --text-nav: rgb(var(--rgb-white) / .84);
+      --text-body: rgb(var(--rgb-white) / .72);
+      --text-soft: rgb(var(--rgb-white) / .61);
+      --text-faint: rgb(var(--rgb-white) / .49);
+      --line: rgb(var(--rgb-white) / .15);
+      --line-strong: rgb(var(--rgb-white) / .25);
+      --surface: rgb(var(--rgb-white) / .028);
+      --surface-hover: rgb(var(--rgb-white) / .050);
+      background:
+        radial-gradient(42rem 32rem at 14% 4%, rgb(var(--rgb-white) / .026), transparent 70%),
+        radial-gradient(34rem 28rem at 88% 18%, rgb(var(--rgb-white) / .014), transparent 72%),
+        linear-gradient(180deg, rgb(22 24 26), rgb(10 11 12));
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    #builds .build-category {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 760px;
+    }
+
+    #builds .project-card {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 390px;
+    }
 
     .offer-grid {
       display: grid;
@@ -1720,6 +1782,92 @@
     }
 
 
+
+    /* FAQ — isolated, editorial, accessible; no existing site geometry altered */
+    .website-faq {
+      display: grid;
+      gap: var(--s5);
+      margin-top: clamp(var(--s8), 7vw, var(--s10));
+      padding-top: var(--s7);
+      border-top: 1px solid var(--line);
+    }
+
+    .website-faq-head {
+      display: grid;
+      gap: var(--s2);
+      max-width: 760px;
+    }
+
+    .website-faq-kicker {
+      margin: 0;
+      color: var(--text-faint);
+      font-size: .62rem;
+      font-weight: var(--weight-medium);
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .website-faq-title {
+      margin: 0;
+      color: var(--text-strong);
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: var(--weight-book);
+      line-height: 1;
+      letter-spacing: -.045em;
+      text-shadow: var(--glow-white);
+    }
+
+    .website-faq-list {
+      display: grid;
+      border-top: 1px solid var(--line);
+    }
+
+    .website-faq-item {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .website-faq-item summary {
+      min-height: 58px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: var(--s4);
+      padding: var(--s4) 0;
+      color: var(--text-strong);
+      cursor: pointer;
+      list-style: none;
+      font-size: clamp(.96rem, 1.5vw, 1.08rem);
+      font-weight: var(--weight-medium);
+      line-height: 1.35;
+    }
+
+    .website-faq-item summary::-webkit-details-marker { display: none; }
+
+    .website-faq-item summary::after {
+      content: "+";
+      color: var(--text-soft);
+      font-size: 1.25rem;
+      font-weight: var(--weight-light);
+      line-height: 1;
+      transition: transform var(--fast) var(--ease), color var(--fast) ease;
+    }
+
+    .website-faq-item[open] summary::after {
+      transform: rotate(45deg);
+      color: #ff3300;
+    }
+
+    .website-faq-answer {
+      max-width: 76ch;
+      padding: 0 0 var(--s5);
+      color: var(--text-body);
+      font-size: .92rem;
+      line-height: 1.68;
+    }
+
+    .website-faq-answer p { margin: 0; }
+    .website-faq-answer strong { color: var(--text-strong); font-weight: var(--weight-medium); }
+
     .about-layout {
       display: grid;
       gap: var(--s5);
@@ -1905,13 +2053,126 @@
   </script>
 
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "BNDR LLC",
-    "url": "https://bndr-or-identityfxtm-or-canvascode-production.up.railway.app/",
-    "description": "Web, games, systems, and selected digital work."
-  }
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://bndrllc.com/#organization",
+      "name": "BNDR LLC",
+      "url": "https://bndrllc.com/",
+      "email": "mailto:bndr.labs@gmail.com",
+      "sameAs": [
+        "https://substack.com/@bndrllc",
+        "https://www.facebook.com/BNDRLLC",
+        "https://www.instagram.com/bndrllc",
+        "https://propps.me/bndrllc"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://bndrllc.com/#website",
+      "url": "https://bndrllc.com/",
+      "name": "BNDR LLC",
+      "publisher": {
+        "@id": "https://bndrllc.com/#organization"
+      },
+      "inLanguage": "en-US"
+    },
+    {
+      "@type": "Service",
+      "@id": "https://bndrllc.com/#custom-web-design",
+      "name": "Custom Website Design and Development",
+      "provider": {
+        "@id": "https://bndrllc.com/#organization"
+      },
+      "url": "https://bndrllc.com/#website",
+      "serviceType": [
+        "Custom web design",
+        "Custom website development",
+        "Web application development",
+        "Interactive website development"
+      ],
+      "areaServed": [
+        {
+          "@type": "City",
+          "name": "Phoenix"
+        },
+        {
+          "@type": "State",
+          "name": "Arizona"
+        },
+        {
+          "@type": "Country",
+          "name": "United States"
+        }
+      ],
+      "description": "Custom-coded, mobile-first websites, web apps, and interactive builds with clean code, direct communication, and strong technical SEO foundations."
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://bndrllc.com/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What exactly do I get for the price?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A custom website built around your business, not a recycled template with your logo dropped into it. Your package includes the listed number of pages, mobile-first design, the listed revision rounds, deployment, and direct communication with me throughout the build. I’m very particular about the work I put my name on. I don’t like handing over something I think you might be even slightly disappointed with."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does payment work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The first three promotional spots are paid in full at checkout at the advertised discounted price. After those are gone, regular-price projects are 50% upfront to start and 50% before launch or handoff. Managed Hosting + Care is separate at $75/month."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How long does a website take?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Website timelines vary based on what you need and how clearly you already know what you want. I aim for 1–3 days for one-page sites, 1–2 weeks for three-page sites, usually closer to one week, and larger builds within about a month. If you know exactly what you want and we nail it quickly, it can be finished sooner."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What counts as a revision?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A revision is a reasonable round of changes to the design or content already included in the project. New pages, new features, major changes in direction, or work outside the original scope are additional work. I’ll always discuss that with you first. Additional work is $75/hour and is only billed after the work and hours are approved."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Who owns the website when it’s finished?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Once the project is paid in full, the finished website and code are yours, along with your content, domain, and business accounts. You’re not locked into BNDR. If you want the site handed off for hosting somewhere else, it can be."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What happens after launch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Managed Hosting + Care is $75/month and covers hosting, SSL, deployment, uptime monitoring, basic maintenance, and keeping the site live. If you don’t want managed hosting, the site can be handed off elsewhere. The code is yours."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will my site be mobile-friendly, fast, accessible, and set up well for SEO?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Every design I build is mobile-first. I also build in a strong SEO foundation: clean code, proper heading hierarchy, keywords, page titles, meta descriptions, Open Graph tags, semantic structure, crawlable content, responsive design, performance work, and accessibility fundamentals. Because the sites are coded, I can also make them more interactive and engaging where it makes sense. That should give you a stronger overall SEO foundation while also making the site better for the people actually using it."
+          }
+        }
+      ]
+    }
+  ]
+}
   </script>
 </head>
 <body>
@@ -2019,52 +2280,10 @@
         <section>
           <p class="view-kicker">Selected work / live previews</p>
           <h2 class="view-title" id="builds-title">My Builds</h2>
-          <p class="view-intro">Games, working systems, pilots, and focused examples. Previews load as they enter view to keep the page fast.</p>
+          <p class="view-intro">Websites first, web apps and working systems next, games and interactive builds last. Live previews load only as needed.</p>
         </section>
         <button class="back" type="button" data-close>← Back</button>
       </header>
-
-      <section class="build-category" aria-labelledby="games-title">
-        <header class="category-head">
-          <h3 class="category-title" id="games-title">Games &amp; Interactive</h3>
-          <span class="category-count">05 builds</span>
-        </header>
-        <section class="project-grid" aria-label="Games and interactive builds">
-          <article class="project-card">
-            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="MindCan live preview" data-src="https://mindcan-production-1ba2.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-            <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">MindCan™</h4></section><a class="project-link" href="https://mindcan-production-1ba2.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open MindCan live">↗</a></header>
-          </article>
-          <article class="project-card">
-            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="BMDR live preview" data-src="https://bmdrtm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-            <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">BMDR™</h4></section><a class="project-link" href="https://bmdrtm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BMDR live">↗</a></header>
-          </article>
-          <article class="project-card">
-            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="BNDR LifeMatrix live preview" data-src="https://bndr-lifematrix-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-            <header class="project-info"><section><p class="project-type">Game / System</p><h4 class="project-name">BNDR LifeMatrix</h4></section><a class="project-link" href="https://bndr-lifematrix-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BNDR LifeMatrix live">↗</a></header>
-          </article>
-          <article class="project-card">
-            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Rogue Rita live preview" data-src="https://rogue-ritatm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-            <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Rogue Rita™</h4></section><a class="project-link" href="https://rogue-ritatm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Rogue Rita live">↗</a></header>
-          </article>
-          <article class="project-card">
-            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Hyper Drive live preview" data-src="https://hyperdrive-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-            <header class="project-info"><section><p class="project-type">Interactive / Game-adjacent</p><h4 class="project-name">Hyper Drive</h4></section><a class="project-link" href="https://hyperdrive-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Hyper Drive live">↗</a></header>
-          </article>
-        </section>
-      </section>
-
-      <section class="build-category" aria-labelledby="apps-title">
-        <header class="category-head">
-          <h3 class="category-title" id="apps-title">Web Apps &amp; Pilots</h3>
-          <span class="category-count">01 build</span>
-        </header>
-        <section class="project-grid" aria-label="Web apps and pilots">
-          <article class="project-card">
-            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="QR Resets live preview" data-src="https://qr-resets-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-            <header class="project-info"><section><p class="project-type">Web App / Pilot</p><h4 class="project-name">QR Resets</h4><p class="project-note">Pilot concept — not an active program.</p></section><a class="project-link" href="https://qr-resets-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open QR Resets live">↗</a></header>
-          </article>
-        </section>
-      </section>
 
       <section class="build-category" aria-labelledby="examples-title">
         <header class="category-head">
@@ -2073,21 +2292,63 @@
         </header>
         <section class="project-grid" aria-label="Website and design examples">
           <article class="project-card">
-            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Jackson's live preview" data-src="https://jacksons-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-            <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Jackson's</h4></section><a class="project-link" href="https://jacksons-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Jackson's live">↗</a></header>
-          </article>
+                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Jackson's live preview" data-src="https://jacksons-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Jackson's</h4></section><a class="project-link" href="https://jacksons-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Jackson's live">↗</a></header>
+                    </article>
           <article class="project-card">
-            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Liquid Glass live preview" data-src="https://liquidglass-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-            <header class="project-info"><section><p class="project-type">Interaction Example</p><h4 class="project-name">Liquid Glass</h4></section><a class="project-link" href="https://liquidglass-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Liquid Glass live">↗</a></header>
-          </article>
+                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Liquid Glass live preview" data-src="https://liquidglass-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+                      <header class="project-info"><section><p class="project-type">Interaction Example</p><h4 class="project-name">Liquid Glass</h4></section><a class="project-link" href="https://liquidglass-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Liquid Glass live">↗</a></header>
+                    </article>
           <article class="project-card">
-            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Forma live preview" data-src="https://forma-production-8f79.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-            <header class="project-info"><section><p class="project-type">Design Example</p><h4 class="project-name">Forma</h4></section><a class="project-link" href="https://forma-production-8f79.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Forma live">↗</a></header>
-          </article>
+                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Forma live preview" data-src="https://forma-production-8f79.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+                      <header class="project-info"><section><p class="project-type">Design Example</p><h4 class="project-name">Forma</h4></section><a class="project-link" href="https://forma-production-8f79.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Forma live">↗</a></header>
+                    </article>
           <article class="project-card">
-            <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Editorial Studio live preview" data-src="https://cecy7-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-            <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Editorial Studio</h4></section><a class="project-link" href="https://cecy7-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Editorial Studio live">↗</a></header>
-          </article>
+                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Editorial Studio live preview" data-src="https://cecy7-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Editorial Studio</h4></section><a class="project-link" href="https://cecy7-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Editorial Studio live">↗</a></header>
+                    </article>
+        </section>
+      </section>
+
+      <section class="build-category" aria-labelledby="apps-title">
+        <header class="category-head">
+          <h3 class="category-title" id="apps-title">Web Apps &amp; Pilots</h3>
+          <span class="category-count">03 builds</span>
+        </header>
+        <section class="project-grid" aria-label="Web apps and pilots">
+          <article class="project-card">
+                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="MindCan live preview" data-src="https://mindcan-production-1ba2.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / Interactive</p><h4 class="project-name">MindCan™</h4></section><a class="project-link" href="https://mindcan-production-1ba2.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open MindCan live">↗</a></header>
+                    </article>
+          <article class="project-card">
+                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="BNDR LifeMatrix live preview" data-src="https://bndr-lifematrix-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / System</p><h4 class="project-name">BNDR LifeMatrix</h4></section><a class="project-link" href="https://bndr-lifematrix-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BNDR LifeMatrix live">↗</a></header>
+                    </article>
+          <article class="project-card">
+                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="QR Resets live preview" data-src="https://qr-resets-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / Pilot</p><h4 class="project-name">QR Resets</h4><p class="project-note">Pilot concept — not an active program.</p></section><a class="project-link" href="https://qr-resets-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open QR Resets live">↗</a></header>
+                    </article>
+        </section>
+      </section>
+
+      <section class="build-category" aria-labelledby="games-title">
+        <header class="category-head">
+          <h3 class="category-title" id="games-title">Games &amp; Interactive</h3>
+          <span class="category-count">03 builds</span>
+        </header>
+        <section class="project-grid" aria-label="Games and interactive builds">
+          <article class="project-card">
+                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="BMDR live preview" data-src="https://bmdrtm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">BMDR™</h4></section><a class="project-link" href="https://bmdrtm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BMDR live">↗</a></header>
+                    </article>
+          <article class="project-card">
+                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Rogue Rita live preview" data-src="https://rogue-ritatm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Rogue Rita™</h4></section><a class="project-link" href="https://rogue-ritatm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Rogue Rita live">↗</a></header>
+                    </article>
+          <article class="project-card">
+                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Hyper Drive live preview" data-src="https://hyperdrive-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
+                      <header class="project-info"><section><p class="project-type">Interactive / Game-adjacent</p><h4 class="project-name">Hyper Drive</h4></section><a class="project-link" href="https://hyperdrive-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Hyper Drive live">↗</a></header>
+                    </article>
         </section>
       </section>
     </section>
@@ -2392,9 +2653,68 @@
         <aside class="estimate-quote" aria-live="polite">
           <span class="estimate-quote-label">Your flat price</span>
           <strong class="estimate-quote-value" id="estimate-total">Choose a size</strong>
-          <p class="estimate-quote-note">Flat build price. Managed Hosting + Care is $75/month separate — covered in the FAQ on BNDRLLC.com.</p>
+          <p class="estimate-quote-note">Flat build price. Managed Hosting + Care is $75/month separate — see the FAQ below.</p>
         </aside>
       </form>
+
+      <section class="website-faq" id="faq" aria-labelledby="faq-title">
+        <header class="website-faq-head">
+          <p class="website-faq-kicker">FAQ</p>
+          <h3 class="website-faq-title" id="faq-title">Straight answers.</h3>
+        </header>
+
+        <div class="website-faq-list">
+          <details class="website-faq-item">
+            <summary>What exactly do I get for the price?</summary>
+            <div class="website-faq-answer">
+              <p>A custom website built around your business, not a recycled template with your logo dropped into it. Your package includes the listed number of pages, <strong>mobile-first design</strong>, the listed revision rounds, deployment, and direct communication with me throughout the build. I’m very particular about the work I put my name on. I don’t like handing over something I think you might be even slightly disappointed with.</p>
+            </div>
+          </details>
+
+          <details class="website-faq-item">
+            <summary>How does payment work?</summary>
+            <div class="website-faq-answer">
+              <p>The first three promotional spots are paid in full at checkout at the advertised discounted price. After those are gone, regular-price projects are <strong>50% upfront to start and 50% before launch or handoff</strong>. Managed Hosting + Care is separate at <strong>$75/month</strong>.</p>
+            </div>
+          </details>
+
+          <details class="website-faq-item">
+            <summary>How long does a website take?</summary>
+            <div class="website-faq-answer">
+              <p>Website timelines vary based on what you need and how clearly you already know what you want. I aim for <strong>1–3 days for one-page sites</strong>, <strong>1–2 weeks for three-page sites, usually closer to one week</strong>, and <strong>larger builds within about a month</strong>. If you know exactly what you want and we nail it quickly, it can be finished sooner.</p>
+            </div>
+          </details>
+
+          <details class="website-faq-item">
+            <summary>What counts as a revision?</summary>
+            <div class="website-faq-answer">
+              <p>A revision is a reasonable round of changes to the design or content already included in the project. New pages, new features, major changes in direction, or work outside the original scope are additional work. I’ll always discuss that with you first. Additional work is <strong>$75/hour</strong> and is only billed after the work and hours are approved.</p>
+            </div>
+          </details>
+
+          <details class="website-faq-item">
+            <summary>Who owns the website when it’s finished?</summary>
+            <div class="website-faq-answer">
+              <p>Once the project is paid in full, <strong>the finished website and code are yours</strong>, along with your content, domain, and business accounts. You’re not locked into BNDR. If you want the site handed off for hosting somewhere else, it can be.</p>
+            </div>
+          </details>
+
+          <details class="website-faq-item">
+            <summary>What happens after launch?</summary>
+            <div class="website-faq-answer">
+              <p>Managed Hosting + Care is <strong>$75/month</strong> and covers hosting, SSL, deployment, uptime monitoring, basic maintenance, and keeping the site live. If you don’t want managed hosting, the site can be handed off elsewhere. <strong>The code is yours.</strong></p>
+            </div>
+          </details>
+
+          <details class="website-faq-item">
+            <summary>Will my site be mobile-friendly, fast, accessible, and set up well for SEO?</summary>
+            <div class="website-faq-answer">
+              <p>Yes. <strong>Every design I build is mobile-first.</strong> I also build in a strong SEO foundation: clean code, proper heading hierarchy, keywords, page titles, meta descriptions, Open Graph tags, semantic structure, crawlable content, responsive design, performance work, and accessibility fundamentals. Because the sites are coded, I can also make them more interactive and engaging where it makes sense. That should give you a stronger overall SEO foundation while also making the site better for the people actually using it.</p>
+            </div>
+          </details>
+        </div>
+      </section>
+
     </section>
   </section>
 
@@ -2738,12 +3058,18 @@
       Live-preview budget:
       - desktop/tablet: max 2 app runtimes alive
       - mobile: max 1
-      - unload offscreen frames and all frames when Builds closes
-      This keeps previews live while preventing every app from executing at once.
+      - only ONE heavy cross-origin app is allowed to boot at a time
+      - frames load only when actually near/inside the Builds viewport
+      - offscreen frames unload quickly and all frames unload when Builds closes
+      - future project cards are observed automatically
       Direct project links remain the authoritative fallback for apps that disallow iframe embedding.
     */
     const previewLimit=matchMedia('(max-width: 720px)').matches ? 1 : 2;
+    const previewBootLimit=1;
     const activePreviews=[];
+    const visiblePreviews=new Set();
+    const queuedPreviews=[];
+    const loadingFrames=new Set();
     const unloadTimers=new WeakMap();
     const previewVersions=new WeakMap();
 
@@ -2755,24 +3081,35 @@
       if(index>=0) activePreviews.splice(index,1);
     };
 
+    const removeQueuedPreview=card=>{
+      const index=queuedPreviews.indexOf(card);
+      if(index>=0) queuedPreviews.splice(index,1);
+    };
+
     const nextPreviewVersion=frame=>{
       const version=(previewVersions.get(frame) || 0) + 1;
       previewVersions.set(frame,version);
       return version;
     };
 
+    let drainPreviewQueue=()=>{};
+
+    const releaseBootSlot=frame=>{
+      if(!loadingFrames.delete(frame)) return;
+      queueMicrotask(drainPreviewQueue);
+    };
+
     const unloadPreview=card=>{
       const timer=unloadTimers.get(card);
       if(timer){ clearTimeout(timer); unloadTimers.delete(card); }
+
+      removeQueuedPreview(card);
+
       const frame=frameFor(card);
       if(!frame) return;
 
-      /*
-        Invalidate any in-flight remote load BEFORE clearing the iframe.
-        This prevents an about:blank unload from satisfying a stale load
-        listener and falsely hiding the preview status over an empty frame.
-      */
       nextPreviewVersion(frame);
+      releaseBootSlot(frame);
       frame.classList.remove('loaded');
 
       if(frame.hasAttribute('src')){
@@ -2783,24 +3120,21 @@
       const status=statusFor(card);
       if(status) status.textContent='Live preview';
       removeActivePreview(card);
+      queueMicrotask(drainPreviewQueue);
     };
 
-    const enforcePreviewBudget=nextCard=>{
-      while(activePreviews.length>=previewLimit){
-        const victim=activePreviews.find(card=>card!==nextCard) || activePreviews[0];
-        if(!victim) break;
-        unloadPreview(victim);
-      }
-    };
+    const loadPreviewNow=card=>{
+      const frame=frameFor(card);
+      if(
+        !frame ||
+        frame.hasAttribute('src') ||
+        !visiblePreviews.has(card) ||
+        activePreviews.length>=previewLimit ||
+        loadingFrames.size>=previewBootLimit
+      ) return false;
 
-    const loadPreview=card=>{
       const timer=unloadTimers.get(card);
       if(timer){ clearTimeout(timer); unloadTimers.delete(card); }
-
-      const frame=frameFor(card);
-      if(!frame || frame.hasAttribute('src')) return;
-
-      enforcePreviewBudget(card);
 
       const status=statusFor(card);
       if(status) status.textContent='Loading live preview';
@@ -2813,6 +3147,9 @@
       const version=nextPreviewVersion(frame);
       let settled=false;
 
+      loadingFrames.add(frame);
+      activePreviews.push(card);
+
       const timeout=setTimeout(()=>{
         if(
           settled ||
@@ -2820,6 +3157,7 @@
           !frame.hasAttribute('src')
         ) return;
         if(status) status.textContent='Open live ↗';
+        releaseBootSlot(frame);
       },5000);
 
       frame.addEventListener('load',()=>{
@@ -2832,28 +3170,91 @@
         settled=true;
         clearTimeout(timeout);
         frame.classList.add('loaded');
+        releaseBootSlot(frame);
       },{once:true});
 
       frame.src=expectedURL;
-      activePreviews.push(card);
+      return true;
+    };
+
+    drainPreviewQueue=()=>{
+      if(loadingFrames.size>=previewBootLimit || activePreviews.length>=previewLimit) return;
+
+      while(queuedPreviews.length){
+        const card=queuedPreviews.shift();
+        if(!visiblePreviews.has(card)) continue;
+        if(loadPreviewNow(card)) return;
+      }
+    };
+
+    const queuePreview=card=>{
+      if(!card || !visiblePreviews.has(card)) return;
+      const frame=frameFor(card);
+      if(!frame || frame.hasAttribute('src') || queuedPreviews.includes(card)) return;
+      queuedPreviews.push(card);
+      drainPreviewQueue();
     };
 
     const previewObserver=new IntersectionObserver(entries=>{
       entries.forEach(entry=>{
         const card=entry.target;
+
         if(entry.isIntersecting){
-          loadPreview(card);
+          visiblePreviews.add(card);
+          const timer=unloadTimers.get(card);
+          if(timer){ clearTimeout(timer); unloadTimers.delete(card); }
+          queuePreview(card);
           return;
         }
+
+        visiblePreviews.delete(card);
+        removeQueuedPreview(card);
+
         if(!frameFor(card)?.hasAttribute('src')) return;
-        const timer=setTimeout(()=>unloadPreview(card),900);
+        const timer=setTimeout(()=>unloadPreview(card),450);
         unloadTimers.set(card,timer);
       });
-    },{root:views.builds,rootMargin:'120px 0px',threshold:.08});
+    },{root:views.builds,rootMargin:'24px 0px',threshold:.08});
 
-    document.querySelectorAll('.project-card').forEach(card=>previewObserver.observe(card));
+    const updateBuildCounts=()=>{
+      views.builds.querySelectorAll('.build-category').forEach(category=>{
+        const count=category.querySelectorAll(':scope > .project-grid > .project-card').length;
+        const output=category.querySelector('.category-count');
+        if(!output) return;
+        const label=category.getAttribute('aria-labelledby')==='examples-title'
+          ? `${String(count).padStart(2,'0')} ${count===1?'example':'examples'}`
+          : `${String(count).padStart(2,'0')} ${count===1?'build':'builds'}`;
+        output.textContent=label;
+      });
+    };
+
+    const registerProjectCard=card=>{
+      if(!(card instanceof Element) || !card.matches('.project-card')) return;
+      previewObserver.observe(card);
+    };
+
+    views.builds.querySelectorAll('.project-card').forEach(registerProjectCard);
+    updateBuildCounts();
+
+    const buildMutationObserver=new MutationObserver(mutations=>{
+      let changed=false;
+      mutations.forEach(mutation=>{
+        mutation.addedNodes.forEach(node=>{
+          if(!(node instanceof Element)) return;
+          if(node.matches('.project-card')){ registerProjectCard(node); changed=true; }
+          node.querySelectorAll?.('.project-card').forEach(card=>{
+            registerProjectCard(card);
+            changed=true;
+          });
+        });
+      });
+      if(changed) updateBuildCounts();
+    });
+    buildMutationObserver.observe(views.builds,{childList:true,subtree:true});
 
     const unloadAllPreviews=()=>{
+      queuedPreviews.splice(0);
+      visiblePreviews.clear();
       [...activePreviews].forEach(unloadPreview);
     };
 
