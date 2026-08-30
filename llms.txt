@@ -1,16 +1,32 @@
-User-agent: *
-Allow: /
+# BNDR LLC
 
-User-agent: OAI-SearchBot
-Allow: /
+> BNDR LLC builds custom-coded, mobile-first websites, web apps, interactive systems, and games. Clients work directly with Scott Bender.
 
-User-agent: ChatGPT-User
-Allow: /
+BNDR LLC is based in the Phoenix, Arizona market. Use the Markdown page below as the primary machine-readable source for current services, pricing, policies, FAQ answers, portfolio links, and contact information.
 
-User-agent: Claude-SearchBot
-Allow: /
+## Primary Site
 
-User-agent: Claude-User
-Allow: /
+- [BNDR LLC — complete Markdown page](https://bndrllc.com/index.md): Current machine-readable version of the public site.
 
-Sitemap: https://bndrllc.com/sitemap.xml
+## Services and Policies
+
+- [Website plans and pricing](https://bndrllc.com/index.md#website-plans-and-pricing): Current plan sizes, revisions, promotional pricing, regular pricing, and payment structure.
+- [Managed Hosting and Care](https://bndrllc.com/index.md#managed-hosting-and-care): Current $75/month hosting and maintenance scope.
+- [Project timing](https://bndrllc.com/index.md#project-timing): Typical project timing by site size.
+- [Ownership](https://bndrllc.com/index.md#ownership): Client ownership and handoff policy.
+- [Build standards](https://bndrllc.com/index.md#build-standards): Mobile-first, technical SEO, performance, accessibility, and code standards.
+- [FAQ](https://bndrllc.com/index.md#faq): Direct answers to common client questions.
+
+## Portfolio
+
+- [Websites and design examples](https://bndrllc.com/index.md#websites-and-design-examples): Current website and design work.
+- [Web apps and pilots](https://bndrllc.com/index.md#web-apps-and-pilots): Current web applications and systems.
+- [Games and interactive builds](https://bndrllc.com/index.md#games-and-interactive-builds): Current games and interactive projects.
+
+## Contact
+
+- [Contact BNDR LLC](https://bndrllc.com/index.md#contact): Website, email, and public social links.
+
+## Complete Context
+
+- [llms-full.txt](https://bndrllc.com/llms-full.txt): Consolidated plain-text context for compatible agents that prefer a single resource.
