@@ -1445,9 +1445,13 @@
       border-top: 1px solid var(--line);
     }
     .custom-calculator-divider strong {
+      max-width: 34ch;
       color: var(--text-strong);
-      font-size: 1rem;
-      font-weight: var(--weight-medium);
+      font-size: clamp(1.3rem, 2.6vw, 2rem);
+      font-weight: var(--weight-book);
+      line-height: 1.15;
+      letter-spacing: -.035em;
+      text-shadow: var(--glow-white);
     }
 
     .custom-calculator-divider span {
@@ -2669,8 +2673,9 @@
         </form>
 
         <div class="custom-calculator-divider">
+          <p class="quick-sale-copy-kicker">Custom scope</p>
           <strong>Need a custom build or something outside these plans?</strong>
-          <span>Use the existing custom pricing calculator below. It remains the path for special requirements and custom scope.</span>
+          <span>Use the custom pricing calculator below — it stays the path for special requirements and custom scope.</span>
         </div>
       </section>
 
