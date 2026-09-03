@@ -1,0 +1,24 @@
+BNDR LLC — AI DISCOVERY / SEO DEPLOYMENT
+
+Deploy these files at the site root:
+  /index.html
+  /robots.txt
+  /sitemap.xml
+  /llms.txt
+  /llms-full.txt
+  /index.md
+
+Already wired in index.html:
+  <link rel="describedby" href="/llms.txt">
+  <link rel="alternate" href="/index.md" type="text/markdown">
+
+Recommended MIME type for /index.md:
+  text/markdown; charset=utf-8
+
+The social preview image is now hosted at:
+  https://r2-uploader-production.up.railway.app/files/e44be66a-89fc-4d83-9f94-b2dafe6d25c8.JPG
+
+The favicon is now hosted at:
+  https://r2-uploader-production.up.railway.app/files/995c490f-e89d-4531-b584-be98d03a5698.png
+
+No repository state was used. This package was built from the current local working HTML.
