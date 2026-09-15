@@ -9,28 +9,31 @@ BNDR LLC builds custom digital work around the individual business rather than d
 ### BNDR Lander
 - 1 custom page
 - 1 included revision
-- Regular price: $2,500
-- Customer 1 promotional price: $750
-- Customer 2 promotional price: $1,000
-- Customer 3 promotional price: $1,500
+- Regular price: $1,500
+- Introductory place 1: $450 (70% off), available once per package
+- Introductory place 2: $600 (60% off), available once per package
+- Introductory place 3: $900 (40% off), available once per package
+- Regular deposit: $750; balance: $750
 
 ### BNDR Standard
 - 3 custom pages
 - 2 included revisions
-- Regular price: $5,000
-- Customer 1 promotional price: $1,500
-- Customer 2 promotional price: $2,000
-- Customer 3 promotional price: $3,000
+- Regular price: $3,000
+- Introductory place 1: $900 (70% off), available once per package
+- Introductory place 2: $1,200 (60% off), available once per package
+- Introductory place 3: $1,800 (40% off), available once per package
+- Regular deposit: $1,500; balance: $1,500
 
 ### BNDR Expanded
 - 5 custom pages
 - 3 included revisions
-- Regular price: $7,500
-- Customer 1 promotional price: $2,250
-- Customer 2 promotional price: $3,000
-- Customer 3 promotional price: $4,500
+- Regular price: $4,500
+- Introductory place 1: $1,350 (70% off), available once per package
+- Introductory place 2: $1,800 (60% off), available once per package
+- Introductory place 3: $2,700 (40% off), available once per package
+- Regular deposit: $2,250; balance: $2,250
 
-The first three promotional customers pay the advertised promotional price in full at checkout. After those promotional spots are gone, regular-price projects use a 50% deposit to start and the remaining 50% is due before launch or handoff.
+Each package has three introductory places. Each place is paid in full and can be purchased once. A completed purchase advances only that package to the next introductory price, then to regular pricing after all three places are taken. Regular projects require 50% upfront and 50% before launch or handoff. Current availability is checked against Stripe at checkout.
 
 Managed Hosting + Care is $75/month.
 
@@ -74,25 +77,25 @@ Coded sites can also include interactive and engaging experiences where they mak
 ## FAQ
 
 ### What exactly do I get for the price?
-A custom website built around your business, not a recycled template with your logo dropped into it. Your package includes the listed number of pages, mobile-first design, the listed revision rounds, deployment, and direct communication with me throughout the build. I’m very particular about the work I put my name on. I don’t like handing over something I think you might be even slightly disappointed with.
+Your package includes the listed number of custom pages, mobile-first design, the listed revision rounds, deployment and direct communication with me throughout the build. We agree on the scope before work starts, and you review the site before launch.
 
 ### How does payment work?
-The first three promotional spots are paid in full at checkout at the advertised discounted price. After those are gone, regular-price projects are 50% upfront to start and 50% before launch or handoff. Managed Hosting + Care is separate at $75/month.
+Each package has three introductory places, paid in full at the available discounted price. Each place is used once, and a completed purchase advances only that package. After those places are taken, the regular total is $1,500 for one page, $3,000 for three pages or $4,500 for five pages, with 50% upfront and 50% before launch or handoff. Managed Hosting + Care is separate at $75/month.
 
 ### How long does a website take?
-Website timelines vary based on what you need and how clearly you already know what you want. I aim for 1–3 days for one-page sites, 1–2 weeks for three-page sites, usually closer to one week, and larger builds within about a month. If you know exactly what you want and we nail it quickly, it can be finished sooner.
+I aim for 1–3 days for one-page sites, 1–2 weeks for three-page sites, usually closer to one week, and larger builds within about a month. Timing depends on the scope, available content and how quickly we agree on the direction. A clear brief and quick feedback can shorten the build.
 
 ### What counts as a revision?
-A revision is a reasonable round of changes to the design or content already included in the project. New pages, new features, major changes in direction, or work outside the original scope are additional work. I’ll always discuss that with you first. Additional work is $75/hour and is only billed after the work and hours are approved.
+A revision is a round of changes to the design or content within the agreed scope. New pages, new features, a major change of direction or other work outside that scope is quoted separately. Additional work is $75/hour; you approve the work and hours before it is billed.
 
 ### Who owns the website when it’s finished?
-Once the project is paid in full, the finished website and code are yours, along with your content, domain, and business accounts. You’re not locked into BNDR. If you want the site handed off for hosting somewhere else, it can be.
+Once the project is paid in full, the finished website and code are yours. Your content, domain and business accounts remain yours too. You can keep hosting with BNDR or have the site handed off to another host.
 
 ### What happens after launch?
-Managed Hosting + Care is $75/month and covers hosting, SSL, deployment, uptime monitoring, basic maintenance, and keeping the site live. If you don’t want managed hosting, the site can be handed off elsewhere. The code is yours.
+Managed Hosting + Care is $75/month for hosting, SSL, deployment, uptime monitoring and basic maintenance to keep the site live. It is separate from the build. If you prefer another host, I can hand over the finished site. The code is yours.
 
 ### Will my site be mobile-friendly, fast, accessible, and set up well for SEO?
-Yes. Every design I build is mobile-first. I also build in a strong SEO foundation: clean code, proper heading hierarchy, keywords, page titles, meta descriptions, Open Graph tags, semantic structure, crawlable content, responsive design, performance work, and accessibility fundamentals. Because the sites are coded, I can also make them more interactive and engaging where it makes sense. That should give you a stronger overall SEO foundation while also making the site better for the people actually using it.
+Every site is designed for mobile first. The build includes clear headings, page titles, meta descriptions, relevant keywords, Open Graph tags, semantic HTML and crawlable content, alongside responsive layouts, performance work and accessibility fundamentals. Interactive features are added where they help customers use the site.
 
 ## Websites and Design Examples
 
@@ -140,3 +143,4 @@ Yes. Every design I build is mobile-first. I also build in a strong SEO foundati
 - Facebook: https://www.facebook.com/BNDRLLC
 - Instagram: https://www.instagram.com/bndrllc
 - Proppz: https://propps.me/bndrllc
+

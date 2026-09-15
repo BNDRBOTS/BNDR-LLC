@@ -1,0 +1,4 @@
+.verification/
+node_modules/
+.env
+.env.*

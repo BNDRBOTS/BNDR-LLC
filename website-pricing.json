@@ -1,0 +1,110 @@
+{
+  "revision": "2026-09-15",
+  "currency": "usd",
+  "discountPercentages": [
+    70,
+    60,
+    40
+  ],
+  "depositPercentage": 50,
+  "hostingMonthly": 75,
+  "additionalWorkHourly": 75,
+  "packages": [
+    {
+      "id": "lander",
+      "name": "BNDR Lander",
+      "pages": 1,
+      "revisions": 1,
+      "regular": 1500,
+      "sale": [
+        450,
+        600,
+        900
+      ],
+      "deposit": 750,
+      "stripeProduct": "prod_VARDTC10BAGL7I",
+      "description": "One focused page for your offer, your work and a clear way to get in touch.",
+      "legacySaleLinks": [
+        {
+          "tier": 1,
+          "url": "https://buy.stripe.com/aFacN560340ackkgze0oM0y",
+          "amount": 750
+        },
+        {
+          "tier": 2,
+          "url": "https://buy.stripe.com/6oU6oH4VZ54e8445UA0oM0z",
+          "amount": 1000
+        },
+        {
+          "tier": 3,
+          "url": "https://buy.stripe.com/00wbJ188bgMWesser60oM0A",
+          "amount": 1500
+        }
+      ]
+    },
+    {
+      "id": "standard",
+      "name": "BNDR Standard",
+      "pages": 3,
+      "revisions": 2,
+      "regular": 3000,
+      "sale": [
+        900,
+        1200,
+        1800
+      ],
+      "deposit": 1500,
+      "stripeProduct": "prod_VAREbYCe0EnD4s",
+      "description": "Room to explain your services, show your work and help customers choose you.",
+      "legacySaleLinks": [
+        {
+          "tier": 1,
+          "url": "https://buy.stripe.com/3cI6oH3RVgMW1FGgze0oM0C",
+          "amount": 1500
+        },
+        {
+          "tier": 2,
+          "url": "https://buy.stripe.com/cNi28rdsv40adoo82I0oM0D",
+          "amount": 2000
+        },
+        {
+          "tier": 3,
+          "url": "https://buy.stripe.com/aFa6oHfADeEO3NOer60oM0E",
+          "amount": 3000
+        }
+      ]
+    },
+    {
+      "id": "expanded",
+      "name": "BNDR Expanded",
+      "pages": 5,
+      "revisions": 3,
+      "regular": 4500,
+      "sale": [
+        1350,
+        1800,
+        2700
+      ],
+      "deposit": 2250,
+      "stripeProduct": "prod_VAREvmRTYNRwQi",
+      "description": "Separate pages for the services and details your customers need before they enquire.",
+      "legacySaleLinks": [
+        {
+          "tier": 1,
+          "url": "https://buy.stripe.com/bJefZh9cf2W61FGgze0oM0G",
+          "amount": 2250
+        },
+        {
+          "tier": 2,
+          "url": "https://buy.stripe.com/4gM28rdsvfIS7003Ms0oM0H",
+          "amount": 3000
+        },
+        {
+          "tier": 3,
+          "url": "https://buy.stripe.com/dRm5kD7471S2doo5UA0oM0I",
+          "amount": 4500
+        }
+      ]
+    }
+  ]
+}
