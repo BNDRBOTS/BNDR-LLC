@@ -2171,7 +2171,7 @@
           "name": "What exactly do I get for the price?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "A custom website built around your business, not a recycled template with your logo dropped into it. Your package includes the listed number of pages, mobile-first design, the listed revision rounds, deployment, and direct communication with me throughout the build. I’m very particular about the work I put my name on. I don’t like handing over something I think you might be even slightly disappointed with."
+            "text": "Your package includes the listed number of custom pages, mobile-first design, the listed revision rounds, deployment and direct communication with me throughout the build. We agree on the scope before work starts, and you review the site before launch."
           }
         },
         {
@@ -2179,7 +2179,7 @@
           "name": "How does payment work?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "The first three promotional spots are paid in full at checkout at the advertised discounted price. After those are gone, regular-price projects are 50% upfront to start and 50% before launch or handoff. Managed Hosting + Care is separate at $75/month."
+            "text": "Each package has three introductory places, paid in full at the available discounted price. Each place is used once, and a completed purchase advances only that package. After those places are taken, the regular total is $1,500 for one page, $3,000 for three pages or $4,500 for five pages, with 50% upfront and 50% before launch or handoff. Managed Hosting + Care is separate at $75/month."
           }
         },
         {
@@ -2187,7 +2187,7 @@
           "name": "How long does a website take?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Website timelines vary based on what you need and how clearly you already know what you want. I aim for 1–3 days for one-page sites, 1–2 weeks for three-page sites, usually closer to one week, and larger builds within about a month. If you know exactly what you want and we nail it quickly, it can be finished sooner."
+            "text": "I aim for 1–3 days for one-page sites, 1–2 weeks for three-page sites, usually closer to one week, and larger builds within about a month. Timing depends on the scope, available content and how quickly we agree on the direction. A clear brief and quick feedback can shorten the build."
           }
         },
         {
@@ -2195,7 +2195,7 @@
           "name": "What counts as a revision?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "A revision is a reasonable round of changes to the design or content already included in the project. New pages, new features, major changes in direction, or work outside the original scope are additional work. I’ll always discuss that with you first. Additional work is $75/hour and is only billed after the work and hours are approved."
+            "text": "A revision is a round of changes to the design or content within the agreed scope. New pages, new features, a major change of direction or other work outside that scope is quoted separately. Additional work is $75/hour; you approve the work and hours before it is billed."
           }
         },
         {
@@ -2203,7 +2203,7 @@
           "name": "Who owns the website when it’s finished?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Once the project is paid in full, the finished website and code are yours, along with your content, domain, and business accounts. You’re not locked into BNDR. If you want the site handed off for hosting somewhere else, it can be."
+            "text": "Once the project is paid in full, the finished website and code are yours. Your content, domain and business accounts remain yours too. You can keep hosting with BNDR or have the site handed off to another host."
           }
         },
         {
@@ -2211,7 +2211,7 @@
           "name": "What happens after launch?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Managed Hosting + Care is $75/month and covers hosting, SSL, deployment, uptime monitoring, basic maintenance, and keeping the site live. If you don’t want managed hosting, the site can be handed off elsewhere. The code is yours."
+            "text": "Managed Hosting + Care is $75/month for hosting, SSL, deployment, uptime monitoring and basic maintenance to keep the site live. It is separate from the build. If you prefer another host, I can hand over the finished site. The code is yours."
           }
         },
         {
@@ -2219,7 +2219,7 @@
           "name": "Will my site be mobile-friendly, fast, accessible, and set up well for SEO?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. Every design I build is mobile-first. I also build in a strong SEO foundation: clean code, proper heading hierarchy, keywords, page titles, meta descriptions, Open Graph tags, semantic structure, crawlable content, responsive design, performance work, and accessibility fundamentals. Because the sites are coded, I can also make them more interactive and engaging where it makes sense. That should give you a stronger overall SEO foundation while also making the site better for the people actually using it."
+            "text": "Every site is designed for mobile first. The build includes clear headings, page titles, meta descriptions, relevant keywords, Open Graph tags, semantic HTML and crawlable content, alongside responsive layouts, performance work and accessibility fundamentals. Interactive features are added where they help customers use the site."
           }
         }
       ]
@@ -2227,6 +2227,7 @@
   ]
 }
   </script>
+  <link rel="stylesheet" href="/website.css">
 </head>
 <body>
   <canvas id="fx" aria-hidden="true"></canvas>
@@ -2484,116 +2485,91 @@
     <section class="view-shell">
       <header class="view-header">
         <section>
-          <p class="view-kicker">Instant Estimate</p>
+          <p class="view-kicker">Custom Website Design</p>
           <h2 class="view-title" id="website-title">Get a Website</h2>
-          <p class="view-intro">Tap through a few options and the number updates live. Flat pricing, known before you say yes — no sales call, no email chain, no surprises.</p>
+          <p class="view-intro">A website that makes your business easy to understand and easy to contact. Custom design, a clear scope and direct access to the person building it.</p>
         </section>
         <button class="back" type="button" data-close>← Back</button>
       </header>
 
             <section class="quick-pick-pricing" id="quick-pick-pricing" aria-labelledby="quick-pick-title">
         <header class="quick-pick-head">
-          <p class="quick-pick-kicker">Quick-Pick Plans</p>
-          <h3 class="quick-pick-title" id="quick-pick-title">Pick the size that fits.</h3>
-          <p class="quick-pick-lead">Three fixed-scope options for straightforward builds. If your project needs something outside these packages, the full custom calculator stays right below them.</p>
+          <p class="quick-pick-kicker">Website Packages</p>
+          <h3 class="quick-pick-title" id="quick-pick-title">Choose the right starting point.</h3>
+          <p class="quick-pick-lead">Choose one, three or five pages. Every package includes mobile-first design, the revision rounds listed and deployment. Need more? Build a custom estimate below.</p>
         </header>
 
-        <div class="quick-pick-grid" role="group" aria-label="Quick-pick website plans">
-          <article class="quick-plan" data-quick-plan="BNDR Lander" data-pages="1" data-revisions="1" data-regular="2500" data-c1="750" data-c2="1000" data-c3="1500"
-            data-stripe-product="prod_VARDTC10BAGL7I"
-            data-stripe-c1-price="price_1UA6MAGuY1oGAyYSYTGCH0xf"
-            data-stripe-c1-link="https://buy.stripe.com/aFacN560340ackkgze0oM0y"
-            data-stripe-c2-price="price_1UA6MEGuY1oGAyYS1dCawM9g"
-            data-stripe-c2-link="https://buy.stripe.com/6oU6oH4VZ54e8445UA0oM0z"
-            data-stripe-c3-price="price_1UA6MLGuY1oGAyYSh6wQSvxR"
-            data-stripe-c3-link="https://buy.stripe.com/00wbJ188bgMWesser60oM0A"
-            data-deposit="1250"
-            data-stripe-deposit-link="https://buy.stripe.com/4gM28rgEHcwGgAAdn20oM0M">
+        <div class="quick-pick-grid" role="group" aria-label="Website packages">
+          <article class="quick-plan" data-quick-plan="BNDR Lander" data-package="lander" data-pages="1" data-revisions="1" data-regular="1500" data-deposit="750" aria-labelledby="plan-lander-title">
             <div class="quick-plan-top">
               <span class="quick-plan-index">01</span>
               <span class="quick-plan-badge">1 page · 1 revision</span>
             </div>
-            <h3>BNDR Lander</h3>
-            <p class="quick-plan-spec">1 page · Included revisions: 1</p>
+            <h4 id="plan-lander-title">BNDR Lander</h4>
+            <p class="quick-plan-spec">One focused page for your offer, your work and a clear way to get in touch.</p>
             <div class="quick-price">
-              <span class="quick-price-regular">Regular <s>$2,500</s></span>
-              <strong class="quick-price-current">$750</strong>
-              <span class="quick-price-caption">Customer 1 · 70% off</span>
+              <span class="quick-price-regular">Regular total $1,500</span>
+              <strong class="quick-price-current">$1,500</strong>
+              <span class="quick-price-caption">Checking introductory availability…</span>
             </div>
-            <div class="quick-sequence" aria-label="BNDR Lander promotional sequence">
-              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$750</strong></div>
-              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$1,000</strong></div>
-              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$1,500</strong></div>
-              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$1,250</strong></div>
+            <div class="quick-sequence" aria-label="BNDR Lander introductory prices">
+              <div class="quick-sequence-row" data-sale-tier="1"><span>Place 1 · 70% off</span><strong>$450</strong></div>
+              <div class="quick-sequence-row" data-sale-tier="2"><span>Place 2 · 60% off</span><strong>$600</strong></div>
+              <div class="quick-sequence-row" data-sale-tier="3"><span>Place 3 · 40% off</span><strong>$900</strong></div>
+              <div class="quick-sequence-row" data-sale-tier="regular"><span>Regular · 50% to start</span><strong>$750</strong></div>
             </div>
-            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Lander →</button>
+            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false" disabled>Select BNDR Lander →</button>
           </article>
 
-          <article class="quick-plan" data-quick-plan="BNDR Standard" data-pages="3" data-revisions="2" data-regular="5000" data-c1="1500" data-c2="2000" data-c3="3000"
-            data-stripe-product="prod_VAREbYCe0EnD4s"
-            data-stripe-c1-price="price_1UA6MRGuY1oGAyYS3JwOmg9G"
-            data-stripe-c1-link="https://buy.stripe.com/3cI6oH3RVgMW1FGgze0oM0C"
-            data-stripe-c2-price="price_1UA6MZGuY1oGAyYS7CARMPV2"
-            data-stripe-c2-link="https://buy.stripe.com/cNi28rdsv40adoo82I0oM0D"
-            data-stripe-c3-price="price_1UA6MeGuY1oGAyYS5egsbpqp"
-            data-stripe-c3-link="https://buy.stripe.com/aFa6oHfADeEO3NOer60oM0E"
-            data-deposit="2500"
-            data-stripe-deposit-link="https://buy.stripe.com/5kQ28r2NR1S2gAA4Qw0oM0O">
+          <article class="quick-plan" data-quick-plan="BNDR Standard" data-package="standard" data-pages="3" data-revisions="2" data-regular="3000" data-deposit="1500" aria-labelledby="plan-standard-title">
             <div class="quick-plan-top">
               <span class="quick-plan-index">02</span>
               <span class="quick-plan-badge">3 pages · 2 revisions</span>
             </div>
-            <h3>BNDR Standard</h3>
-            <p class="quick-plan-spec">3 pages · Included revisions: 2</p>
+            <h4 id="plan-standard-title">BNDR Standard</h4>
+            <p class="quick-plan-spec">Room to explain your services, show your work and help customers choose you.</p>
             <div class="quick-price">
-              <span class="quick-price-regular">Regular <s>$5,000</s></span>
-              <strong class="quick-price-current">$1,500</strong>
-              <span class="quick-price-caption">Customer 1 · 70% off</span>
+              <span class="quick-price-regular">Regular total $3,000</span>
+              <strong class="quick-price-current">$3,000</strong>
+              <span class="quick-price-caption">Checking introductory availability…</span>
             </div>
-            <div class="quick-sequence" aria-label="BNDR Standard promotional sequence">
-              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$1,500</strong></div>
-              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$2,000</strong></div>
-              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$3,000</strong></div>
-              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$2,500</strong></div>
+            <div class="quick-sequence" aria-label="BNDR Standard introductory prices">
+              <div class="quick-sequence-row" data-sale-tier="1"><span>Place 1 · 70% off</span><strong>$900</strong></div>
+              <div class="quick-sequence-row" data-sale-tier="2"><span>Place 2 · 60% off</span><strong>$1,200</strong></div>
+              <div class="quick-sequence-row" data-sale-tier="3"><span>Place 3 · 40% off</span><strong>$1,800</strong></div>
+              <div class="quick-sequence-row" data-sale-tier="regular"><span>Regular · 50% to start</span><strong>$1,500</strong></div>
             </div>
-            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Standard →</button>
+            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false" disabled>Select BNDR Standard →</button>
           </article>
 
-          <article class="quick-plan" data-quick-plan="BNDR Expanded" data-pages="5" data-revisions="3" data-regular="7500" data-c1="2250" data-c2="3000" data-c3="4500"
-            data-stripe-product="prod_VAREvmRTYNRwQi"
-            data-stripe-c1-price="price_1UA6MkGuY1oGAyYSrSMJ4EJu"
-            data-stripe-c1-link="https://buy.stripe.com/bJefZh9cf2W61FGgze0oM0G"
-            data-stripe-c2-price="price_1UA6MuGuY1oGAyYSjGQwigKb"
-            data-stripe-c2-link="https://buy.stripe.com/4gM28rdsvfIS7003Ms0oM0H"
-            data-stripe-c3-price="price_1UA6N2GuY1oGAyYS6kTB4ip3"
-            data-stripe-c3-link="https://buy.stripe.com/dRm5kD7471S2doo5UA0oM0I"
-            data-deposit="3750"
-            data-stripe-deposit-link="https://buy.stripe.com/00w28r1JN68i4RS82I0oM0Q">
+          <article class="quick-plan" data-quick-plan="BNDR Expanded" data-package="expanded" data-pages="5" data-revisions="3" data-regular="4500" data-deposit="2250" aria-labelledby="plan-expanded-title">
             <div class="quick-plan-top">
               <span class="quick-plan-index">03</span>
               <span class="quick-plan-badge">5 pages · 3 revisions</span>
             </div>
-            <h3>BNDR Expanded</h3>
-            <p class="quick-plan-spec">5 pages · Included revisions: 3</p>
+            <h4 id="plan-expanded-title">BNDR Expanded</h4>
+            <p class="quick-plan-spec">Separate pages for the services and details your customers need before they enquire.</p>
             <div class="quick-price">
-              <span class="quick-price-regular">Regular <s>$7,500</s></span>
-              <strong class="quick-price-current">$2,250</strong>
-              <span class="quick-price-caption">Customer 1 · 70% off</span>
+              <span class="quick-price-regular">Regular total $4,500</span>
+              <strong class="quick-price-current">$4,500</strong>
+              <span class="quick-price-caption">Checking introductory availability…</span>
             </div>
-            <div class="quick-sequence" aria-label="BNDR Expanded promotional sequence">
-              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$2,250</strong></div>
-              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$3,000</strong></div>
-              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$4,500</strong></div>
-              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$3,750</strong></div>
+            <div class="quick-sequence" aria-label="BNDR Expanded introductory prices">
+              <div class="quick-sequence-row" data-sale-tier="1"><span>Place 1 · 70% off</span><strong>$1,350</strong></div>
+              <div class="quick-sequence-row" data-sale-tier="2"><span>Place 2 · 60% off</span><strong>$1,800</strong></div>
+              <div class="quick-sequence-row" data-sale-tier="3"><span>Place 3 · 40% off</span><strong>$2,700</strong></div>
+              <div class="quick-sequence-row" data-sale-tier="regular"><span>Regular · 50% to start</span><strong>$2,250</strong></div>
             </div>
-            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Expanded →</button>
+            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false" disabled>Select BNDR Expanded →</button>
           </article>
         </div>
+
+        <p class="website-pricing-status" id="website-pricing-status" role="status" aria-live="polite">Checking current availability…</p>
 
         <section class="quick-terms" aria-label="Service terms">
           <article class="quick-term">
             <strong>Managed Hosting + Care: $75/month</strong>
-            <p>Covers Hosting, SSL, Deployment, Uptime monitoring, Basic maintenance, and Keeping the site live.</p>
+            <p>Hosting, SSL, deployment, uptime monitoring and basic maintenance to keep your site running. Available separately from your build.</p>
             <div class="quick-care-list" aria-hidden="true">
               <span>Hosting</span><span>SSL</span><span>Deployment</span><span>Uptime monitoring</span><span>Basic maintenance</span><span>Keeping the site live</span>
             </div>
@@ -2604,58 +2580,56 @@
           </article>
           <article class="quick-term">
             <strong>Additional work: $75/hour</strong>
-            <p>Additional work outside included scope is quoted first, then billed at $75/hour for the approved number of hours.</p>
+            <p>For work outside your package, I quote the scope and hours first. You approve the work before it is billed.</p>
           </article>
         </section>
 
         <section class="quick-sale-copy" aria-labelledby="sale-copy-title">
           <header class="quick-sale-copy-head">
             <section>
-              <p class="quick-sale-copy-kicker">Launch Pricing</p>
-              <h3 id="sale-copy-title">Three spots.<br>Then back to normal.</h3>
+              <p class="quick-sale-copy-kicker">Introductory Pricing</p>
+              <h3 id="sale-copy-title">A limited start.<br>A clear price after.</h3>
             </section>
-            <p class="quick-sale-copy-lead">I’m opening three custom website spots at stupid-low prices to get some fresh builds out the door.</p>
+            <p class="quick-sale-copy-lead">Each package has three introductory places. The available price is shown above, and changes as those places are taken.</p>
           </header>
 
           <div class="quick-sale-copy-grid">
             <article class="quick-sale-copy-group">
               <h4>Regular pricing</h4>
               <div class="quick-sale-copy-rows">
-                <div class="quick-sale-copy-row"><span>One-page custom site</span><strong>$2,500</strong></div>
-                <div class="quick-sale-copy-row"><span>Three-page custom site</span><strong>$5,000</strong></div>
-                <div class="quick-sale-copy-row"><span>Five-page custom site</span><strong>$7,500</strong></div>
+                <div class="quick-sale-copy-row"><span>One-page custom site</span><strong>$1,500</strong></div>
+                <div class="quick-sale-copy-row"><span>Three-page custom site</span><strong>$3,000</strong></div>
+                <div class="quick-sale-copy-row"><span>Five-page custom site</span><strong>$4,500</strong></div>
               </div>
               <p class="quick-sale-copy-note">50% upfront · 50% before launch or handoff.</p>
             </article>
             <article class="quick-sale-copy-group">
-              <h4>First three customers</h4>
+              <h4>Three places per package</h4>
               <div class="quick-sale-copy-rows">
-                <div class="quick-sale-copy-row"><span>First customer</span><strong>70% off</strong></div>
-                <div class="quick-sale-copy-row"><span>Second customer</span><strong>60% off</strong></div>
-                <div class="quick-sale-copy-row"><span>Third customer</span><strong>40% off</strong></div>
+                <div class="quick-sale-copy-row"><span>First place</span><strong>70% off</strong></div>
+                <div class="quick-sale-copy-row"><span>Second place</span><strong>60% off</strong></div>
+                <div class="quick-sale-copy-row"><span>Third place</span><strong>40% off</strong></div>
               </div>
-              <p class="quick-sale-copy-note">On every package.</p>
+              <p class="quick-sale-copy-note">One purchase per place. Each package advances separately.</p>
             </article>
           </div>
 
           <div class="quick-sale-copy-body">
             <section class="quick-sale-copy-col">
               <p class="quick-sale-copy-label">How the spots work</p>
-              <p>Once the three spots are gone, pricing goes back to normal. Regular builds run 50% upfront, with the balance due before launch or handoff. Each discount link only works while its spot is still open — if the link works, the spot is yours.</p>
+              <p>Each introductory place can be purchased once. A completed payment advances that package to its next price; the other packages stay where they are. Introductory builds are paid in full. After all three places are taken, that package returns to its regular price: 50% upfront and 50% before launch or handoff.</p>
             </section>
             <section class="quick-sale-copy-col">
               <p class="quick-sale-copy-label">How I build</p>
-              <p>Every site is a custom build around your business — mobile-ready, handled by me from the first design conversation to the finished build. No agency handoff. I keep the project count low so each site gets the time it deserves.</p>
-              <p>I take pride in the work, and most of it comes through referrals. I pay for referrals too.</p>
+              <p>You work with me from the first design conversation through launch. We agree on the pages and scope, then shape the site around your business, your customers and the action you want them to take. I keep the project count small so I can stay involved throughout.</p>
+              <p>Have someone in mind? Ask me about paid referrals.</p>
             </section>
           </div>
-
-          <p class="quick-sale-copy-closer">If price is the reason you’ve been putting off your site, this is probably the cheapest I’m ever going to do it.</p>
         </section>
 
         <form class="quick-pick-contact" id="quick-pick-contact-form" novalidate aria-label="Quick-pick website request">
           <div class="quick-pick-summary">
-            <span class="quick-pick-summary-label">Selected quick-pick</span>
+            <span class="quick-pick-summary-label">Your selected package</span>
             <strong id="quick-pick-summary-name">Choose a plan above</strong>
             <span id="quick-pick-summary-detail"></span>
           </div>
@@ -2667,15 +2641,15 @@
             <div class="quick-contact-field is-wide"><label for="quick-notes">Anything else? (optional)</label><textarea id="quick-notes" name="notes" rows="3" maxlength="900"></textarea></div>
           </div>
           <div class="quick-honeypot" aria-hidden="true"><label for="quick-hp">Leave this field empty</label><input id="quick-hp" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
-          <button class="quick-contact-submit" type="submit">Claim this plan →</button>
-          <p class="quick-contact-note">This sends the selected plan and your contact details directly to bndr.labs@gmail.com so the current promotional spot can be confirmed.</p>
+          <button class="quick-contact-submit" type="submit">Send details & continue →</button>
+          <p class="quick-contact-note">Your details go directly to me. You will review the amount in Stripe before paying. Selecting a package or sending this form does not reserve an introductory place.</p>
           <div class="quick-contact-status" id="quick-contact-status" role="status" aria-live="polite"></div>
         </form>
 
         <div class="custom-calculator-divider">
           <p class="quick-sale-copy-kicker">Custom scope</p>
-          <strong>Need a custom build or something outside these plans?</strong>
-          <span>Use the custom pricing calculator below — it stays the path for special requirements and custom scope.</span>
+          <h3>Need something more specific?</h3>
+          <span>Build an estimate for your pages and extras. Custom estimates use regular package pricing; introductory prices apply to the fixed packages above.</span>
         </div>
       </section>
 
@@ -2690,7 +2664,7 @@
             <header class="estimate-step-head">
               <span class="estimate-step-index">01</span>
               <h3>What kind of business?</h3>
-              <p class="estimate-step-sub">This tunes the advice you get back — nothing else.</p>
+              <p class="estimate-step-sub">Tell me who the website needs to work for.</p>
             </header>
             <div class="estimate-options" role="group" aria-label="Business type">
               <button class="estimate-option" type="button" data-estimate-key="biz" data-value="Home services / trades"><span class="estimate-option-main">Home services / trades</span></button>
@@ -2709,10 +2683,10 @@
               <h3>What do you need?</h3>
             </header>
             <div class="estimate-options" role="group" aria-label="Website need">
-              <button class="estimate-option" type="button" data-estimate-key="need" data-value="Brand-new site — nothing exists yet"><span class="estimate-option-main">Brand-new site — nothing exists yet</span></button>
-              <button class="estimate-option" type="button" data-estimate-key="need" data-value="Redesign — my current site embarrasses me"><span class="estimate-option-main">Redesign — my current site embarrasses me</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="need" data-value="A new website"><span class="estimate-option-main">A new website</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="need" data-value="Improve an existing website"><span class="estimate-option-main">Improve an existing website</span></button>
               <button class="estimate-option" type="button" data-estimate-key="need" data-value="Landing page for a campaign or launch"><span class="estimate-option-main">Landing page for a campaign or launch</span></button>
-              <button class="estimate-option" type="button" data-estimate-key="need" data-value="Not sure — tell me what I need"><span class="estimate-option-main">Not sure — tell me what I need</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="need" data-value="Help choosing the right approach"><span class="estimate-option-main">Help choosing the right approach</span></button>
             </div>
           </section>
 
@@ -2720,13 +2694,13 @@
             <header class="estimate-step-head">
               <span class="estimate-step-index">03</span>
               <h3>Pick a size</h3>
-              <p class="estimate-step-sub">Flat prices — the number you see is the number you pay.</p>
+              <p class="estimate-step-sub">Regular package prices, with any selected extras added below. Half is due upfront; the balance is due before launch or handoff.</p>
             </header>
             <div class="estimate-options" role="group" aria-label="Website size">
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Launch Site Special" data-price="599"><span class="estimate-option-main">Launch Site Special<span class="estimate-option-detail">One sharp page, fast</span></span><span class="estimate-option-meta">$599</span></button>
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="One-Page Lander™" data-price="2500"><span class="estimate-option-main">One-Page Lander™<span class="estimate-option-detail">A single page engineered to convert</span></span><span class="estimate-option-meta">$2,500</span></button>
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Three-Page Custom™" data-price="4500"><span class="estimate-option-main">Three-Page Custom™<span class="estimate-option-detail">Home, work, contact — the full pitch</span></span><span class="estimate-option-meta">$4,500</span></button>
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Small Business Site™" data-price="6500"><span class="estimate-option-main">Small Business Site™<span class="estimate-option-detail">The complete presence</span></span><span class="estimate-option-meta">$6,500</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Campaign landing page" data-package="lander" data-price="1500"><span class="estimate-option-main">Campaign landing page<span class="estimate-option-detail">A focused page for a campaign or launch</span></span><span class="estimate-option-meta">$1,500</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="BNDR Lander" data-package="lander" data-price="1500"><span class="estimate-option-main">BNDR Lander<span class="estimate-option-detail">One custom page · 1 revision</span></span><span class="estimate-option-meta">$1,500</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="BNDR Standard" data-package="standard" data-price="3000"><span class="estimate-option-main">BNDR Standard<span class="estimate-option-detail">Three custom pages · 2 revisions</span></span><span class="estimate-option-meta">$3,000</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="BNDR Expanded" data-package="expanded" data-price="4500"><span class="estimate-option-main">BNDR Expanded<span class="estimate-option-detail">Five custom pages · 3 revisions</span></span><span class="estimate-option-meta">$4,500</span></button>
             </div>
           </section>
 
@@ -2764,10 +2738,10 @@
           <section class="estimate-step" data-estimate-step="5" hidden>
             <header class="estimate-step-head">
               <span class="estimate-step-index">06</span>
-              <h3>Budget comfort zone</h3>
-              <p class="estimate-step-sub">So the recommendation fits reality — nothing is gated on it.</p>
+              <h3>Your budget</h3>
+              <p class="estimate-step-sub">An approximate range helps me recommend the right scope.</p>
             </header>
-            <div class="estimate-options" role="group" aria-label="Budget comfort zone">
+            <div class="estimate-options" role="group" aria-label="Your budget">
               <button class="estimate-option" type="button" data-estimate-key="budget" data-value="Under $1k"><span class="estimate-option-main">Under $1k</span></button>
               <button class="estimate-option" type="button" data-estimate-key="budget" data-value="$1k – $3k"><span class="estimate-option-main">$1k – $3k</span></button>
               <button class="estimate-option" type="button" data-estimate-key="budget" data-value="$3k – $6k"><span class="estimate-option-main">$3k – $6k</span></button>
@@ -2780,7 +2754,7 @@
             <header class="estimate-step-head">
               <span class="estimate-step-index">07</span>
               <h3>Where do I send the reply?</h3>
-              <p class="estimate-step-sub">That's the whole form — the reply comes from the person who builds it.</p>
+              <p class="estimate-step-sub">I will review your choices and reply directly.</p>
             </header>
             <div class="estimate-contact-grid">
               <div class="estimate-field"><label for="estimate-name">Name *</label><input id="estimate-name" name="name" maxlength="120" autocomplete="name" required></div>
@@ -2790,16 +2764,16 @@
               <div class="estimate-field is-wide"><label for="estimate-notes">Anything else? (optional)</label><textarea id="estimate-notes" name="notes" rows="3" maxlength="900"></textarea></div>
             </div>
             <div class="estimate-honeypot" aria-hidden="true"><label for="estimate-hp">Leave this field empty</label><input id="estimate-hp" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
-            <button class="estimate-submit" type="submit">Send it — get your reply direct →</button>
-            <p class="estimate-email-note">No spam, no list, no drip campaign. This goes straight to the builder's inbox and nowhere else.</p>
+            <button class="estimate-submit" type="submit">Send my project details →</button>
+            <p class="estimate-email-note">Your request goes to bndr.labs@gmail.com so I can reply about your project.</p>
             <div class="estimate-status" id="estimate-status" role="status" aria-live="polite"></div>
           </section>
         </section>
 
         <aside class="estimate-quote" aria-live="polite">
-          <span class="estimate-quote-label">Your flat price</span>
+          <span class="estimate-quote-label">Your build estimate</span>
           <strong class="estimate-quote-value" id="estimate-total">Choose a size</strong>
-          <p class="estimate-quote-note">Flat build price. Managed Hosting + Care is $75/month separate — see the FAQ below.</p>
+          <p class="estimate-quote-note">Regular build price plus selected extras. 50% upfront; 50% before launch or handoff. Managed Hosting + Care is separate at $75/month.</p>
         </aside>
       </form>
 
@@ -2813,49 +2787,49 @@
           <details class="website-faq-item">
             <summary>What exactly do I get for the price?</summary>
             <div class="website-faq-answer">
-              <p>A custom website built around your business, not a recycled template with your logo dropped into it. Your package includes the listed number of pages, <strong>mobile-first design</strong>, the listed revision rounds, deployment, and direct communication with me throughout the build. I’m very particular about the work I put my name on. I don’t like handing over something I think you might be even slightly disappointed with.</p>
+              <p>Your package includes the listed number of custom pages, <strong>mobile-first design</strong>, the listed revision rounds, deployment and direct communication with me throughout the build. We agree on the scope before work starts, and you review the site before launch.</p>
             </div>
           </details>
 
           <details class="website-faq-item">
             <summary>How does payment work?</summary>
             <div class="website-faq-answer">
-              <p>The first three promotional spots are paid in full at checkout at the advertised discounted price. After those are gone, regular-price projects are <strong>50% upfront to start and 50% before launch or handoff</strong>. Managed Hosting + Care is separate at <strong>$75/month</strong>.</p>
+              <p>Each package has three introductory places, paid <strong>in full at the available discounted price</strong>. Each place is used once, and a completed purchase advances only that package. After those places are taken, the regular total is <strong>$1,500 for one page, $3,000 for three pages or $4,500 for five pages</strong>, with <strong>50% upfront and 50% before launch or handoff</strong>. Managed Hosting + Care is separate at <strong>$75/month</strong>.</p>
             </div>
           </details>
 
           <details class="website-faq-item">
             <summary>How long does a website take?</summary>
             <div class="website-faq-answer">
-              <p>Website timelines vary based on what you need and how clearly you already know what you want. I aim for <strong>1–3 days for one-page sites</strong>, <strong>1–2 weeks for three-page sites, usually closer to one week</strong>, and <strong>larger builds within about a month</strong>. If you know exactly what you want and we nail it quickly, it can be finished sooner.</p>
+              <p>I aim for <strong>1–3 days for one-page sites</strong>, <strong>1–2 weeks for three-page sites, usually closer to one week</strong>, and <strong>larger builds within about a month</strong>. Timing depends on the scope, available content and how quickly we agree on the direction. A clear brief and quick feedback can shorten the build.</p>
             </div>
           </details>
 
           <details class="website-faq-item">
             <summary>What counts as a revision?</summary>
             <div class="website-faq-answer">
-              <p>A revision is a reasonable round of changes to the design or content already included in the project. New pages, new features, major changes in direction, or work outside the original scope are additional work. I’ll always discuss that with you first. Additional work is <strong>$75/hour</strong> and is only billed after the work and hours are approved.</p>
+              <p>A revision is a round of changes to the design or content within the agreed scope. New pages, new features, a major change of direction or other work outside that scope is quoted separately. Additional work is <strong>$75/hour</strong>; you approve the work and hours before it is billed.</p>
             </div>
           </details>
 
           <details class="website-faq-item">
             <summary>Who owns the website when it’s finished?</summary>
             <div class="website-faq-answer">
-              <p>Once the project is paid in full, <strong>the finished website and code are yours</strong>, along with your content, domain, and business accounts. You’re not locked into BNDR. If you want the site handed off for hosting somewhere else, it can be.</p>
+              <p>Once the project is paid in full, <strong>the finished website and code are yours</strong>. Your content, domain and business accounts remain yours too. You can keep hosting with BNDR or have the site handed off to another host.</p>
             </div>
           </details>
 
           <details class="website-faq-item">
             <summary>What happens after launch?</summary>
             <div class="website-faq-answer">
-              <p>Managed Hosting + Care is <strong>$75/month</strong> and covers hosting, SSL, deployment, uptime monitoring, basic maintenance, and keeping the site live. If you don’t want managed hosting, the site can be handed off elsewhere. <strong>The code is yours.</strong></p>
+              <p>Managed Hosting + Care is <strong>$75/month</strong> for hosting, SSL, deployment, uptime monitoring and basic maintenance to keep the site live. It is separate from the build. If you prefer another host, I can hand over the finished site. <strong>The code is yours.</strong></p>
             </div>
           </details>
 
           <details class="website-faq-item">
             <summary>Will my site be mobile-friendly, fast, accessible, and set up well for SEO?</summary>
             <div class="website-faq-answer">
-              <p>Yes. <strong>Every design I build is mobile-first.</strong> I also build in a strong SEO foundation: clean code, proper heading hierarchy, keywords, page titles, meta descriptions, Open Graph tags, semantic structure, crawlable content, responsive design, performance work, and accessibility fundamentals. Because the sites are coded, I can also make them more interactive and engaging where it makes sense. That should give you a stronger overall SEO foundation while also making the site better for the people actually using it.</p>
+              <p>Every site is designed for mobile first. The build includes <strong>clear headings, page titles, meta descriptions, relevant keywords, Open Graph tags, semantic HTML and crawlable content</strong>, alongside responsive layouts, performance work and accessibility fundamentals. Interactive features are added where they help customers use the site.</p>
             </div>
           </details>
         </div>
@@ -3504,212 +3478,8 @@
 
 
   
-  <script>
-  (() => {
-    "use strict";
-    if (window.__BNDR_QUICK_PICK__) return;
-    window.__BNDR_QUICK_PICK__ = true;
-
-    const OWNER_EMAIL = "bndr.labs@gmail.com";
-    const CURRENT_PROMO_CUSTOMER = 1;
-    const form = document.getElementById("quick-pick-contact-form");
-    const cards = Array.from(document.querySelectorAll(".quick-plan"));
-    const summaryName = document.getElementById("quick-pick-summary-name");
-    const summaryDetail = document.getElementById("quick-pick-summary-detail");
-    const statusNode = document.getElementById("quick-contact-status");
-    if (!form || !cards.length) return;
-
-    const startedAt = Date.now();
-    let selected = null;
-    let sending = false;
-
-    const money = value => "$" + Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
-
-    function selectCard(card) {
-      const isRegularFallback = CURRENT_PROMO_CUSTOMER === 0;
-      const stripeSlot = `c${CURRENT_PROMO_CUSTOMER}`;
-      selected = {
-        name: card.dataset.quickPlan,
-        pages: Number(card.dataset.pages),
-        revisions: Number(card.dataset.revisions),
-        regular: Number(card.dataset.regular),
-        charge: isRegularFallback
-          ? Number(card.dataset.deposit)
-          : Number(card.dataset["c" + CURRENT_PROMO_CUSTOMER]),
-        paymentType: isRegularFallback ? "50% project deposit" : `Customer ${CURRENT_PROMO_CUSTOMER} promotional payment`,
-        stripeProductId: card.dataset.stripeProduct,
-        stripePriceId: isRegularFallback
-          ? ""
-          : card.dataset[`stripe${stripeSlot.charAt(0).toUpperCase() + stripeSlot.slice(1)}Price`],
-        stripeCheckoutUrl: isRegularFallback
-          ? card.dataset.stripeDepositLink
-          : card.dataset[`stripe${stripeSlot.charAt(0).toUpperCase() + stripeSlot.slice(1)}Link`]
-      };
-
-      cards.forEach(item => {
-        const active = item === card;
-        item.classList.toggle("is-selected", active);
-        const button = item.querySelector("[data-quick-select]");
-        button.setAttribute("aria-pressed", String(active));
-        button.textContent = active ? "Selected ✓" : `Select ${item.dataset.quickPlan} →`;
-      });
-
-      summaryName.textContent = selected.name;
-      summaryDetail.textContent =
-        `${selected.pages} page${selected.pages === 1 ? "" : "s"} · ${selected.revisions} included revision${selected.revisions === 1 ? "" : "s"} · ` +
-        (CURRENT_PROMO_CUSTOMER === 0
-          ? `Regular ${money(selected.regular)} total · 50% deposit ${money(selected.charge)} · remaining 50% due before launch/handoff · Managed Hosting + Care $75/month`
-          : `Customer ${CURRENT_PROMO_CUSTOMER}: ${money(selected.charge)} · Regular ${money(selected.regular)} · Managed Hosting + Care $75/month`);
-
-      form.classList.add("is-open");
-      form.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      requestAnimationFrame(() => form.querySelector("#quick-name")?.focus({ preventScroll: true }));
-    }
-
-    cards.forEach(card => {
-      card.querySelector("[data-quick-select]").addEventListener("click", () => selectCard(card));
-    });
-
-    function setStatus(message, state = "") {
-      statusNode.dataset.state = state;
-      statusNode.innerHTML = message;
-    }
-
-    form.addEventListener("submit", event => {
-      event.preventDefault();
-      if (sending) return;
-
-      if (!selected) {
-        setStatus("Choose BNDR Lander, BNDR Standard, or BNDR Expanded first.");
-        return;
-      }
-
-      const name = form.querySelector("#quick-name").value.trim();
-      const email = form.querySelector("#quick-email").value.trim();
-
-      if (form.querySelector("#quick-hp").value) {
-        setStatus("<strong>Got it — it's in my inbox.</strong>", "ok");
-        return;
-      }
-
-      if (Date.now() - startedAt < 4000) {
-        setStatus("That was superhumanly fast — take one more look, then hit send again.");
-        return;
-      }
-
-      if (!name) {
-        setStatus("Add your name, then hit send.");
-        form.querySelector("#quick-name").focus();
-        return;
-      }
-
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-        setStatus("Double-check the email address, then hit send.");
-        form.querySelector("#quick-email").focus();
-        return;
-      }
-
-      const business = form.querySelector("#quick-business").value.trim();
-      const phone = form.querySelector("#quick-phone").value.trim();
-      const notes = form.querySelector("#quick-notes").value.trim();
-      const summary = [
-        `Quick-pick plan: ${selected.name}`,
-        `Pages: ${selected.pages}`,
-        `Included revisions: ${selected.revisions}`,
-        `Regular total: ${money(selected.regular)}`,
-        `Payment type: ${selected.paymentType}`,
-        `Amount due now: ${money(selected.charge)}`,
-        ...(CURRENT_PROMO_CUSTOMER === 0 ? [`Remaining balance: ${money(selected.regular - selected.charge)} due before launch or handoff`] : []),
-        `Managed Hosting + Care: $75/month`,
-        `Additional work outside included scope: $75/hour`,
-        `Business: ${business || "—"}`,
-        `Name: ${name}`,
-        `Email: ${email}`,
-        `Phone: ${phone || "—"}`,
-        `Notes: ${notes || "—"}`
-      ].join("\n");
-
-      const payload = {
-        _subject: `[BNDR QUICK-PICK] ${selected.name} — ${selected.paymentType} — ${money(selected.charge)}`,
-        _template: "table",
-        _captcha: "false",
-        name,
-        business,
-        email,
-        phone,
-        plan: selected.name,
-        pages: String(selected.pages),
-        included_revisions: String(selected.revisions),
-        regular_total: money(selected.regular),
-        payment_type: selected.paymentType,
-        amount_due_now: money(selected.charge),
-        promotional_customer: CURRENT_PROMO_CUSTOMER === 0 ? "none — regular 50% deposit" : String(CURRENT_PROMO_CUSTOMER),
-        remaining_balance: CURRENT_PROMO_CUSTOMER === 0 ? money(selected.regular - selected.charge) : "—",
-        managed_hosting_care: "$75/month",
-        additional_work: "$75/hour",
-        stripe_product_id: selected.stripeProductId,
-        stripe_price_id: selected.stripePriceId,
-        stripe_checkout_url: selected.stripeCheckoutUrl,
-        notes,
-        page: location.href.split("?")[0]
-      };
-
-      const submit = form.querySelector(".quick-contact-submit");
-
-      function restore() {
-        sending = false;
-        submit.disabled = false;
-        submit.textContent = "Claim this plan →";
-      }
-
-      function fallback() {
-        const mail =
-          `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(payload._subject)}` +
-          `&body=${encodeURIComponent(summary)}`;
-        setStatus(`The form service didn't answer, but nothing is lost — <a href="${mail}">send the same request by email in one tap →</a>`);
-        restore();
-      }
-
-      sending = true;
-      submit.disabled = true;
-      submit.textContent = "Sending…";
-      setStatus("");
-
-      try {
-        fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Accept": "application/json" },
-          body: JSON.stringify(payload)
-        })
-          .then(response => {
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json().catch(() => ({}));
-          })
-          .then(() => {
-            setStatus("<strong>Sent.</strong> Opening secure Stripe checkout…", "ok");
-            form.querySelectorAll("input,textarea,button").forEach(node => { node.disabled = true; });
-            if (window.gtag) {
-              try {
-                window.gtag("event", "generate_lead", {
-                  currency: "USD",
-                  value: selected.charge
-                });
-              } catch (_) {}
-            }
-            if (!/^https:\/\/buy\.stripe\.com\//.test(selected.stripeCheckoutUrl || "")) {
-              throw new Error("Missing Stripe checkout URL");
-            }
-            window.setTimeout(() => {
-              window.location.assign(selected.stripeCheckoutUrl);
-            }, 300);
-          })
-          .catch(fallback);
-      } catch (_) {
-        fallback();
-      }
-    });
-  })();
-  </script>
+  <script type="application/json" id="website-pricing-config">{"revision":"2026-09-15","currency":"usd","discountPercentages":[70,60,40],"depositPercentage":50,"hostingMonthly":75,"additionalWorkHourly":75,"packages":[{"id":"lander","name":"BNDR Lander","pages":1,"revisions":1,"regular":1500,"sale":[450,600,900],"deposit":750,"stripeProduct":"prod_VARDTC10BAGL7I","description":"One focused page for your offer, your work and a clear way to get in touch.","legacySaleLinks":[{"tier":1,"url":"https://buy.stripe.com/aFacN560340ackkgze0oM0y","amount":750},{"tier":2,"url":"https://buy.stripe.com/6oU6oH4VZ54e8445UA0oM0z","amount":1000},{"tier":3,"url":"https://buy.stripe.com/00wbJ188bgMWesser60oM0A","amount":1500}]},{"id":"standard","name":"BNDR Standard","pages":3,"revisions":2,"regular":3000,"sale":[900,1200,1800],"deposit":1500,"stripeProduct":"prod_VAREbYCe0EnD4s","description":"Room to explain your services, show your work and help customers choose you.","legacySaleLinks":[{"tier":1,"url":"https://buy.stripe.com/3cI6oH3RVgMW1FGgze0oM0C","amount":1500},{"tier":2,"url":"https://buy.stripe.com/cNi28rdsv40adoo82I0oM0D","amount":2000},{"tier":3,"url":"https://buy.stripe.com/aFa6oHfADeEO3NOer60oM0E","amount":3000}]},{"id":"expanded","name":"BNDR Expanded","pages":5,"revisions":3,"regular":4500,"sale":[1350,1800,2700],"deposit":2250,"stripeProduct":"prod_VAREvmRTYNRwQi","description":"Separate pages for the services and details your customers need before they enquire.","legacySaleLinks":[{"tier":1,"url":"https://buy.stripe.com/bJefZh9cf2W61FGgze0oM0G","amount":2250},{"tier":2,"url":"https://buy.stripe.com/4gM28rdsvfIS7003Ms0oM0H","amount":3000},{"tier":3,"url":"https://buy.stripe.com/dRm5kD7471S2doo5UA0oM0I","amount":4500}]}]}</script>
+  <script src="/website.js"></script>
 
 <script>
   (() => {
@@ -3746,6 +3516,9 @@
 
     function updateQuote() {
       totalNode.textContent = pick.size ? money(total()) : "Choose a size";
+      let policy = form.querySelector(".website-quote-policy");
+      if (!policy) { policy = document.createElement("span"); policy.className = "website-quote-policy"; totalNode.after(policy); }
+      policy.textContent = pick.size ? `${money(total() / 2)} upfront · ${money(total() / 2)} before launch or handoff` : "";
     }
 
     function showStep(index, { focus = true } = {}) {
@@ -3807,8 +3580,10 @@
         "Size: " + (pick.size ? `${pick.size.label} (${money(pick.size.price)})` : "—"),
         "Add-ons: " + (pick.addons.length ? pick.addons.map(item => `${item.label} (+${money(item.price)})`).join(", ") : "none"),
         "Timeline: " + (pick.timeline || "—"),
-        "Budget comfort: " + (pick.budget || "—"),
-        "Estimate shown: " + (pick.size ? money(total()) : "not locked")
+        "Budget: " + (pick.budget || "—"),
+        "Build estimate: " + (pick.size ? money(total()) : "Size not selected"),
+        "Payment: " + (pick.size ? `${money(total() / 2)} upfront; ${money(total() / 2)} before launch or handoff` : "50% upfront; 50% before launch or handoff"),
+        "Managed Hosting + Care: $75/month, separate"
       ].join("\n");
     }
 
@@ -3825,20 +3600,20 @@
       const email = form.querySelector("#estimate-email").value.trim();
 
       if (form.querySelector("#estimate-hp").value) {
-        setStatus("<strong>Got it — it's in my inbox.</strong> You'll hear back from me directly, usually same day.", "ok");
+        setStatus("<strong>Your request has been received.</strong>", "ok");
         return;
       }
       if (Date.now() - startedAt < 4000) {
-        setStatus("That was superhumanly fast — take one more look, then hit send again.");
+        setStatus("Please review your details, then send your request.");
         return;
       }
       if (!name) {
-        setStatus("Your name is the one thing I actually need — add it and hit send.");
+        setStatus("Please enter your name.");
         form.querySelector("#estimate-name").focus();
         return;
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-        setStatus("That email doesn't look deliverable — double-check it and hit send.");
+        setStatus("Please check your email address.");
         form.querySelector("#estimate-email").focus();
         return;
       }
@@ -3860,12 +3635,12 @@
       const restore = () => {
         sending = false;
         submit.disabled = false;
-        submit.textContent = "Send it — get your reply direct →";
+        submit.textContent = "Send my project details →";
       };
 
       const fallback = () => {
         const mail = `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(payload._subject)}&body=${encodeURIComponent(summaryText() + `\n\nName: ${name}\nBusiness: ${payload.business}\nEmail: ${email}\nPhone: ${payload.phone}\nNotes: ${payload.notes}`)}`;
-        setStatus(`The form service didn't answer, but nothing is lost — <a href="${mail}">send the same details by email in one tap →</a>`);
+        setStatus(`The form could not be sent.  <a href="${mail}">Send your project details by email →</a>`);
         restore();
       };
 
@@ -3878,14 +3653,16 @@
         fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "Accept": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(15000)
         })
           .then(response => {
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json().catch(() => ({}));
+            return response.json();
           })
-          .then(() => {
-            setStatus("<strong>Got it — it's in my inbox.</strong> You'll hear back from me directly, usually same day. No secretary, no queue, no drip campaign.", "ok");
+          .then(result => {
+            if (![true, "true"].includes(result.success)) throw new Error("Delivery was not confirmed.");
+            setStatus("<strong>Your request has been sent.</strong> I will review your details and reply directly.", "ok");
             form.querySelectorAll("input,textarea,button").forEach(node => { node.disabled = true; });
             if (window.gtag) {
               try { window.gtag("event", "generate_lead", { currency: "USD", value: pick.size ? total() : 0 }); } catch (_) {}
