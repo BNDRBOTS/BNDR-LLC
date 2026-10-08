@@ -3591,9 +3591,11 @@
       filament.rotation.y += 0.0005 * frameScale;
     };
 
+    let pointerActiveTarget = 0;
     const updatePointer = (clientX, clientY) => {
       const x = (clientX / innerWidth) * 2 - 1;
       const y = -((clientY / innerHeight) * 2 - 1);
+      pointerActiveTarget = 1;
       uniforms.uMouseTarget.value.set(x, y);
       filamentMouse.set(x, y);
     };
@@ -3602,11 +3604,18 @@
     addEventListener('touchmove', e => {
       if (e.touches[0]) updatePointer(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: true });
-    document.addEventListener('mouseleave', () => { filamentMouse.set(-999, -999); });
+    document.addEventListener('mouseleave', () => {
+      pointerActiveTarget = 0;
+      filamentMouse.set(-999, -999);
+    });
 
     const started = performance.now();
     let previousTick = started;
     let lastFilamentTick = started - FILAMENT.frameInterval;
+    let morphFrom = 0;
+    let morphTarget = 0;
+    let morphStarted = started;
+    let pageTarget = 0;
     let homeOpacityTarget = 1;
     let filamentOpacityTarget = 0;
     let filamentViewActive = false;
@@ -3616,15 +3625,27 @@
     const tick = now => {
       /* Home keeps its established time base and pointer interpolation unchanged. */
       uniforms.uTime.value = (now - started) / 1000;
+      const elapsed = Math.max(0, (now - previousTick) / 1000);
+      const dt = Math.min(0.05, elapsed);
+      const morphDt = Math.min(0.1, elapsed);
+      previousTick = now;
+
+      const response = 1 - Math.exp(-morphDt * Math.log(10) / 0.18);
+      const progress = reduceMotion ? 1 : Math.min(1, (now - morphStarted) / 800);
+      uniforms.uMorph.value = morphFrom + (morphTarget - morphFrom) * progress * progress * (3 - 2 * progress);
+      uniforms.uPage.value = reduceMotion ? pageTarget : uniforms.uPage.value + (pageTarget - uniforms.uPage.value) * response;
+      uniforms.uFoldTime.value = reduceMotion ? 0 : uniforms.uTime.value;
+      if (!reduceMotion) {
+        uniforms.uFoldPointer.value.lerp(uniforms.uMouseTarget.value, response);
+        uniforms.uPointerActive.value += (pointerActiveTarget - uniforms.uPointerActive.value) * response;
+      }
+
       uniforms.uMouse.value.lerp(
         uniforms.uMouseTarget.value,
         reduceMotion ? 0.018 : 0.05
       );
 
-      const dt = Math.min(0.05, Math.max(0, (now - previousTick) / 1000));
-      previousTick = now;
       let filamentUpdated = false;
-
       if (reduceMotion) {
         uniforms.uHomeOpacity.value = homeOpacityTarget;
         filamentMaterial.opacity = filamentOpacityTarget;
@@ -3670,9 +3691,14 @@
       if (inner && !filamentViewActive && filamentMaterial.opacity <= 0.0001) {
         placeFilament(reduceMotion ? 0 : performance.now() * 0.001);
       }
+      morphFrom = uniforms.uMorph.value;
+      morphTarget = inner ? 1 : 0;
+      morphStarted = performance.now();
+      pageTarget = name === 'builds' ? 1 : 0;
       homeOpacityTarget = inner ? 0 : 1;
       filamentOpacityTarget = inner ? FILAMENT.opacity : 0;
       filamentViewActive = inner;
+      pointerActiveTarget = 0;
       fxDirty = true;
     };
     })();
