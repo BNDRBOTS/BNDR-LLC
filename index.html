@@ -977,7 +977,7 @@
       line-height: 1.35;
     }
 
-    #website .quick-sequence {
+    #website .quick-payment-breakdown {
       display: grid;
       gap: 7px;
       margin: 0 0 var(--s5);
@@ -987,7 +987,7 @@
       background: rgb(var(--rgb-white) / .015);
     }
 
-    #website .quick-sequence-row {
+    #website .quick-payment-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: var(--s3);
@@ -996,22 +996,17 @@
       line-height: 1.35;
     }
 
-    #website .quick-sequence-row strong {
+    #website .quick-payment-row strong {
       color: var(--text-nav);
       font-weight: var(--weight-medium);
-    }
-
-    #website .quick-sequence-row.is-current {
-      color: var(--text-strong);
-    }
-
-    #website .quick-sequence-row.is-current strong {
-      color: var(--text-strong);
     }
 
     #website .quick-plan-cta {
       position: relative;
       z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
       min-height: 50px;
       margin-top: auto;
@@ -1024,6 +1019,9 @@
       cursor: pointer;
       font-size: .78rem;
       font-weight: var(--weight-semibold);
+      line-height: 1.3;
+      text-align: center;
+      text-decoration: none;
       box-shadow:
         inset 0 1px 0 rgb(var(--rgb-white) / .85),
         0 11px 26px rgb(var(--rgb-black) / .30);
@@ -1047,6 +1045,34 @@
       box-shadow:
         inset 0 3px 6px rgb(var(--rgb-black) / .20),
         0 7px 16px rgb(var(--rgb-black) / .25);
+    }
+
+    #website .quick-plan-detail-cta,
+    #website .quick-balance-link {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: 100%;
+      margin: 10px 0 0;
+      padding: 4px 0;
+      border: 0;
+      background: transparent;
+      color: var(--text-soft);
+      font: inherit;
+      font-size: .66rem;
+      line-height: 1.4;
+      text-align: center;
+      text-decoration: none;
+      text-underline-offset: 4px;
+    }
+
+    #website .quick-plan-detail-cta { cursor: pointer; }
+    #website .quick-plan-detail-cta:hover,
+    #website .quick-plan-detail-cta:focus-visible,
+    #website .quick-balance-link:hover,
+    #website .quick-balance-link:focus-visible {
+      color: #dfc7af;
+      text-decoration: underline;
     }
 
     #website .quick-terms {
@@ -2188,15 +2214,13 @@
     #website .quick-plan h3 { margin: 0 0 12px; color: var(--text-strong); font-size: clamp(1.5rem, 2.3vw, 1.95rem); font-weight: var(--weight-book); letter-spacing: -.045em; line-height: 1.1; }
     #website .quick-plan-spec { min-height: 3em; margin-bottom: 28px; line-height: 1.55; }
 
-    /* Price hierarchy + pricing progression (plain lines; consumed introductory tiers are removed) */
+    /* Package price, due-now deposit and balance stay together without customer-order sequencing. */
     #website .quick-price { gap: 9px; margin-bottom: 24px; }
     #website .quick-price-current { font-size: clamp(2.7rem, 4.2vw, 3.6rem); color: #f4e9de; font-variant-numeric: tabular-nums; text-shadow: 0 2px 24px rgb(222 178 131 / .09); }
     #website .quick-price-caption { min-height: 2.7em; max-width: 31ch; line-height: 1.45; }
-    #website .quick-sequence { padding: 0; gap: 11px; border: 0; background: transparent; border-radius: 0; margin-bottom: 26px; }
-    #website .quick-sequence-row { font-size: .72rem; font-weight: var(--weight-light); color: var(--text-soft); }
-    #website .quick-sequence-row strong { font-weight: var(--weight-regular); }
-    #website .quick-sequence-row.is-current, #website .quick-sequence-row.is-current strong { color: #e6c5a7; }
-    #website .quick-sequence-row.is-consumed, #website .quick-sequence-row[data-consumed="true"] { display: none; }
+    #website .quick-payment-breakdown { padding: 0; gap: 11px; border: 0; background: transparent; border-radius: 0; margin-bottom: 26px; }
+    #website .quick-payment-row { font-size: .72rem; font-weight: var(--weight-light); color: var(--text-soft); }
+    #website .quick-payment-row strong { font-weight: var(--weight-regular); }
 
     /* Primary buttons: package CTA, contact submit, estimate submit, next step and Stripe checkout (.website-checkout) */
     #website .quick-plan-cta,
@@ -2338,6 +2362,7 @@
       #website .quick-plan-spec { min-height: 0; }
       #website .quick-price-caption { min-height: 0; max-width: none; }
       #website .quick-plan-cta,
+      #website .quick-plan-detail-cta,
       #website .quick-contact-submit,
       #website .estimate-submit,
       #website .estimate-control[data-estimate-next],
@@ -2476,7 +2501,7 @@
           "name": "How does payment work?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "The first three promotional spots are paid in full at checkout at the advertised discounted price. After those are gone, regular-price projects are 50% upfront to start and 50% before launch or handoff. Managed Hosting + Care is separate at $75/month."
+            "text": "Website projects are split into two payments: a 50% deposit at checkout and the remaining 50% before launch or handoff. Managed Hosting + Care is separate at $75/month."
           }
         },
         {
@@ -2795,8 +2820,8 @@
           <p class="quick-pick-lead">Three fixed-scope options for straightforward builds. If your project needs something outside these packages, the full custom calculator stays right below them.</p>
         </header>
 
-        <div class="quick-pick-grid" role="group" aria-label="Quick-pick website plans">
-          <article class="quick-plan" data-quick-plan="BNDR Lander" data-pages="1" data-revisions="1" data-regular="2500" data-c1="750" data-c2="1000" data-c3="1500"
+        <div class="quick-pick-grid" role="group" aria-label="Fixed-scope website plans">
+          <article class="quick-plan" data-quick-plan="BNDR Lander" data-pages="1" data-revisions="1" data-total="1500" data-deposit="750" data-balance="750"
             data-stripe-product="prod_VARDTC10BAGL7I"
             data-stripe-c1-price="price_1UA6MAGuY1oGAyYSYTGCH0xf"
             data-stripe-c1-link="https://buy.stripe.com/aFacN560340ackkgze0oM0y"
@@ -2804,8 +2829,8 @@
             data-stripe-c2-link="https://buy.stripe.com/6oU6oH4VZ54e8445UA0oM0z"
             data-stripe-c3-price="price_1UA6MLGuY1oGAyYSh6wQSvxR"
             data-stripe-c3-link="https://buy.stripe.com/00wbJ188bgMWesser60oM0A"
-            data-deposit="1250"
-            data-stripe-deposit-link="https://buy.stripe.com/4gM28rgEHcwGgAAdn20oM0M">
+            data-stripe-deposit-link="https://buy.stripe.com/dRm3cv6038gqckkgze0oM1h"
+            data-stripe-balance-link="https://buy.stripe.com/6oUcN5cor40afwwfva0oM1k">
             <div class="quick-plan-top">
               <span class="quick-plan-index">01</span>
               <span class="quick-plan-badge">1 page · 1 revision</span>
@@ -2813,20 +2838,20 @@
             <h3>BNDR Lander</h3>
             <p class="quick-plan-spec">1 page · Included revisions: 1</p>
             <div class="quick-price">
-              <span class="quick-price-regular">Regular <s>$2,500</s></span>
-              <strong class="quick-price-current">$750</strong>
-              <span class="quick-price-caption">Customer 1 · 70% off</span>
+              <span class="quick-price-regular">Project total</span>
+              <strong class="quick-price-current">$1,500</strong>
+              <span class="quick-price-caption">50% deposit at checkout · $750</span>
             </div>
-            <div class="quick-sequence" aria-label="BNDR Lander promotional sequence">
-              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$750</strong></div>
-              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$1,000</strong></div>
-              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$1,500</strong></div>
-              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$1,250</strong></div>
+            <div class="quick-payment-breakdown" aria-label="BNDR Lander payment breakdown">
+              <div class="quick-payment-row"><span>Deposit at checkout · 50%</span><strong>$750</strong></div>
+              <div class="quick-payment-row"><span>Balance before launch/handoff · 50%</span><strong>$750</strong></div>
             </div>
-            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Lander →</button>
+            <a class="quick-plan-cta" data-quick-checkout href="https://buy.stripe.com/dRm3cv6038gqckkgze0oM1h" target="_blank" rel="noopener noreferrer" aria-label="Pay the $750 BNDR Lander deposit with Stripe">Pay 50% deposit · $750 →</a>
+            <button class="quick-plan-detail-cta" type="button" data-quick-select aria-pressed="false">Add contact details (optional) →</button>
+            <a class="quick-balance-link" href="https://buy.stripe.com/6oUcN5cor40afwwfva0oM1k" target="_blank" rel="noopener noreferrer">Already paid the deposit? Pay Lander balance →</a>
           </article>
 
-          <article class="quick-plan" data-quick-plan="BNDR Standard" data-pages="3" data-revisions="2" data-regular="5000" data-c1="1500" data-c2="2000" data-c3="3000"
+          <article class="quick-plan" data-quick-plan="BNDR Standard" data-pages="3" data-revisions="2" data-total="3000" data-deposit="1500" data-balance="1500"
             data-stripe-product="prod_VAREbYCe0EnD4s"
             data-stripe-c1-price="price_1UA6MRGuY1oGAyYS3JwOmg9G"
             data-stripe-c1-link="https://buy.stripe.com/3cI6oH3RVgMW1FGgze0oM0C"
@@ -2834,8 +2859,8 @@
             data-stripe-c2-link="https://buy.stripe.com/cNi28rdsv40adoo82I0oM0D"
             data-stripe-c3-price="price_1UA6MeGuY1oGAyYS5egsbpqp"
             data-stripe-c3-link="https://buy.stripe.com/aFa6oHfADeEO3NOer60oM0E"
-            data-deposit="2500"
-            data-stripe-deposit-link="https://buy.stripe.com/5kQ28r2NR1S2gAA4Qw0oM0O">
+            data-stripe-deposit-link="https://buy.stripe.com/00w4gzagj9kuacc5UA0oM1i"
+            data-stripe-balance-link="https://buy.stripe.com/fZu6oHcor7cm988beU0oM1l">
             <div class="quick-plan-top">
               <span class="quick-plan-index">02</span>
               <span class="quick-plan-badge">3 pages · 2 revisions</span>
@@ -2843,20 +2868,20 @@
             <h3>BNDR Standard</h3>
             <p class="quick-plan-spec">3 pages · Included revisions: 2</p>
             <div class="quick-price">
-              <span class="quick-price-regular">Regular <s>$5,000</s></span>
-              <strong class="quick-price-current">$1,500</strong>
-              <span class="quick-price-caption">Customer 1 · 70% off</span>
+              <span class="quick-price-regular">Project total</span>
+              <strong class="quick-price-current">$3,000</strong>
+              <span class="quick-price-caption">50% deposit at checkout · $1,500</span>
             </div>
-            <div class="quick-sequence" aria-label="BNDR Standard promotional sequence">
-              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$1,500</strong></div>
-              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$2,000</strong></div>
-              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$3,000</strong></div>
-              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$2,500</strong></div>
+            <div class="quick-payment-breakdown" aria-label="BNDR Standard payment breakdown">
+              <div class="quick-payment-row"><span>Deposit at checkout · 50%</span><strong>$1,500</strong></div>
+              <div class="quick-payment-row"><span>Balance before launch/handoff · 50%</span><strong>$1,500</strong></div>
             </div>
-            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Standard →</button>
+            <a class="quick-plan-cta" data-quick-checkout href="https://buy.stripe.com/00w4gzagj9kuacc5UA0oM1i" target="_blank" rel="noopener noreferrer" aria-label="Pay the $1,500 BNDR Standard deposit with Stripe">Pay 50% deposit · $1,500 →</a>
+            <button class="quick-plan-detail-cta" type="button" data-quick-select aria-pressed="false">Add contact details (optional) →</button>
+            <a class="quick-balance-link" href="https://buy.stripe.com/fZu6oHcor7cm988beU0oM1l" target="_blank" rel="noopener noreferrer">Already paid the deposit? Pay Standard balance →</a>
           </article>
 
-          <article class="quick-plan" data-quick-plan="BNDR Expanded" data-pages="5" data-revisions="3" data-regular="7500" data-c1="2250" data-c2="3000" data-c3="4500"
+          <article class="quick-plan" data-quick-plan="BNDR Expanded" data-pages="5" data-revisions="3" data-total="4500" data-deposit="2250" data-balance="2250"
             data-stripe-product="prod_VAREvmRTYNRwQi"
             data-stripe-c1-price="price_1UA6MkGuY1oGAyYSrSMJ4EJu"
             data-stripe-c1-link="https://buy.stripe.com/bJefZh9cf2W61FGgze0oM0G"
@@ -2864,8 +2889,8 @@
             data-stripe-c2-link="https://buy.stripe.com/4gM28rdsvfIS7003Ms0oM0H"
             data-stripe-c3-price="price_1UA6N2GuY1oGAyYS6kTB4ip3"
             data-stripe-c3-link="https://buy.stripe.com/dRm5kD7471S2doo5UA0oM0I"
-            data-deposit="3750"
-            data-stripe-deposit-link="https://buy.stripe.com/00w28r1JN68i4RS82I0oM0Q">
+            data-stripe-deposit-link="https://buy.stripe.com/cNibJ12NR7cm4RSciY0oM1j"
+            data-stripe-balance-link="https://buy.stripe.com/bJe4gzagj2W60BC82I0oM1m">
             <div class="quick-plan-top">
               <span class="quick-plan-index">03</span>
               <span class="quick-plan-badge">5 pages · 3 revisions</span>
@@ -2873,17 +2898,17 @@
             <h3>BNDR Expanded</h3>
             <p class="quick-plan-spec">5 pages · Included revisions: 3</p>
             <div class="quick-price">
-              <span class="quick-price-regular">Regular <s>$7,500</s></span>
-              <strong class="quick-price-current">$2,250</strong>
-              <span class="quick-price-caption">Customer 1 · 70% off</span>
+              <span class="quick-price-regular">Project total</span>
+              <strong class="quick-price-current">$4,500</strong>
+              <span class="quick-price-caption">50% deposit at checkout · $2,250</span>
             </div>
-            <div class="quick-sequence" aria-label="BNDR Expanded promotional sequence">
-              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$2,250</strong></div>
-              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$3,000</strong></div>
-              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$4,500</strong></div>
-              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$3,750</strong></div>
+            <div class="quick-payment-breakdown" aria-label="BNDR Expanded payment breakdown">
+              <div class="quick-payment-row"><span>Deposit at checkout · 50%</span><strong>$2,250</strong></div>
+              <div class="quick-payment-row"><span>Balance before launch/handoff · 50%</span><strong>$2,250</strong></div>
             </div>
-            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Expanded →</button>
+            <a class="quick-plan-cta" data-quick-checkout href="https://buy.stripe.com/cNibJ12NR7cm4RSciY0oM1j" target="_blank" rel="noopener noreferrer" aria-label="Pay the $2,250 BNDR Expanded deposit with Stripe">Pay 50% deposit · $2,250 →</a>
+            <button class="quick-plan-detail-cta" type="button" data-quick-select aria-pressed="false">Add contact details (optional) →</button>
+            <a class="quick-balance-link" href="https://buy.stripe.com/bJe4gzagj2W60BC82I0oM1m" target="_blank" rel="noopener noreferrer">Already paid the deposit? Pay Expanded balance →</a>
           </article>
         </div>
 
@@ -2905,51 +2930,6 @@
           </article>
         </section>
 
-        <section class="quick-sale-copy" aria-labelledby="sale-copy-title">
-          <header class="quick-sale-copy-head">
-            <section>
-              <p class="quick-sale-copy-kicker">Launch Pricing</p>
-              <h3 id="sale-copy-title">Three spots.<br>Then back to normal.</h3>
-            </section>
-            <p class="quick-sale-copy-lead">I’m opening three custom website spots at stupid-low prices to get some fresh builds out the door.</p>
-          </header>
-
-          <div class="quick-sale-copy-grid">
-            <article class="quick-sale-copy-group">
-              <h4>Regular pricing</h4>
-              <div class="quick-sale-copy-rows">
-                <div class="quick-sale-copy-row"><span>One-page custom site</span><strong>$2,500</strong></div>
-                <div class="quick-sale-copy-row"><span>Three-page custom site</span><strong>$5,000</strong></div>
-                <div class="quick-sale-copy-row"><span>Five-page custom site</span><strong>$7,500</strong></div>
-              </div>
-              <p class="quick-sale-copy-note">50% upfront · 50% before launch or handoff.</p>
-            </article>
-            <article class="quick-sale-copy-group">
-              <h4>First three customers</h4>
-              <div class="quick-sale-copy-rows">
-                <div class="quick-sale-copy-row"><span>First customer</span><strong>70% off</strong></div>
-                <div class="quick-sale-copy-row"><span>Second customer</span><strong>60% off</strong></div>
-                <div class="quick-sale-copy-row"><span>Third customer</span><strong>40% off</strong></div>
-              </div>
-              <p class="quick-sale-copy-note">On every package.</p>
-            </article>
-          </div>
-
-          <div class="quick-sale-copy-body">
-            <section class="quick-sale-copy-col">
-              <p class="quick-sale-copy-label">How the spots work</p>
-              <p>Once the three spots are gone, pricing goes back to normal. Regular builds run 50% upfront, with the balance due before launch or handoff. Each discount link only works while its spot is still open — if the link works, the spot is yours.</p>
-            </section>
-            <section class="quick-sale-copy-col">
-              <p class="quick-sale-copy-label">How I build</p>
-              <p>Every site is a custom build around your business — mobile-ready, handled by me from the first design conversation to the finished build. No agency handoff. I keep the project count low so each site gets the time it deserves.</p>
-              <p>I take pride in the work, and most of it comes through referrals. I pay for referrals too.</p>
-            </section>
-          </div>
-
-          <p class="quick-sale-copy-closer">If price is the reason you’ve been putting off your site, this is probably the cheapest I’m ever going to do it.</p>
-        </section>
-
         <form class="quick-pick-contact" id="quick-pick-contact-form" novalidate aria-label="Quick-pick website request">
           <div class="quick-pick-summary">
             <span class="quick-pick-summary-label">Selected quick-pick</span>
@@ -2964,8 +2944,9 @@
             <div class="quick-contact-field is-wide"><label for="quick-notes">Anything else? (optional)</label><textarea id="quick-notes" name="notes" rows="3" maxlength="900"></textarea></div>
           </div>
           <div class="quick-honeypot" aria-hidden="true"><label for="quick-hp">Leave this field empty</label><input id="quick-hp" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
-          <button class="quick-contact-submit" type="submit">Claim this plan →</button>
-          <p class="quick-contact-note">This sends the selected plan and your contact details directly to bndr.labs@gmail.com so the current promotional spot can be confirmed.</p>
+          <a class="website-checkout" id="quick-checkout-link" href="https://buy.stripe.com/dRm3cv6038gqckkgze0oM1h" target="_blank" rel="noopener noreferrer">Continue to Stripe checkout · $750 deposit →</a>
+          <button class="quick-contact-submit" type="submit">Send details &amp; continue to checkout →</button>
+          <p class="quick-contact-note">Contact delivery is best-effort, never required for checkout. Stripe collects your email; a checkout visit is not payment confirmation.</p>
           <div class="quick-contact-status" id="quick-contact-status" role="status" aria-live="polite"></div>
         </form>
 
@@ -3017,12 +2998,12 @@
             <header class="estimate-step-head">
               <span class="estimate-step-index">03</span>
               <h3>Pick a size</h3>
-              <p class="estimate-step-sub">Flat prices — the number you see is the number you pay.</p>
+              <p class="estimate-step-sub">Prices update live. Calculator submissions are estimate requests, not Stripe checkout.</p>
             </header>
             <div class="estimate-options" role="group" aria-label="Website size">
               <button class="estimate-option" type="button" data-estimate-key="size" data-label="Launch Site Special" data-price="599"><span class="estimate-option-main">Launch Site Special<span class="estimate-option-detail">One sharp page, fast</span></span><span class="estimate-option-meta">$599</span></button>
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="One-Page Lander™" data-price="2500"><span class="estimate-option-main">One-Page Lander™<span class="estimate-option-detail">A single page engineered to convert</span></span><span class="estimate-option-meta">$2,500</span></button>
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Three-Page Custom™" data-price="4500"><span class="estimate-option-main">Three-Page Custom™<span class="estimate-option-detail">Home, work, contact — the full pitch</span></span><span class="estimate-option-meta">$4,500</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="One-Page Lander™" data-price="1500"><span class="estimate-option-main">One-Page Lander™<span class="estimate-option-detail">A single page engineered to convert</span></span><span class="estimate-option-meta">$1,500</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Three-Page Custom™" data-price="3000"><span class="estimate-option-main">Three-Page Custom™<span class="estimate-option-detail">Home, work, contact — the full pitch</span></span><span class="estimate-option-meta">$3,000</span></button>
               <button class="estimate-option" type="button" data-estimate-key="size" data-label="Small Business Site™" data-price="6500"><span class="estimate-option-main">Small Business Site™<span class="estimate-option-detail">The complete presence</span></span><span class="estimate-option-meta">$6,500</span></button>
             </div>
           </section>
@@ -3094,9 +3075,10 @@
         </section>
 
         <aside class="estimate-quote" aria-live="polite">
-          <span class="estimate-quote-label">Your flat price</span>
+          <span class="estimate-quote-label">Estimated build total</span>
           <strong class="estimate-quote-value" id="estimate-total">Choose a size</strong>
-          <p class="estimate-quote-note">Flat build price. Managed Hosting + Care is $75/month separate — see the FAQ below.</p>
+          <p class="estimate-quote-note" id="estimate-subtotals">Choose a size to see the base price and add-ons subtotal.</p>
+          <p class="estimate-quote-note">Calculator submissions stay quote requests; no Stripe checkout is started here. Managed Hosting + Care is $75/month separate.</p>
         </aside>
       </form>
 
@@ -3117,7 +3099,7 @@
           <details class="website-faq-item">
             <summary>How does payment work?</summary>
             <div class="website-faq-answer">
-              <p>The first three promotional spots are paid in full at checkout at the advertised discounted price. After those are gone, regular-price projects are <strong>50% upfront to start and 50% before launch or handoff</strong>. Managed Hosting + Care is separate at <strong>$75/month</strong>.</p>
+              <p>Website projects are split into two payments: a <strong>50% deposit at checkout</strong> and the remaining <strong>50% before launch or handoff</strong>. Managed Hosting + Care is separate at <strong>$75/month</strong>.</p>
             </div>
           </details>
 
@@ -3838,80 +3820,77 @@
     window.__BNDR_QUICK_PICK__ = true;
 
     const OWNER_EMAIL = "bndr.labs@gmail.com";
-    const CURRENT_PROMO_CUSTOMER = 1;
+    const FORM_TIMEOUT_MS = 5000;
     const form = document.getElementById("quick-pick-contact-form");
     const cards = Array.from(document.querySelectorAll(".quick-plan"));
     const summaryName = document.getElementById("quick-pick-summary-name");
     const summaryDetail = document.getElementById("quick-pick-summary-detail");
     const statusNode = document.getElementById("quick-contact-status");
-    if (!form || !cards.length) return;
+    if (!form || !cards.length || !statusNode) return;
 
-    const startedAt = Date.now();
     let selected = null;
     let sending = false;
-
+    const submit = form.querySelector(".quick-contact-submit");
+    const checkoutLink = form.querySelector("#quick-checkout-link");
     const money = value => "$" + Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
+    const validStripeLink = url => /^https:\/\/buy\.stripe\.com\/[A-Za-z0-9]+$/.test(url || "");
 
-    cards.forEach(card => {
-      const rows = Array.from(card.querySelectorAll(".quick-sequence-row"));
-      rows.forEach((row, index) => {
-        const promoTier = index < 3 ? index + 1 : 0;
-        const consumed = CURRENT_PROMO_CUSTOMER === 0 ? promoTier > 0 : promoTier > 0 && promoTier < CURRENT_PROMO_CUSTOMER;
-        const current = CURRENT_PROMO_CUSTOMER === 0 ? promoTier === 0 : promoTier === CURRENT_PROMO_CUSTOMER;
-        row.classList.toggle("is-consumed", consumed);
-        row.classList.toggle("is-current", current);
-      });
+    function setStatus(message, state = "") {
+      statusNode.dataset.state = state;
+      statusNode.innerHTML = message;
+    }
 
-      const currentPrice = card.querySelector(".quick-price-current");
-      const currentCaption = card.querySelector(".quick-price-caption");
-      if (CURRENT_PROMO_CUSTOMER === 0) {
-        if (currentPrice) currentPrice.textContent = money(Number(card.dataset.deposit));
-        if (currentCaption) currentCaption.textContent = "Regular pricing · 50% deposit";
-      } else {
-        const charge = Number(card.dataset["c" + CURRENT_PROMO_CUSTOMER]);
-        if (currentPrice) currentPrice.textContent = money(charge);
-        if (currentCaption) {
-          const discount = CURRENT_PROMO_CUSTOMER === 1 ? "70% off" : CURRENT_PROMO_CUSTOMER === 2 ? "60% off" : "40% off";
-          currentCaption.textContent = `Customer ${CURRENT_PROMO_CUSTOMER} · ${discount}`;
-        }
+    function restoreSubmit() {
+      sending = false;
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = "Send details & continue to checkout →";
       }
-    });
+    }
+
+    function continueToCheckout(message, state = "", plan = selected) {
+      if (!plan || !validStripeLink(plan.depositUrl)) {
+        setStatus("The selected Stripe link is unavailable. Use the direct deposit link on the package card above.");
+        restoreSubmit();
+        return;
+      }
+      setStatus(message, state);
+      window.setTimeout(() => window.location.assign(plan.depositUrl), 350);
+    }
 
     function selectCard(card) {
-      const isRegularFallback = CURRENT_PROMO_CUSTOMER === 0;
-      const stripeSlot = `c${CURRENT_PROMO_CUSTOMER}`;
       selected = {
         name: card.dataset.quickPlan,
         pages: Number(card.dataset.pages),
         revisions: Number(card.dataset.revisions),
-        regular: Number(card.dataset.regular),
-        charge: isRegularFallback
-          ? Number(card.dataset.deposit)
-          : Number(card.dataset["c" + CURRENT_PROMO_CUSTOMER]),
-        paymentType: isRegularFallback ? "50% project deposit" : `Customer ${CURRENT_PROMO_CUSTOMER} promotional payment`,
-        stripeProductId: card.dataset.stripeProduct,
-        stripePriceId: isRegularFallback
-          ? ""
-          : card.dataset[`stripe${stripeSlot.charAt(0).toUpperCase() + stripeSlot.slice(1)}Price`],
-        stripeCheckoutUrl: isRegularFallback
-          ? card.dataset.stripeDepositLink
-          : card.dataset[`stripe${stripeSlot.charAt(0).toUpperCase() + stripeSlot.slice(1)}Link`]
+        total: Number(card.dataset.total),
+        deposit: Number(card.dataset.deposit),
+        balance: Number(card.dataset.balance),
+        depositUrl: card.dataset.stripeDepositLink,
+        balanceUrl: card.dataset.stripeBalanceLink
       };
 
       cards.forEach(item => {
         const active = item === card;
         item.classList.toggle("is-selected", active);
         const button = item.querySelector("[data-quick-select]");
-        button.setAttribute("aria-pressed", String(active));
-        button.textContent = active ? "Selected ✓" : `Select ${item.dataset.quickPlan} →`;
+        if (button) {
+          button.setAttribute("aria-pressed", String(active));
+          button.textContent = active ? "Details selected ✓" : "Add contact details (optional) →";
+        }
       });
 
       summaryName.textContent = selected.name;
       summaryDetail.textContent =
         `${selected.pages} page${selected.pages === 1 ? "" : "s"} · ${selected.revisions} included revision${selected.revisions === 1 ? "" : "s"} · ` +
-        (CURRENT_PROMO_CUSTOMER === 0
-          ? `Regular ${money(selected.regular)} total · 50% deposit ${money(selected.charge)} · remaining 50% due before launch/handoff · Managed Hosting + Care $75/month`
-          : `Customer ${CURRENT_PROMO_CUSTOMER}: ${money(selected.charge)} · Regular ${money(selected.regular)} · Managed Hosting + Care $75/month`);
+        `${money(selected.total)} project total · ${money(selected.deposit)} deposit at checkout · ` +
+        `${money(selected.balance)} balance before launch/handoff · Managed Hosting + Care $75/month separate`;
+
+      if (checkoutLink && validStripeLink(selected.depositUrl)) {
+        checkoutLink.href = selected.depositUrl;
+        checkoutLink.textContent = `Continue to Stripe checkout · ${money(selected.deposit)} deposit →`;
+        checkoutLink.setAttribute("aria-label", `Pay the ${money(selected.deposit)} ${selected.name} deposit with Stripe`);
+      }
 
       form.classList.add("is-open");
       form.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
@@ -3919,45 +3898,66 @@
     }
 
     cards.forEach(card => {
-      card.querySelector("[data-quick-select]").addEventListener("click", () => selectCard(card));
+      card.querySelector("[data-quick-select]")?.addEventListener("click", () => selectCard(card));
     });
 
-    function setStatus(message, state = "") {
-      statusNode.dataset.state = state;
-      statusNode.innerHTML = message;
+    function sendContact(payload) {
+      const controller = typeof AbortController === "function" ? new AbortController() : null;
+      let timeoutId = 0;
+      const request = fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload),
+        ...(controller ? { signal: controller.signal } : {})
+      }).then(async response => {
+        const result = await response.json();
+        const accepted = result && (result.success === true || result.success === "true");
+        if (!response.ok || !accepted) throw new Error("FormSubmit rejected the request");
+        return result;
+      });
+      const timeout = new Promise((_, reject) => {
+        timeoutId = window.setTimeout(() => {
+          try { controller?.abort(); } catch (_) {}
+          reject(new Error("FormSubmit timed out"));
+        }, FORM_TIMEOUT_MS);
+      });
+      return Promise.race([request, timeout]).finally(() => window.clearTimeout(timeoutId));
     }
 
-    form.addEventListener("submit", event => {
+    form.addEventListener("submit", async event => {
       event.preventDefault();
       if (sending) return;
 
       if (!selected) {
-        setStatus("Choose BNDR Lander, BNDR Standard, or BNDR Expanded first.");
+        setStatus("Choose a package above, or use one of its direct Stripe links.");
+        return;
+      }
+
+      if (!validStripeLink(selected.depositUrl)) {
+        setStatus("The selected Stripe link is unavailable. Use the direct deposit link on the package card above.");
+        return;
+      }
+      const checkoutPlan = selected;
+
+      if (form.querySelector("#quick-hp").value) {
+        setStatus("The contact request was not sent. Customers can use the direct Stripe deposit link on the package card.");
         return;
       }
 
       const name = form.querySelector("#quick-name").value.trim();
       const email = form.querySelector("#quick-email").value.trim();
-
-      if (form.querySelector("#quick-hp").value) {
-        setStatus("<strong>Got it — it's in my inbox.</strong>", "ok");
-        return;
-      }
-
-      if (Date.now() - startedAt < 4000) {
-        setStatus("That was superhumanly fast — take one more look, then hit send again.");
-        return;
-      }
-
-      if (!name) {
-        setStatus("Add your name, then hit send.");
-        form.querySelector("#quick-name").focus();
-        return;
-      }
-
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-        setStatus("Double-check the email address, then hit send.");
-        form.querySelector("#quick-email").focus();
+      const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+      if (!name || !emailIsValid) {
+        sending = true;
+        if (submit) {
+          submit.disabled = true;
+          submit.textContent = "Opening Stripe checkout…";
+        }
+        continueToCheckout(
+          "No contact request was sent because the name or email is incomplete. Continuing to Stripe, which collects your email. Payment is not confirmed until Stripe confirms it.",
+          "",
+          checkoutPlan
+        );
         return;
       }
 
@@ -3965,24 +3965,22 @@
       const phone = form.querySelector("#quick-phone").value.trim();
       const notes = form.querySelector("#quick-notes").value.trim();
       const summary = [
-        `Quick-pick plan: ${selected.name}`,
+        `Plan: ${selected.name}`,
         `Pages: ${selected.pages}`,
         `Included revisions: ${selected.revisions}`,
-        `Regular total: ${money(selected.regular)}`,
-        `Payment type: ${selected.paymentType}`,
-        `Amount due now: ${money(selected.charge)}`,
-        ...(CURRENT_PROMO_CUSTOMER === 0 ? [`Remaining balance: ${money(selected.regular - selected.charge)} due before launch or handoff`] : []),
-        `Managed Hosting + Care: $75/month`,
-        `Additional work outside included scope: $75/hour`,
+        `Project total: ${money(selected.total)}`,
+        `50% deposit due at checkout: ${money(selected.deposit)}`,
+        `50% balance due before launch or handoff: ${money(selected.balance)}`,
+        "Managed Hosting + Care: $75/month, separate",
+        "Additional approved work: $75/hour",
         `Business: ${business || "—"}`,
         `Name: ${name}`,
         `Email: ${email}`,
         `Phone: ${phone || "—"}`,
         `Notes: ${notes || "—"}`
       ].join("\n");
-
       const payload = {
-        _subject: `[BNDR QUICK-PICK] ${selected.name} — ${selected.paymentType} — ${money(selected.charge)}`,
+        _subject: `[BNDR WEBSITE] ${selected.name} — ${money(selected.deposit)} deposit`,
         _template: "table",
         _captcha: "false",
         name,
@@ -3992,72 +3990,43 @@
         plan: selected.name,
         pages: String(selected.pages),
         included_revisions: String(selected.revisions),
-        regular_total: money(selected.regular),
-        payment_type: selected.paymentType,
-        amount_due_now: money(selected.charge),
-        promotional_customer: CURRENT_PROMO_CUSTOMER === 0 ? "none — regular 50% deposit" : String(CURRENT_PROMO_CUSTOMER),
-        remaining_balance: CURRENT_PROMO_CUSTOMER === 0 ? money(selected.regular - selected.charge) : "—",
-        managed_hosting_care: "$75/month",
-        additional_work: "$75/hour",
-        stripe_product_id: selected.stripeProductId,
-        stripe_price_id: selected.stripePriceId,
-        stripe_checkout_url: selected.stripeCheckoutUrl,
+        project_total: money(selected.total),
+        deposit_due_at_checkout: money(selected.deposit),
+        balance_due_before_launch_or_handoff: money(selected.balance),
+        payment_terms: "50% deposit at checkout; remaining 50% before launch or handoff",
+        managed_hosting_care: "$75/month, separate",
+        additional_work: "$75/hour, approved work only",
+        stripe_deposit_link: selected.depositUrl,
+        stripe_balance_link: selected.balanceUrl,
         notes,
         page: location.href.split("?")[0]
       };
 
-      const submit = form.querySelector(".quick-contact-submit");
-
-      function restore() {
-        sending = false;
-        submit.disabled = false;
-        submit.textContent = "Claim this plan →";
-      }
-
-      function fallback() {
-        const mail =
-          `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(payload._subject)}` +
-          `&body=${encodeURIComponent(summary)}`;
-        setStatus(`The form service didn't answer, but nothing is lost — <a href="${mail}">send the same request by email in one tap →</a>`);
-        restore();
-      }
-
       sending = true;
-      submit.disabled = true;
-      submit.textContent = "Sending…";
-      setStatus("");
+      if (submit) {
+        submit.disabled = true;
+        submit.textContent = "Sending details…";
+      }
+      setStatus("Trying to send your contact details; checkout stays available regardless.");
 
+      let contactSent = false;
       try {
-        fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Accept": "application/json" },
-          body: JSON.stringify(payload)
-        })
-          .then(response => {
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json().catch(() => ({}));
-          })
-          .then(() => {
-            setStatus("<strong>Sent.</strong> Opening secure Stripe checkout…", "ok");
-            form.querySelectorAll("input,textarea,button").forEach(node => { node.disabled = true; });
-            if (window.gtag) {
-              try {
-                window.gtag("event", "generate_lead", {
-                  currency: "USD",
-                  value: selected.charge
-                });
-              } catch (_) {}
-            }
-            if (!/^https:\/\/buy\.stripe\.com\//.test(selected.stripeCheckoutUrl || "")) {
-              throw new Error("Missing Stripe checkout URL");
-            }
-            window.setTimeout(() => {
-              window.location.assign(selected.stripeCheckoutUrl);
-            }, 300);
-          })
-          .catch(fallback);
+        await sendContact(payload);
+        contactSent = true;
       } catch (_) {
-        fallback();
+        contactSent = false;
+      }
+
+      if (contactSent && window.gtag) {
+        try {
+          window.gtag("event", "generate_lead", { currency: "USD", value: checkoutPlan.total });
+        } catch (_) {}
+      }
+
+      if (contactSent) {
+        continueToCheckout("<strong>Contact request sent.</strong> Opening Stripe checkout. This is not payment confirmation.", "ok", checkoutPlan);
+      } else {
+        continueToCheckout("Contact request was not delivered. Continuing directly to Stripe checkout; Stripe will collect your email. Payment is not confirmed until Stripe confirms it.", "", checkoutPlan);
       }
     });
   })();
@@ -4076,9 +4045,11 @@
     const progressLabel = document.getElementById("estimate-progress-label");
     const progressFill = document.getElementById("estimate-progress-fill");
     const totalNode = document.getElementById("estimate-total");
+    const subtotalsNode = document.getElementById("estimate-subtotals");
     const statusNode = document.getElementById("estimate-status");
     const startedAt = Date.now();
     const OWNER_EMAIL = "bndr.labs@gmail.com";
+    const FORM_TIMEOUT_MS = 5000;
 
     const pick = {
       biz: null,
@@ -4093,11 +4064,22 @@
     let sending = false;
     let advanceTimer = 0;
 
-    const money = value => "$" + Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
-    const total = () => (pick.size?.price || 0) + pick.addons.reduce((sum, item) => sum + item.price, 0);
+    const money = value => {
+      const amount = Number(value || 0);
+      return "$" + amount.toLocaleString("en-US", {
+        minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+        maximumFractionDigits: 2
+      });
+    };
+    const baseTotal = () => pick.size?.price || 0;
+    const addonsTotal = () => pick.addons.reduce((sum, item) => sum + item.price, 0);
+    const total = () => baseTotal() + addonsTotal();
 
     function updateQuote() {
       totalNode.textContent = pick.size ? money(total()) : "Choose a size";
+      subtotalsNode.textContent = pick.size
+        ? `Base price: ${money(baseTotal())} · Add-ons subtotal: ${money(addonsTotal())}`
+        : "Choose a size to see the base price and add-ons subtotal.";
     }
 
     function showStep(index, { focus = true } = {}) {
@@ -4156,11 +4138,17 @@
       return [
         "Business type: " + (pick.biz || "—"),
         "Need: " + (pick.need || "—"),
-        "Size: " + (pick.size ? `${pick.size.label} (${money(pick.size.price)})` : "—"),
+        "Size: " + (pick.size ? `${pick.size.label} (${money(baseTotal())})` : "—"),
+        "Build subtotal: " + (pick.size ? money(baseTotal()) : "—"),
         "Add-ons: " + (pick.addons.length ? pick.addons.map(item => `${item.label} (+${money(item.price)})`).join(", ") : "none"),
+        "Add-ons subtotal: " + money(addonsTotal()),
         "Timeline: " + (pick.timeline || "—"),
         "Budget comfort: " + (pick.budget || "—"),
-        "Estimate shown: " + (pick.size ? money(total()) : "not locked")
+        "Estimate shown (total): " + (pick.size ? money(total()) : "not locked"),
+        "Payment terms: 50% deposit at checkout; remaining 50% before launch or handoff (confirmed in the quote).",
+        "Managed Hosting + Care: $75/month, separate.",
+        "Additional approved work: $75/hour.",
+        "Next step: quote request only; no Stripe checkout is initiated by this calculator."
       ].join("\n");
     }
 
@@ -4169,7 +4157,30 @@
       statusNode.innerHTML = message;
     }
 
-    form.addEventListener("submit", event => {
+    function sendEstimate(payload) {
+      const controller = typeof AbortController === "function" ? new AbortController() : null;
+      let timeoutId = 0;
+      const request = fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload),
+        ...(controller ? { signal: controller.signal } : {})
+      }).then(async response => {
+        const result = await response.json();
+        const accepted = result && (result.success === true || result.success === "true");
+        if (!response.ok || !accepted) throw new Error("FormSubmit rejected the estimate request");
+        return result;
+      });
+      const timeout = new Promise((_, reject) => {
+        timeoutId = window.setTimeout(() => {
+          try { controller?.abort(); } catch (_) {}
+          reject(new Error("FormSubmit timed out"));
+        }, FORM_TIMEOUT_MS);
+      });
+      return Promise.race([request, timeout]).finally(() => window.clearTimeout(timeoutId));
+    }
+
+    form.addEventListener("submit", async event => {
       event.preventDefault();
       if (sending) return;
 
@@ -4177,7 +4188,7 @@
       const email = form.querySelector("#estimate-email").value.trim();
 
       if (form.querySelector("#estimate-hp").value) {
-        setStatus("<strong>Got it — it's in my inbox.</strong> You'll hear back from me directly, usually same day.", "ok");
+        setStatus("The estimate request was not sent.");
         return;
       }
       if (Date.now() - startedAt < 4000) {
@@ -4196,16 +4207,30 @@
       }
 
       const submit = form.querySelector(".estimate-submit");
+      const business = form.querySelector("#estimate-business").value.trim();
+      const phone = form.querySelector("#estimate-phone").value.trim();
+      const notes = form.querySelector("#estimate-notes").value.trim();
+      const estimateSummary = summaryText();
+      const estimateTotal = pick.size ? total() : null;
+      const estimateBaseSubtotal = pick.size ? baseTotal() : null;
+      const estimateAddonsSubtotal = addonsTotal();
       const payload = {
-        _subject: `[BNDR ESTIMATE] ${name} — ${pick.size ? money(total()) : "no size picked"}`,
+        _subject: `[BNDR ESTIMATE] ${name} — ${estimateTotal === null ? "no size picked" : money(estimateTotal)}`,
         _template: "table",
         _captcha: "false",
         name,
-        business: form.querySelector("#estimate-business").value.trim(),
+        business,
         email,
-        phone: form.querySelector("#estimate-phone").value.trim(),
-        project: summaryText(),
-        notes: form.querySelector("#estimate-notes").value.trim(),
+        phone,
+        project: estimateSummary,
+        build_subtotal: estimateBaseSubtotal === null ? "—" : money(estimateBaseSubtotal),
+        addons_subtotal: money(estimateAddonsSubtotal),
+        estimate_total: estimateTotal === null ? "not locked" : money(estimateTotal),
+        payment_terms: "50% deposit at checkout; remaining 50% before launch or handoff (confirmed in quote)",
+        managed_hosting_care: "$75/month, separate",
+        additional_work: "$75/hour, approved work only",
+        request_type: "Quote request only — no Stripe checkout initiated",
+        notes,
         page: location.href.split("?")[0]
       };
 
@@ -4214,10 +4239,10 @@
         submit.disabled = false;
         submit.textContent = "Send it — get your reply direct →";
       };
-
       const fallback = () => {
-        const mail = `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(payload._subject)}&body=${encodeURIComponent(summaryText() + `\n\nName: ${name}\nBusiness: ${payload.business}\nEmail: ${email}\nPhone: ${payload.phone}\nNotes: ${payload.notes}`)}`;
-        setStatus(`The form service didn't answer, but nothing is lost — <a href="${mail}">send the same details by email in one tap →</a>`);
+        const body = estimateSummary + `\n\nName: ${name}\nBusiness: ${business}\nEmail: ${email}\nPhone: ${phone}\nNotes: ${notes}`;
+        const mail = `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(payload._subject)}&body=${encodeURIComponent(body)}`;
+        setStatus(`Estimate request was not delivered by the form service. <a href="${mail}">Send the same details by email →</a>`);
         restore();
       };
 
@@ -4227,23 +4252,12 @@
       setStatus("");
 
       try {
-        fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Accept": "application/json" },
-          body: JSON.stringify(payload)
-        })
-          .then(response => {
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json().catch(() => ({}));
-          })
-          .then(() => {
-            setStatus("<strong>Got it — it's in my inbox.</strong> You'll hear back from me directly, usually same day. No secretary, no queue, no drip campaign.", "ok");
-            form.querySelectorAll("input,textarea,button").forEach(node => { node.disabled = true; });
-            if (window.gtag) {
-              try { window.gtag("event", "generate_lead", { currency: "USD", value: pick.size ? total() : 0 }); } catch (_) {}
-            }
-          })
-          .catch(fallback);
+        await sendEstimate(payload);
+        setStatus("<strong>Estimate request sent.</strong> This is not a payment confirmation.", "ok");
+        form.querySelectorAll("input,textarea,button").forEach(node => { node.disabled = true; });
+        if (window.gtag) {
+          try { window.gtag("event", "generate_lead", { currency: "USD", value: estimateTotal || 0 }); } catch (_) {}
+        }
       } catch (_) {
         fallback();
       }
