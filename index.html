@@ -3300,25 +3300,38 @@
 
         // A raymarched sheet with a rounded fold, sharing the Home material.
         // Website: a broad right-hand fold. Builds: a narrow seam at the margin.
-        float foldMap(vec3 p) {
+        float foldCurve(float y) {
           float aspect = uResolution.x / uResolution.y;
           float portrait = 1.0 - smoothstep(0.95, 1.28, aspect);
           float xShift = mix(0.50, 0.18, portrait);
           float yShift = mix(0.02, -0.18, portrait);
-          float pixel = (2.0 * 4.7 / 2.32) / uResolution.y;
           float phase = uFoldTime * 6.2831853 / 16.0;
           float margin = (aspect - xShift) * 4.7 / 2.32 - 0.30;
           float center = mix(0.45, margin, uPage);
           float bend = mix(0.32, 0.10, uPage);
-          float crease = center + bend * sin(p.y * 0.85 + phase)
-            + bend * 0.55 * cos(p.y * 0.42 - phase);
-          float width = mix(0.46, 0.20, uPage);
-          float across = (p.x - crease) / width;
+          return center + bend * sin(y * 0.85 + phase)
+            + bend * 0.55 * cos(y * 0.42 - phase);
+        }
+
+        float foldProximity(vec2 point) {
+          float aspect = uResolution.x / uResolution.y;
+          float portrait = 1.0 - smoothstep(0.95, 1.28, aspect);
+          float xShift = mix(0.50, 0.18, portrait);
+          float yShift = mix(0.02, -0.18, portrait);
+          float radius = (2.0 * 4.7 / 2.32) / uResolution.y * 180.0;
           vec2 pointer = vec2(uFoldPointer.x * aspect - xShift, uFoldPointer.y - yShift) * 4.7 / 2.32;
-          float proximity = pow(max(0.0, 1.0 - length(p.xy - pointer) / (180.0 * pixel)), 2.0);
+          float nearFold = pow(max(0.0, 1.0 - abs(pointer.x - foldCurve(pointer.y)) / radius), 2.0);
+          return pow(max(0.0, 1.0 - length(point - pointer) / radius), 2.0) * nearFold * uPointerActive;
+        }
+
+        float foldMap(vec3 p) {
+          float pixel = (2.0 * 4.7 / 2.32) / uResolution.y;
+          float phase = uFoldTime * 6.2831853 / 16.0;
+          float width = mix(0.46, 0.20, uPage);
+          float across = (p.x - foldCurve(p.y)) / width;
           float height = mix(0.58, 0.30, uPage) * exp(-across * across)
             + 0.025 * sin(p.y * 1.15 + phase) * sin(p.x * 0.75 - phase)
-            + 12.0 * pixel * proximity * uPointerActive;
+            + 12.0 * pixel * foldProximity(p.xy);
           float sheet = (abs(p.z - height) - 0.035) / 2.4;
           return sheet;
         }
@@ -3448,9 +3461,7 @@
             alpha = clamp(0.82 + fresnel * 0.13 + rim * 0.035, 0.82, 0.985);
 
             if (uMorph > 0.0) {
-              float pixel = (2.0 * 4.7 / 2.32) / uResolution.y;
-              vec2 pointer = vec2(uFoldPointer.x * aspect - xShift, uFoldPointer.y - yShift) * 4.7 / 2.32;
-              float nearby = pow(max(0.0, 1.0 - length(p.xy - pointer) / (180.0 * pixel)), 2.0) * uPointerActive;
+              float nearby = foldProximity(p.xy);
               vec3 cement = mix(uColorBase, uColorWarm, diff * 0.14);
               cement *= (0.70 + diff * 0.24 + fill * 0.12) * ao;
               cement += uColorWarm * (spec * 0.14 + rim * 0.05);
