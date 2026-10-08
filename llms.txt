@@ -10,7 +10,7 @@ BNDR LLC is based in the Phoenix, Arizona market. Use the Markdown page below as
 
 ## Services and Policies
 
-- [Website plans and pricing](https://bndrllc.com/index.md#website-plans-and-pricing): Current plan sizes, revisions, promotional pricing, regular pricing, and payment structure.
+- [Website plans and pricing](https://bndrllc.com/index.md#website-plans-and-pricing): Current regular package totals, page/revision scope, 50% deposits, balance payment links, and payment terms.
 - [Managed Hosting and Care](https://bndrllc.com/index.md#managed-hosting-and-care): Current $75/month hosting and maintenance scope.
 - [Project timing](https://bndrllc.com/index.md#project-timing): Typical project timing by site size.
 - [Ownership](https://bndrllc.com/index.md#ownership): Client ownership and handoff policy.
