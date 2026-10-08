@@ -3223,6 +3223,7 @@
       uColorBase: { value: new THREE.Color('#111111') },
       uColorHeat: { value: new THREE.Color('#ff3300') },
       uReveal: { value: 1.0 },
+      uHomeOpacity: { value: 1.0 },
       uMorph: { value: 0 },
       uPage: { value: 0 },
       uFoldTime: { value: 0 },
@@ -3253,6 +3254,7 @@
         uniform vec3 uColorBase;
         uniform vec3 uColorHeat;
         uniform float uReveal;
+        uniform float uHomeOpacity;
         uniform float uMorph;
         uniform float uPage;
         uniform float uFoldTime;
@@ -3471,60 +3473,183 @@
 
           /* Same linear-to-gamma output transform as the supplied reference. */
           col = pow(max(col, vec3(0.0)), vec3(1.0 / 2.2));
-          gl_FragColor = vec4(col, alpha);
+          gl_FragColor = vec4(col, alpha * uHomeOpacity);
         }
       `
     });
 
     scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
 
-    let pointerActiveTarget = 0;
+    /* FORM STUDIO's filament runs beside the untouched Home shader in the shared renderer. */
+    const filamentIsMobile = matchMedia('(max-width: 767px)').matches;
+    const FILAMENT = Object.freeze({
+      count: filamentIsMobile ? 12000 : 28000,
+      size: filamentIsMobile ? 0.6 : 0.45,
+      opacity: 0.15,
+      positionEase: 0.07,
+      interactionEase: 0.11,
+      cursorRadius: 52,
+      cursorStrength: 1.75,
+      cursorX: 120,
+      cursorY: 60,
+      fadeRate: Math.log(20) / 1.8,
+      frameInterval: 1000 / 60
+    });
+
+    const filamentScene = new THREE.Scene();
+    const filamentCamera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 1000);
+    filamentCamera.position.z = 100;
+
+    const filamentPositions = new Float32Array(FILAMENT.count * 3);
+    const filamentPhases = new Float32Array(FILAMENT.count);
+    const filamentPhaseSin = new Float32Array(FILAMENT.count);
+    const filamentPhaseCos = new Float32Array(FILAMENT.count);
+
+    for (let i = 0; i < FILAMENT.count; i++) {
+      filamentPhases[i] = Math.random() * Math.PI * 2;
+      const phase = filamentPhases[i];
+      filamentPhaseSin[i] = Math.sin(phase);
+      filamentPhaseCos[i] = Math.cos(phase);
+    }
+
+    const filamentPositionAttribute = new THREE.BufferAttribute(filamentPositions, 3);
+    const filamentGeometry = new THREE.BufferGeometry();
+    filamentGeometry.setAttribute('position', filamentPositionAttribute);
+    filamentGeometry.setAttribute('phase', new THREE.BufferAttribute(filamentPhases, 1));
+
+    const filamentMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: FILAMENT.size,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      opacity: 0,
+      depthWrite: false
+    });
+    const filament = new THREE.Points(filamentGeometry, filamentMaterial);
+    filamentScene.add(filament);
+
+    const filamentMouse = new THREE.Vector2(-999, -999);
+    const placeFilament = time => {
+      const sinX = Math.sin(time * 0.10);
+      const cosX = Math.cos(time * 0.10);
+      const sinY = Math.sin(time * 0.12);
+      const cosY = Math.cos(time * 0.12);
+      const sinZ = Math.sin(time * 0.08);
+      const cosZ = Math.cos(time * 0.08);
+
+      for (let i = 0; i < FILAMENT.count; i++) {
+        const i3 = i * 3;
+        const phaseSin = filamentPhaseSin[i];
+        const phaseCos = filamentPhaseCos[i];
+        filamentPositions[i3] = (sinX * phaseCos + cosX * phaseSin) * 180;
+        filamentPositions[i3 + 1] = (cosY * phaseCos - sinY * phaseSin) * 120;
+        filamentPositions[i3 + 2] = (sinZ * phaseCos + cosZ * phaseSin) * 150;
+      }
+      filamentPositionAttribute.needsUpdate = true;
+    };
+    placeFilament(performance.now() * 0.001);
+
+    const animateFilament = (time, frameScale) => {
+      const positionEase = 1 - Math.pow(1 - FILAMENT.positionEase, frameScale);
+      const interactionEase = 1 - Math.pow(1 - FILAMENT.interactionEase, frameScale);
+      const sinX = Math.sin(time * 0.10);
+      const cosX = Math.cos(time * 0.10);
+      const sinY = Math.sin(time * 0.12);
+      const cosY = Math.cos(time * 0.12);
+      const sinZ = Math.sin(time * 0.08);
+      const cosZ = Math.cos(time * 0.08);
+      const cursorX = filamentMouse.x * FILAMENT.cursorX;
+      const cursorY = filamentMouse.y * FILAMENT.cursorY;
+      const radiusSq = FILAMENT.cursorRadius * FILAMENT.cursorRadius;
+
+      for (let i = 0; i < FILAMENT.count; i++) {
+        const i3 = i * 3;
+        const phaseSin = filamentPhaseSin[i];
+        const phaseCos = filamentPhaseCos[i];
+        let tx = (sinX * phaseCos + cosX * phaseSin) * 180;
+        let ty = (cosY * phaseCos - sinY * phaseSin) * 120;
+        const tz = (sinZ * phaseCos + cosZ * phaseSin) * 150;
+        const dx = cursorX - filamentPositions[i3];
+        const dy = cursorY - filamentPositions[i3 + 1];
+        const distSq = dx * dx + dy * dy;
+        let particleEase = positionEase;
+
+        if (distSq < radiusSq) {
+          const proximity = 1 - Math.sqrt(distSq) / FILAMENT.cursorRadius;
+          const force = proximity * proximity * (3 - 2 * proximity);
+          tx -= dx * force * FILAMENT.cursorStrength;
+          ty -= dy * force * FILAMENT.cursorStrength;
+          particleEase += (interactionEase - particleEase) * force;
+        }
+
+        filamentPositions[i3] += (tx - filamentPositions[i3]) * particleEase;
+        filamentPositions[i3 + 1] += (ty - filamentPositions[i3 + 1]) * particleEase;
+        filamentPositions[i3 + 2] += (tz - filamentPositions[i3 + 2]) * positionEase;
+      }
+
+      filamentPositionAttribute.needsUpdate = true;
+      filament.rotation.y += 0.0005 * frameScale;
+    };
+
     const updatePointer = (clientX, clientY) => {
-      pointerActiveTarget = 1;
-      uniforms.uMouseTarget.value.set(
-        (clientX / innerWidth) * 2 - 1,
-        -((clientY / innerHeight) * 2 - 1)
-      );
+      const x = (clientX / innerWidth) * 2 - 1;
+      const y = -((clientY / innerHeight) * 2 - 1);
+      uniforms.uMouseTarget.value.set(x, y);
+      filamentMouse.set(x, y);
     };
 
     addEventListener('mousemove', e => updatePointer(e.clientX, e.clientY), { passive: true });
     addEventListener('touchmove', e => {
       if (e.touches[0]) updatePointer(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: true });
-    document.addEventListener('mouseleave', () => { pointerActiveTarget = 0; });
+    document.addEventListener('mouseleave', () => { filamentMouse.set(-999, -999); });
 
     const started = performance.now();
     let previousTick = started;
-    let morphFrom = 0;
-    let morphTarget = 0;
-    let morphStarted = started;
-    let pageTarget = 0;
+    let lastFilamentTick = started - FILAMENT.frameInterval;
+    let homeOpacityTarget = 1;
+    let filamentOpacityTarget = 0;
+    let filamentViewActive = false;
     let fxDirty = true;
-    const tick = now => {
-      /* Seconds-based time matches the supplied reference ticker time scale. */
-      uniforms.uTime.value = (now - started) / 1000;
-      const dt = Math.min(0.1, Math.max(0, (now - previousTick) / 1000));
-      previousTick = now;
-      const response = 1 - Math.exp(-dt * Math.log(10) / 0.18);
-      const progress = reduceMotion ? 1 : Math.min(1, (now - morphStarted) / 800);
-      uniforms.uMorph.value = morphFrom + (morphTarget - morphFrom) * progress * progress * (3 - 2 * progress);
-      uniforms.uPage.value = reduceMotion ? pageTarget : uniforms.uPage.value + (pageTarget - uniforms.uPage.value) * response;
-      uniforms.uFoldTime.value = reduceMotion ? 0 : uniforms.uTime.value;
-      if (!reduceMotion) {
-        uniforms.uFoldPointer.value.lerp(uniforms.uMouseTarget.value, response);
-        uniforms.uPointerActive.value += (pointerActiveTarget - uniforms.uPointerActive.value) * response;
-      }
+    renderer.autoClear = false;
 
-      /*
-        Exact supplied cursor interpolation coefficient: 0.05.
-        Reduced-motion retains accessibility while normal operation is exact.
-      */
+    const tick = now => {
+      /* Home keeps its established time base and pointer interpolation unchanged. */
+      uniforms.uTime.value = (now - started) / 1000;
       uniforms.uMouse.value.lerp(
         uniforms.uMouseTarget.value,
         reduceMotion ? 0.018 : 0.05
       );
 
-      if (!reduceMotion || uniforms.uMorph.value < 1 || fxDirty) renderer.render(scene, camera);
+      const dt = Math.min(0.05, Math.max(0, (now - previousTick) / 1000));
+      previousTick = now;
+      let filamentUpdated = false;
+
+      if (reduceMotion) {
+        uniforms.uHomeOpacity.value = homeOpacityTarget;
+        filamentMaterial.opacity = filamentOpacityTarget;
+      } else {
+        const fadeResponse = 1 - Math.exp(-dt * FILAMENT.fadeRate);
+        uniforms.uHomeOpacity.value += (homeOpacityTarget - uniforms.uHomeOpacity.value) * fadeResponse;
+        filamentMaterial.opacity += (filamentOpacityTarget - filamentMaterial.opacity) * fadeResponse;
+
+        const filamentVisible = filamentOpacityTarget > 0 || filamentMaterial.opacity > 0.0001;
+        const filamentElapsed = now - lastFilamentTick;
+        if (filamentVisible && !document.hidden && filamentElapsed >= FILAMENT.frameInterval * 0.9) {
+          const frameScale = Math.min(2, filamentElapsed / FILAMENT.frameInterval);
+          animateFilament(now * 0.001, frameScale);
+          lastFilamentTick = now;
+          filamentUpdated = true;
+        }
+      }
+
+      const homeAtRest = homeOpacityTarget === 1 &&
+        uniforms.uHomeOpacity.value > 0.999 && filamentMaterial.opacity <= 0.0001;
+      if (fxDirty || filamentUpdated || homeAtRest) {
+        renderer.clear();
+        if (uniforms.uHomeOpacity.value > 0.0001) renderer.render(scene, camera);
+        if (filamentMaterial.opacity > 0.0001) renderer.render(filamentScene, filamentCamera);
+      }
       fxDirty = false;
       requestAnimationFrame(tick);
     };
@@ -3534,17 +3659,20 @@
       renderer.setPixelRatio(activeDpr());
       renderer.setSize(innerWidth, innerHeight, false);
       uniforms.uResolution.value.set(innerWidth, innerHeight);
+      filamentCamera.aspect = innerWidth / innerHeight;
+      filamentCamera.updateProjectionMatrix();
       fxDirty = true;
     }, { passive: true });
 
     return name => {
       const inner = name === 'website' || name === 'builds';
       (inner ? document.getElementById(name) : document.body).prepend(canvas);
-      morphFrom = uniforms.uMorph.value;
-      morphTarget = inner ? 1 : 0;
-      morphStarted = performance.now();
-      pageTarget = name === 'builds' ? 1 : 0;
-      pointerActiveTarget = 0;
+      if (inner && !filamentViewActive && filamentMaterial.opacity <= 0.0001) {
+        placeFilament(reduceMotion ? 0 : performance.now() * 0.001);
+      }
+      homeOpacityTarget = inner ? 0 : 1;
+      filamentOpacityTarget = inner ? FILAMENT.opacity : 0;
+      filamentViewActive = inner;
       fxDirty = true;
     };
     })();
