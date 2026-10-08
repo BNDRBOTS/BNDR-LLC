@@ -654,7 +654,7 @@
     .project-preview {
       position: relative;
       margin: 0;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: 8 / 5;
       overflow: hidden;
       border-bottom: 1px solid var(--line);
       background:
@@ -663,32 +663,17 @@
       box-shadow: var(--shadow-preview);
     }
 
-    .project-preview iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: var(--color-bg);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity var(--ui) ease;
+    .project-card-link { display: block; height: 100%; color: inherit; text-decoration: none; }
+    .project-card-link:focus-visible { outline-offset: -3px; }
+    .project-card:focus-within { border-color: rgb(var(--rgb-warm) / .42); }
+    .project-preview img { width: 100%; height: 100%; object-fit: contain; object-position: center; }
+    .project-preview-visit { position: absolute; inset: 0; display: flex; gap: 12px; align-items: center; justify-content: center; color: var(--text-soft); font-size: .8rem; }
+    #builds .project-card { border-radius: 18px; }
+    #builds .project-info { padding: 16px 18px; gap: 12px; }
+    #builds .project-name { font-size: clamp(1rem, 1.4vw, 1.16rem); line-height: 1.3; }
+    @media (min-width: 1100px) {
+      #builds .project-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
-    .project-preview iframe.loaded { opacity: 1; }
-
-    .preview-status {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      padding: var(--s4);
-      color: var(--text-faint);
-      font-size: .61rem;
-      font-weight: var(--weight-medium);
-      letter-spacing: .13em;
-      text-align: center;
-      text-transform: uppercase;
-      pointer-events: none;
-    }
-    .project-preview:has(iframe.loaded) .preview-status { opacity: 0; }
 
     .project-info {
       display: grid;
@@ -720,7 +705,7 @@
       font-size: .78rem;
       line-height: 1.45;
     }
-    .project-link {
+    .project-open {
       min-width: var(--touch);
       min-height: var(--touch);
       display: grid;
@@ -732,7 +717,7 @@
       font-size: 1rem;
       transition: border-color var(--fast) ease, background var(--fast) ease, transform var(--fast) ease;
     }
-    .project-link:hover { border-color: rgb(var(--rgb-white) / .36); background: var(--surface-hover); transform: translate(1px, -1px); }
+    .project-card-link:hover .project-open { border-color: rgb(var(--rgb-white) / .36); background: var(--surface-hover); transform: translate(1px, -1px); }
 
     /* MY BUILDS — neutral charcoal hierarchy + render containment */
     #builds {
@@ -2141,6 +2126,10 @@
 
     #website.open::before { animation: website-light-drift 18s ease-in-out infinite alternate; }
 
+    #website > #fx, #builds > #fx { z-index: 0; }
+    #website > .view-shell, #builds > .view-shell { position: relative; z-index: 1; }
+    #website:has(> #fx:not([hidden]))::before { content: none; animation: none; }
+
     /* Header */
     #website > .view-shell {
       position: relative;
@@ -2653,9 +2642,9 @@
     <section class="view-shell">
       <header class="view-header">
         <section>
-          <p class="view-kicker">Selected work / live previews</p>
+          <p class="view-kicker">Selected work / live projects</p>
           <h2 class="view-title" id="builds-title">My Builds</h2>
-          <p class="view-intro">Websites first, web apps and working systems next, games and interactive builds after — and what’s coming soon at the end. Live previews load only as needed.</p>
+          <p class="view-intro">Websites first, web apps and working systems next, games and interactive builds after — and what’s coming soon at the end. Choose a project to open its live site or app.</p>
         </section>
         <button class="back" type="button" data-close>← Back</button>
       </header>
@@ -2666,66 +2655,66 @@
           <span class="category-count">15 examples</span>
         </header>
         <section class="project-grid" aria-label="Website and design examples">
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Jackson's live preview" data-src="https://jacksons-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Jackson's</h4></section><a class="project-link" href="https://jacksons-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Jackson's live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Liquid Glass live preview" data-src="https://liquidglass-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Interaction Example</p><h4 class="project-name">Liquid Glass</h4></section><a class="project-link" href="https://liquidglass-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Liquid Glass live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Forma live preview" data-src="https://forma-production-8f79.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Design Example</p><h4 class="project-name">Forma</h4></section><a class="project-link" href="https://forma-production-8f79.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Forma live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Editorial Studio live preview" data-src="https://cecy7-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Editorial Studio</h4></section><a class="project-link" href="https://cecy7-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Editorial Studio live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Blackline Tattoo Co. live preview" data-src="https://blackline-production-6c6f.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Blackline Tattoo Co.</h4></section><a class="project-link" href="https://blackline-production-6c6f.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Blackline Tattoo Co. live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Form Studio live preview" data-src="https://immersion-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Form Studio</h4></section><a class="project-link" href="https://immersion-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Form Studio live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Obsidian Linx live preview" data-src="https://obsidian-linxtm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Obsidian Linx™</h4></section><a class="project-link" href="https://obsidian-linxtm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Obsidian Linx live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Evie's Cafe live preview" data-src="https://eviescafe-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Evie&rsquo;s Cafe</h4></section><a class="project-link" href="https://eviescafe-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Evie's Cafe live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Love &amp; Compassion live preview" data-src="https://loveandcompassion-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Love &amp; Compassion</h4></section><a class="project-link" href="https://loveandcompassion-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Love and Compassion live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Epoch &amp; Aura live preview" data-src="https://epochaura-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Epoch &amp; Aura</h4></section><a class="project-link" href="https://epochaura-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Epoch and Aura live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Display Engine live preview" data-src="https://controlled-style-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Design Example</p><h4 class="project-name">Display Engine</h4></section><a class="project-link" href="https://controlled-style-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Display Engine live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Reflex live preview" data-src="https://reflex-production-3af8.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Reflex™</h4></section><a class="project-link" href="https://reflex-production-3af8.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Reflex live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Desert Estates live preview" data-src="https://desertestates-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Desert Estates</h4></section><a class="project-link" href="https://desertestates-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Desert Estates live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Real Code live preview" data-src="https://demo-production-faf4.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Real Code</h4></section><a class="project-link" href="https://demo-production-faf4.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Real Code live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="PixelMelt live preview" data-src="https://pixelmelt-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">FX / Interaction Example</p><h4 class="project-name">PixelMelt</h4></section><a class="project-link" href="https://pixelmelt-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open PixelMelt live">↗</a></header>
-                    </article>
+          <article class="project-card"><a class="project-card-link" href="https://jacksons-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Carrington live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-01.jpg" width="1348" height="936" loading="lazy" decoding="async" alt="Carrington website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Carrington</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://liquidglass-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Liquid Glass live in a new tab">
+                      <figure class="project-preview"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Interaction Example</p><h4 class="project-name">Liquid Glass</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://forma-production-8f79.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Forma live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-03.jpg" width="1358" height="933" loading="lazy" decoding="async" alt="Forma website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Design Example</p><h4 class="project-name">Forma</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://cecy7-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Editorial Studio live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-04.jpg" width="1348" height="926" loading="lazy" decoding="async" alt="Editorial Studio website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Editorial Studio</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://blackline-production-6c6f.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Blackline Tattoo Co. live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-05.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="Blackline Tattoo Co. website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Blackline Tattoo Co.</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://immersion-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Form Studio live in a new tab">
+                      <figure class="project-preview"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Form Studio</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://obsidian-linxtm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Obsidian Linx™ live in a new tab">
+                      <figure class="project-preview"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Obsidian Linx™</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://eviescafe-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Evie’s Cafe live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-08.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="Evie’s Cafe website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Evie&rsquo;s Cafe</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://loveandcompassion-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Love & Compassion live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-09.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="Love & Compassion website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Love &amp; Compassion</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://epochaura-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Epoch & Aura live in a new tab">
+                      <figure class="project-preview"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Epoch &amp; Aura</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://controlled-style-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Display Engine live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-11.jpg" width="1348" height="926" loading="lazy" decoding="async" alt="Display Engine website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Design Example</p><h4 class="project-name">Display Engine</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://reflex-production-3af8.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Reflex™ live in a new tab">
+                      <figure class="project-preview"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Reflex™</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://desertestates-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Desert Estates live in a new tab">
+                      <figure class="project-preview"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Desert Estates</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://demo-production-faf4.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Real Code live in a new tab">
+                      <figure class="project-preview"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Real Code</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://pixelmelt-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open PixelMelt live in a new tab">
+                      <figure class="project-preview"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">FX / Interaction Example</p><h4 class="project-name">PixelMelt</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
         </section>
       </section>
 
@@ -2735,30 +2724,30 @@
           <span class="category-count">06 builds</span>
         </header>
         <section class="project-grid" aria-label="Web apps and pilots">
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="MindCan live preview" data-src="https://mindcan-production-1ba2.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Web App / Interactive</p><h4 class="project-name">MindCan™</h4></section><a class="project-link" href="https://mindcan-production-1ba2.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open MindCan live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="BNDR LifeMatrix live preview" data-src="https://bndr-lifematrix-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Web App / System</p><h4 class="project-name">BNDR LifeMatrix</h4></section><a class="project-link" href="https://bndr-lifematrix-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BNDR LifeMatrix live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="QR Resets live preview" data-src="https://qr-resets-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Web App / Pilot</p><h4 class="project-name">QR Resets</h4><p class="project-note">Pilot concept — not an active program.</p></section><a class="project-link" href="https://qr-resets-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open QR Resets live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Solar Expanse live preview" data-src="https://acousticshockwave-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Web App / Interactive</p><h4 class="project-name">Solar Expanse</h4></section><a class="project-link" href="https://acousticshockwave-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Solar Expanse live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="JSON Splitter live preview" data-src="https://json-file-splitter-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Web App / Utility</p><h4 class="project-name">JSON Splitter</h4></section><a class="project-link" href="https://json-file-splitter-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open JSON Splitter live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="SiteScan Pro live preview" data-src="https://ss-production-f357.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">App / Lead Scanner</p><h4 class="project-name">SiteScan Pro</h4></section><a class="project-link" href="https://ss-production-f357.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open SiteScan Pro live">↗</a></header>
-                    </article>
+          <article class="project-card"><a class="project-card-link" href="https://mindcan-production-1ba2.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open MindCan™ live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-16.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="MindCan™ website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / Interactive</p><h4 class="project-name">MindCan™</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://bndr-lifematrix-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BNDR LifeMatrix live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-17.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="BNDR LifeMatrix website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / System</p><h4 class="project-name">BNDR LifeMatrix</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://qr-resets-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open QR Resets live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-18.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="QR Resets website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / Pilot</p><h4 class="project-name">QR Resets</h4><p class="project-note">Pilot concept — not an active program.</p></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://acousticshockwave-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Solar Expanse live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-19.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="Solar Expanse website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / Interactive</p><h4 class="project-name">Solar Expanse</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://json-file-splitter-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open JSON Splitter live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-20.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="JSON Splitter website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / Utility</p><h4 class="project-name">JSON Splitter</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://ss-production-f357.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open SiteScan Pro live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-21.jpg" width="1348" height="926" loading="lazy" decoding="async" alt="SiteScan Pro website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">App / Lead Scanner</p><h4 class="project-name">SiteScan Pro</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
         </section>
       </section>
 
@@ -2768,18 +2757,18 @@
           <span class="category-count">03 builds</span>
         </header>
         <section class="project-grid" aria-label="Games and interactive builds">
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="BMDR live preview" data-src="https://bmdrtm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">BMDR™</h4></section><a class="project-link" href="https://bmdrtm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BMDR live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Rogue Rita live preview" data-src="https://rogue-ritatm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Rogue Rita™</h4></section><a class="project-link" href="https://rogue-ritatm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Rogue Rita live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Hyper Drive live preview" data-src="https://hyperdrive-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Interactive / Game-adjacent</p><h4 class="project-name">Hyper Drive</h4></section><a class="project-link" href="https://hyperdrive-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Hyper Drive live">↗</a></header>
-                    </article>
+          <article class="project-card"><a class="project-card-link" href="https://bmdrtm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BMDR™ live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-22.jpg" width="1353" height="929" loading="lazy" decoding="async" alt="BMDR™ website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">BMDR™</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://rogue-ritatm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Rogue Rita™ live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-23.jpg" width="1348" height="926" loading="lazy" decoding="async" alt="Rogue Rita™ website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Rogue Rita™</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://hyperdrive-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Hyper Drive live in a new tab">
+                      <figure class="project-preview"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Interactive / Game-adjacent</p><h4 class="project-name">Hyper Drive</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
         </section>
       </section>
 
@@ -2789,14 +2778,14 @@
           <span class="category-count">02 builds</span>
         </header>
         <section class="project-grid" aria-label="Coming soon and in-progress builds">
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="KlusterPhuchr Field Terminal live preview" data-src="https://klusterfieldterminal-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">KlusterPhuchr™ Field Terminal</h4></section><a class="project-link" href="https://klusterfieldterminal-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open KlusterPhuchr Field Terminal live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Enforced Answer Engine live preview" data-src="https://wrapper-production-8b0e.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Enforced Answer Engine</h4></section><a class="project-link" href="https://wrapper-production-8b0e.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Enforced Answer Engine live">↗</a></header>
-                    </article>
+          <article class="project-card"><a class="project-card-link" href="https://klusterfieldterminal-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open KlusterPhuchr™ Field Terminal live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-25.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="KlusterPhuchr™ Field Terminal website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">KlusterPhuchr™ Field Terminal</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://wrapper-production-8b0e.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Enforced Answer Engine live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-26.jpg" width="1348" height="926" loading="lazy" decoding="async" alt="Enforced Answer Engine website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Enforced Answer Engine</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
         </section>
       </section>
     </section>
@@ -3209,8 +3198,15 @@
     if (logo?.complete && !logo.naturalWidth) markLogoFailed();
 
     const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const setFxView = (() => {
     const canvas = document.getElementById('fx');
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance' });
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance' });
+    } catch {
+      canvas.hidden = true;
+      return () => {};
+    }
     const activeDpr = () => Math.min(devicePixelRatio || 1, innerWidth < CONFIG.fx.mobileBreakpoint ? CONFIG.fx.dprMobile : CONFIG.fx.dprDesktop);
     renderer.setPixelRatio(activeDpr());
     renderer.setSize(innerWidth, innerHeight, false);
@@ -3234,7 +3230,13 @@
       uColorBg: { value: new THREE.Color('#050505') },
       uColorBase: { value: new THREE.Color('#111111') },
       uColorHeat: { value: new THREE.Color('#ff3300') },
-      uReveal: { value: 1.0 }
+      uReveal: { value: 1.0 },
+      uMorph: { value: 0 },
+      uPage: { value: 0 },
+      uFoldTime: { value: 0 },
+      uFoldPointer: { value: new THREE.Vector2(0, 0) },
+      uPointerActive: { value: 0 },
+      uColorWarm: { value: new THREE.Color('#d8c9b9') }
     };
 
     const material = new THREE.ShaderMaterial({
@@ -3259,6 +3261,12 @@
         uniform vec3 uColorBase;
         uniform vec3 uColorHeat;
         uniform float uReveal;
+        uniform float uMorph;
+        uniform float uPage;
+        uniform float uFoldTime;
+        uniform vec2 uFoldPointer;
+        uniform float uPointerActive;
+        uniform vec3 uColorWarm;
 
         varying vec2 vUv;
 
@@ -3274,7 +3282,7 @@
           smin 1.4
           displacement amplitudes/frequencies/timing .5 / .4 / .15
         */
-        float map(vec3 p) {
+        float homeMap(vec3 p) {
           float d1 = length(p) - 1.2;
 
           vec3 mousePos = vec3(uMouse.x * 6.0, uMouse.y * 6.0, 0.0);
@@ -3288,6 +3296,37 @@
             sin(p.z * 2.0) * 0.15;
 
           return d + disp;
+        }
+
+        // A raymarched sheet with a rounded fold, sharing the Home material.
+        // Website: a broad right-hand fold. Builds: a narrow seam at the margin.
+        float foldMap(vec3 p) {
+          float aspect = uResolution.x / uResolution.y;
+          float portrait = 1.0 - smoothstep(0.95, 1.28, aspect);
+          float xShift = mix(0.50, 0.18, portrait);
+          float yShift = mix(0.02, -0.18, portrait);
+          float pixel = (2.0 * 4.7 / 2.32) / uResolution.y;
+          float phase = uFoldTime * 6.2831853 / 16.0;
+          float margin = (aspect - xShift) * 4.7 / 2.32 - 0.30;
+          float center = mix(0.45, margin, uPage);
+          float bend = mix(0.32, 0.10, uPage);
+          float crease = center + bend * sin(p.y * 0.85 + phase)
+            + bend * 0.55 * cos(p.y * 0.42 - phase);
+          float width = mix(0.46, 0.20, uPage);
+          float across = (p.x - crease) / width;
+          vec2 pointer = vec2(uFoldPointer.x * aspect - xShift, uFoldPointer.y - yShift) * 4.7 / 2.32;
+          float proximity = pow(max(0.0, 1.0 - length(p.xy - pointer) / (180.0 * pixel)), 2.0);
+          float height = mix(0.58, 0.30, uPage) * exp(-across * across)
+            + 0.025 * sin(p.y * 1.15 + phase) * sin(p.x * 0.75 - phase)
+            + 12.0 * pixel * proximity * uPointerActive;
+          float sheet = (abs(p.z - height) - 0.035) / 2.4;
+          return sheet;
+        }
+
+        float map(vec3 p) {
+          if (uMorph <= 0.0) return homeMap(p);
+          if (uMorph >= 1.0) return foldMap(p);
+          return mix(homeMap(p), foldMap(p), uMorph);
         }
 
         vec3 calcNormal(vec3 p) {
@@ -3407,6 +3446,18 @@
             col *= mix(0.88, 1.03, depthFade);
 
             alpha = clamp(0.82 + fresnel * 0.13 + rim * 0.035, 0.82, 0.985);
+
+            if (uMorph > 0.0) {
+              float pixel = (2.0 * 4.7 / 2.32) / uResolution.y;
+              vec2 pointer = vec2(uFoldPointer.x * aspect - xShift, uFoldPointer.y - yShift) * 4.7 / 2.32;
+              float nearby = pow(max(0.0, 1.0 - length(p.xy - pointer) / (180.0 * pixel)), 2.0) * uPointerActive;
+              vec3 cement = mix(uColorBase, uColorWarm, diff * 0.14);
+              cement *= (0.70 + diff * 0.24 + fill * 0.12) * ao;
+              cement += uColorWarm * (spec * 0.14 + rim * 0.05);
+              cement += uColorHeat * nearby * 0.035;
+              col = mix(col, cement, uMorph);
+              alpha = mix(alpha, clamp(0.26 + fresnel * 0.22 + rim * 0.06, 0.26, 0.55), uMorph);
+            }
           }
 
           col = mix(uColorBg, col, uReveal);
@@ -3424,7 +3475,9 @@
 
     scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
 
+    let pointerActiveTarget = 0;
     const updatePointer = (clientX, clientY) => {
+      pointerActiveTarget = 1;
       uniforms.uMouseTarget.value.set(
         (clientX / innerWidth) * 2 - 1,
         -((clientY / innerHeight) * 2 - 1)
@@ -3435,11 +3488,29 @@
     addEventListener('touchmove', e => {
       if (e.touches[0]) updatePointer(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: true });
+    document.addEventListener('mouseleave', () => { pointerActiveTarget = 0; });
 
     const started = performance.now();
+    let previousTick = started;
+    let morphFrom = 0;
+    let morphTarget = 0;
+    let morphStarted = started;
+    let pageTarget = 0;
+    let fxDirty = true;
     const tick = now => {
       /* Seconds-based time matches the supplied reference ticker time scale. */
       uniforms.uTime.value = (now - started) / 1000;
+      const dt = Math.min(0.1, Math.max(0, (now - previousTick) / 1000));
+      previousTick = now;
+      const response = 1 - Math.exp(-dt * Math.log(10) / 0.18);
+      const progress = reduceMotion ? 1 : Math.min(1, (now - morphStarted) / 800);
+      uniforms.uMorph.value = morphFrom + (morphTarget - morphFrom) * progress * progress * (3 - 2 * progress);
+      uniforms.uPage.value = reduceMotion ? pageTarget : uniforms.uPage.value + (pageTarget - uniforms.uPage.value) * response;
+      uniforms.uFoldTime.value = reduceMotion ? 0 : uniforms.uTime.value;
+      if (!reduceMotion) {
+        uniforms.uFoldPointer.value.lerp(uniforms.uMouseTarget.value, response);
+        uniforms.uPointerActive.value += (pointerActiveTarget - uniforms.uPointerActive.value) * response;
+      }
 
       /*
         Exact supplied cursor interpolation coefficient: 0.05.
@@ -3450,7 +3521,8 @@
         reduceMotion ? 0.018 : 0.05
       );
 
-      renderer.render(scene, camera);
+      if (!reduceMotion || uniforms.uMorph.value < 1 || fxDirty) renderer.render(scene, camera);
+      fxDirty = false;
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
@@ -3459,7 +3531,20 @@
       renderer.setPixelRatio(activeDpr());
       renderer.setSize(innerWidth, innerHeight, false);
       uniforms.uResolution.value.set(innerWidth, innerHeight);
+      fxDirty = true;
     }, { passive: true });
+
+    return name => {
+      const inner = name === 'website' || name === 'builds';
+      (inner ? document.getElementById(name) : document.body).prepend(canvas);
+      morphFrom = uniforms.uMorph.value;
+      morphTarget = inner ? 1 : 0;
+      morphStarted = performance.now();
+      pageTarget = name === 'builds' ? 1 : 0;
+      pointerActiveTarget = 0;
+      fxDirty = true;
+    };
+    })();
 
     document.querySelectorAll('.action').forEach(action=>{
       action.addEventListener('pointermove',e=>{
@@ -3478,209 +3563,29 @@
     let activeView=null;
     let lastTrigger=null;
 
-    /*
-      Live-preview budget:
-      - desktop/tablet: max 2 app runtimes alive
-      - mobile: max 1
-      - only ONE heavy cross-origin app is allowed to boot at a time
-      - frames load only when actually near/inside the Builds viewport
-      - offscreen frames unload quickly and all frames unload when Builds closes
-      - future project cards are observed automatically
-      Direct project links remain the authoritative fallback for apps that disallow iframe embedding.
-    */
-    const previewLimit=matchMedia('(max-width: 720px)').matches ? 1 : 2;
-    const previewBootLimit=1;
-    const activePreviews=[];
-    const visiblePreviews=new Set();
-    const queuedPreviews=[];
-    const loadingFrames=new Set();
-    const unloadTimers=new WeakMap();
-    const previewVersions=new WeakMap();
-
-    const statusFor=card=>card.querySelector('.preview-status');
-    const frameFor=card=>card.querySelector('iframe[data-src]');
-
-    const removeActivePreview=card=>{
-      const index=activePreviews.indexOf(card);
-      if(index>=0) activePreviews.splice(index,1);
-    };
-
-    const removeQueuedPreview=card=>{
-      const index=queuedPreviews.indexOf(card);
-      if(index>=0) queuedPreviews.splice(index,1);
-    };
-
-    const nextPreviewVersion=frame=>{
-      const version=(previewVersions.get(frame) || 0) + 1;
-      previewVersions.set(frame,version);
-      return version;
-    };
-
-    let drainPreviewQueue=()=>{};
-
-    const releaseBootSlot=frame=>{
-      if(!loadingFrames.delete(frame)) return;
-      queueMicrotask(drainPreviewQueue);
-    };
-
-    const unloadPreview=card=>{
-      const timer=unloadTimers.get(card);
-      if(timer){ clearTimeout(timer); unloadTimers.delete(card); }
-
-      removeQueuedPreview(card);
-
-      const frame=frameFor(card);
-      if(!frame) return;
-
-      nextPreviewVersion(frame);
-      releaseBootSlot(frame);
-      frame.classList.remove('loaded');
-
-      if(frame.hasAttribute('src')){
-        frame.src='about:blank';
-        frame.removeAttribute('src');
-      }
-
-      const status=statusFor(card);
-      if(status) status.textContent='Live preview';
-      removeActivePreview(card);
-      queueMicrotask(drainPreviewQueue);
-    };
-
-    const loadPreviewNow=card=>{
-      const frame=frameFor(card);
-      if(
-        !frame ||
-        frame.hasAttribute('src') ||
-        !visiblePreviews.has(card) ||
-        activePreviews.length>=previewLimit ||
-        loadingFrames.size>=previewBootLimit
-      ) return false;
-
-      const timer=unloadTimers.get(card);
-      if(timer){ clearTimeout(timer); unloadTimers.delete(card); }
-
-      const status=statusFor(card);
-      if(status) status.textContent='Loading live preview';
-
-      frame.classList.remove('loaded');
-      frame.loading='lazy';
-      frame.setAttribute('fetchpriority','low');
-
-      const expectedURL=frame.dataset.src;
-      const version=nextPreviewVersion(frame);
-      let settled=false;
-
-      loadingFrames.add(frame);
-      activePreviews.push(card);
-
-      const timeout=setTimeout(()=>{
-        if(
-          settled ||
-          previewVersions.get(frame)!==version ||
-          !frame.hasAttribute('src')
-        ) return;
-        if(status) status.textContent='Open live ↗';
-        releaseBootSlot(frame);
-      },8000);
-
-      frame.addEventListener('load',()=>{
-        if(
-          previewVersions.get(frame)!==version ||
-          !frame.hasAttribute('src') ||
-          frame.getAttribute('src')!==expectedURL
-        ) return;
-
-        settled=true;
-        clearTimeout(timeout);
-        frame.classList.add('loaded');
-        releaseBootSlot(frame);
-      },{once:true});
-
-      frame.src=expectedURL;
-      return true;
-    };
-
-    drainPreviewQueue=()=>{
-      if(loadingFrames.size>=previewBootLimit || activePreviews.length>=previewLimit) return;
-
-      while(queuedPreviews.length){
-        const card=queuedPreviews.shift();
-        if(!visiblePreviews.has(card)) continue;
-        if(loadPreviewNow(card)) return;
-      }
-    };
-
-    const queuePreview=card=>{
-      if(!card || !visiblePreviews.has(card)) return;
-      const frame=frameFor(card);
-      if(!frame || frame.hasAttribute('src') || queuedPreviews.includes(card)) return;
-      queuedPreviews.push(card);
-      drainPreviewQueue();
-    };
-
-    const previewObserver=new IntersectionObserver(entries=>{
-      entries.forEach(entry=>{
-        const card=entry.target;
-
-        if(entry.isIntersecting){
-          visiblePreviews.add(card);
-          const timer=unloadTimers.get(card);
-          if(timer){ clearTimeout(timer); unloadTimers.delete(card); }
-          queuePreview(card);
-          return;
-        }
-
-        visiblePreviews.delete(card);
-        removeQueuedPreview(card);
-
-        if(!frameFor(card)?.hasAttribute('src')) return;
-        const timer=setTimeout(()=>unloadPreview(card),450);
-        unloadTimers.set(card,timer);
+    // Local screenshots load when the Builds view opens; no external app runtimes boot here.
+    const loadBuildPreviews=()=>{
+      views.builds.querySelectorAll('.project-preview img[data-src]').forEach(image=>{
+        image.src=image.dataset.src;
+        image.removeAttribute('data-src');
       });
-    },{root:views.builds,rootMargin:'200px 0px',threshold:.08});
-
+    };
     const updateBuildCounts=()=>{
       views.builds.querySelectorAll('.build-category').forEach(category=>{
         const count=category.querySelectorAll(':scope > .project-grid > .project-card').length;
         const output=category.querySelector('.category-count');
-        if(!output) return;
-        const label=category.getAttribute('aria-labelledby')==='examples-title'
-          ? `${String(count).padStart(2,'0')} ${count===1?'example':'examples'}`
-          : `${String(count).padStart(2,'0')} ${count===1?'build':'builds'}`;
-        output.textContent=label;
+        if(output) output.textContent=`${String(count).padStart(2,'0')} ${category.getAttribute('aria-labelledby')==='examples-title' ? (count===1?'example':'examples') : (count===1?'build':'builds')}`;
       });
     };
-
-    const registerProjectCard=card=>{
-      if(!(card instanceof Element) || !card.matches('.project-card')) return;
-      previewObserver.observe(card);
-    };
-
-    views.builds.querySelectorAll('.project-card').forEach(registerProjectCard);
     updateBuildCounts();
-
-    const buildMutationObserver=new MutationObserver(mutations=>{
-      let changed=false;
-      mutations.forEach(mutation=>{
-        mutation.addedNodes.forEach(node=>{
-          if(!(node instanceof Element)) return;
-          if(node.matches('.project-card')){ registerProjectCard(node); changed=true; }
-          node.querySelectorAll?.('.project-card').forEach(card=>{
-            registerProjectCard(card);
-            changed=true;
-          });
-        });
-      });
-      if(changed) updateBuildCounts();
-    });
-    buildMutationObserver.observe(views.builds,{childList:true,subtree:true});
-
-    const unloadAllPreviews=()=>{
-      queuedPreviews.splice(0);
-      visiblePreviews.clear();
-      [...activePreviews].forEach(unloadPreview);
-    };
+    new MutationObserver(mutations=>{
+      const cardsChanged=mutations.some(m=>m.target.matches?.('.project-grid') ||
+        [...m.addedNodes,...m.removedNodes].some(node=>node instanceof Element &&
+          (node.matches('.project-card, .project-grid') || node.querySelector('.project-card'))));
+      if(!cardsChanged) return;
+      updateBuildCounts();
+      if(activeView===views.builds) loadBuildPreviews();
+    }).observe(views.builds,{childList:true,subtree:true});
 
     /* Minimal safe Markdown renderer for the future About copy. */
     const escapeHTML=value=>value.replace(/[&<>"']/g,char=>({
@@ -3744,7 +3649,8 @@
       });
       activeView=name==='home' ? null : views[name];
       home.inert=name!=='home';
-      if(name!=='builds') unloadAllPreviews();
+      setFxView(name);
+      if(name==='builds') loadBuildPreviews();
       if(activeView){
         activeView.scrollTop=0;
         if(focus) requestAnimationFrame(()=>activeView.querySelector('[data-close]')?.focus());
@@ -3771,8 +3677,6 @@
     document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>navigate('home')));
     addEventListener('keydown',event=>{ if(event.key==='Escape' && activeView) navigate('home'); });
     addEventListener('popstate',()=>renderRoute(routeFromLocation(),{focus:false}));
-    addEventListener('pagehide',unloadAllPreviews);
-    document.addEventListener('visibilitychange',()=>{ if(document.hidden) unloadAllPreviews(); });
 
     const initialRoute=routeFromLocation();
     history.replaceState({view:initialRoute},'',routeURL(initialRoute));
