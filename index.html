@@ -2945,7 +2945,6 @@
           </div>
           <div class="quick-honeypot" aria-hidden="true"><label for="quick-hp">Leave this field empty</label><input id="quick-hp" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
           <a class="website-checkout" id="quick-checkout-link" href="https://buy.stripe.com/dRm3cv6038gqckkgze0oM1h" target="_blank" rel="noopener noreferrer">Continue to Stripe checkout · $750 deposit →</a>
-          <button class="quick-contact-submit" type="submit">Send details &amp; continue to checkout →</button>
           <p class="quick-contact-note">Contact delivery is best-effort, never required for checkout. Stripe collects your email; a checkout visit is not payment confirmation.</p>
           <div class="quick-contact-status" id="quick-contact-status" role="status" aria-live="polite"></div>
         </form>
@@ -3001,9 +3000,9 @@
               <p class="estimate-step-sub">Prices update live. Calculator submissions are estimate requests, not Stripe checkout.</p>
             </header>
             <div class="estimate-options" role="group" aria-label="Website size">
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Launch Site Special" data-price="599"><span class="estimate-option-main">Launch Site Special<span class="estimate-option-detail">One sharp page, fast</span></span><span class="estimate-option-meta">$599</span></button>
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="One-Page Lander™" data-price="1500"><span class="estimate-option-main">One-Page Lander™<span class="estimate-option-detail">A single page engineered to convert</span></span><span class="estimate-option-meta">$1,500</span></button>
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Three-Page Custom™" data-price="3000"><span class="estimate-option-main">Three-Page Custom™<span class="estimate-option-detail">Home, work, contact — the full pitch</span></span><span class="estimate-option-meta">$3,000</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="BNDR Lander" data-price="1500" data-pages="1" data-revisions="1"><span class="estimate-option-main">BNDR Lander<span class="estimate-option-detail">1 page · 1 revision</span></span><span class="estimate-option-meta">$1,500</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="BNDR Standard" data-price="3000" data-pages="3" data-revisions="2"><span class="estimate-option-main">BNDR Standard<span class="estimate-option-detail">3 pages · 2 revisions</span></span><span class="estimate-option-meta">$3,000</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="BNDR Expanded" data-price="4500" data-pages="5" data-revisions="3"><span class="estimate-option-main">BNDR Expanded<span class="estimate-option-detail">5 pages · 3 revisions</span></span><span class="estimate-option-meta">$4,500</span></button>
               <button class="estimate-option" type="button" data-estimate-key="size" data-label="Small Business Site™" data-price="6500"><span class="estimate-option-main">Small Business Site™<span class="estimate-option-detail">The complete presence</span></span><span class="estimate-option-meta">$6,500</span></button>
             </div>
           </section>
@@ -3830,8 +3829,8 @@
 
     let selected = null;
     let sending = false;
-    const submit = form.querySelector(".quick-contact-submit");
     const checkoutLink = form.querySelector("#quick-checkout-link");
+    const submit = checkoutLink;
     const money = value => "$" + Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
     const validStripeLink = url => /^https:\/\/buy\.stripe\.com\/[A-Za-z0-9]+$/.test(url || "");
 
@@ -3843,8 +3842,8 @@
     function restoreSubmit() {
       sending = false;
       if (submit) {
-        submit.disabled = false;
-        submit.textContent = "Send details & continue to checkout →";
+        submit.removeAttribute("aria-disabled");
+        submit.textContent = `Continue to Stripe checkout · ${money(selected?.deposit || 750)} deposit →`;
       }
     }
 
@@ -3901,6 +3900,12 @@
       card.querySelector("[data-quick-select]")?.addEventListener("click", () => selectCard(card));
     });
 
+    checkoutLink?.addEventListener("click", event => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      if (!sending) form.requestSubmit();
+    });
+
     function sendContact(payload) {
       const controller = typeof AbortController === "function" ? new AbortController() : null;
       let timeoutId = 0;
@@ -3950,7 +3955,7 @@
       if (!name || !emailIsValid) {
         sending = true;
         if (submit) {
-          submit.disabled = true;
+          submit.setAttribute("aria-disabled", "true");
           submit.textContent = "Opening Stripe checkout…";
         }
         continueToCheckout(
@@ -4004,7 +4009,7 @@
 
       sending = true;
       if (submit) {
-        submit.disabled = true;
+        submit.setAttribute("aria-disabled", "true");
         submit.textContent = "Sending details…";
       }
       setStatus("Trying to send your contact details; checkout stays available regardless.");
@@ -4074,11 +4079,13 @@
     const baseTotal = () => pick.size?.price || 0;
     const addonsTotal = () => pick.addons.reduce((sum, item) => sum + item.price, 0);
     const total = () => baseTotal() + addonsTotal();
+    const deposit = () => total() / 2;
+    const balance = () => total() - deposit();
 
     function updateQuote() {
       totalNode.textContent = pick.size ? money(total()) : "Choose a size";
       subtotalsNode.textContent = pick.size
-        ? `Base price: ${money(baseTotal())} · Add-ons subtotal: ${money(addonsTotal())}`
+        ? `Base price: ${money(baseTotal())} · Add-ons subtotal: ${money(addonsTotal())} · Estimated 50% deposit: ${money(deposit())} · Balance before launch/handoff: ${money(balance())}`
         : "Choose a size to see the base price and add-ons subtotal.";
     }
 
@@ -4103,7 +4110,12 @@
       button.setAttribute("aria-pressed", "true");
 
       if (key === "size") {
-        pick.size = { label: button.dataset.label, price: Number(button.dataset.price) || 0 };
+        pick.size = {
+          label: button.dataset.label,
+          price: Number(button.dataset.price) || 0,
+          pages: Number(button.dataset.pages) || null,
+          revisions: Number(button.dataset.revisions) || null
+        };
         updateQuote();
       } else {
         pick[key] = button.dataset.value;
@@ -4139,12 +4151,15 @@
         "Business type: " + (pick.biz || "—"),
         "Need: " + (pick.need || "—"),
         "Size: " + (pick.size ? `${pick.size.label} (${money(baseTotal())})` : "—"),
+        ...(pick.size?.pages ? [`Pages: ${pick.size.pages}`, `Included revisions: ${pick.size.revisions}`] : []),
         "Build subtotal: " + (pick.size ? money(baseTotal()) : "—"),
         "Add-ons: " + (pick.addons.length ? pick.addons.map(item => `${item.label} (+${money(item.price)})`).join(", ") : "none"),
         "Add-ons subtotal: " + money(addonsTotal()),
         "Timeline: " + (pick.timeline || "—"),
         "Budget comfort: " + (pick.budget || "—"),
         "Estimate shown (total): " + (pick.size ? money(total()) : "not locked"),
+        "Estimated 50% deposit: " + (pick.size ? money(deposit()) : "not locked"),
+        "Estimated balance before launch or handoff: " + (pick.size ? money(balance()) : "not locked"),
         "Payment terms: 50% deposit at checkout; remaining 50% before launch or handoff (confirmed in the quote).",
         "Managed Hosting + Care: $75/month, separate.",
         "Additional approved work: $75/hour.",
@@ -4226,6 +4241,8 @@
         build_subtotal: estimateBaseSubtotal === null ? "—" : money(estimateBaseSubtotal),
         addons_subtotal: money(estimateAddonsSubtotal),
         estimate_total: estimateTotal === null ? "not locked" : money(estimateTotal),
+        estimated_deposit: estimateTotal === null ? "not locked" : money(deposit()),
+        estimated_balance: estimateTotal === null ? "not locked" : money(balance()),
         payment_terms: "50% deposit at checkout; remaining 50% before launch or handoff (confirmed in quote)",
         managed_hosting_care: "$75/month, separate",
         additional_work: "$75/hour, approved work only",
