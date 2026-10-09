@@ -3331,7 +3331,17 @@
       canvas.hidden = true;
       return () => {};
     }
-    const activeDpr = () => Math.min(devicePixelRatio || 1, innerWidth < CONFIG.fx.mobileBreakpoint ? CONFIG.fx.dprMobile : CONFIG.fx.dprDesktop);
+    // Retain the original full-quality ceiling; scale only when device capacity requires it.
+    const constrainedHardware = (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+      (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+    const qualityPresets = [
+      { fps: 60, mobileDpr: CONFIG.fx.dprMobile, desktopDpr: CONFIG.fx.dprDesktop, particles: 1 },
+      { fps: 60, mobileDpr: 1.0, desktopDpr: 1.3, particles: 0.65 },
+      { fps: 30, mobileDpr: 0.85, desktopDpr: 1.0, particles: 0.4 }
+    ];
+    let qualityIndex = constrainedHardware ? 1 : 0;
+    let quality = qualityPresets[qualityIndex];
+    const activeDpr = () => Math.min(devicePixelRatio || 1, innerWidth < CONFIG.fx.mobileBreakpoint ? quality.mobileDpr : quality.desktopDpr);
     renderer.setPixelRatio(activeDpr());
     renderer.setSize(innerWidth, innerHeight, false);
 
@@ -3646,6 +3656,8 @@
     const filamentGeometry = new THREE.BufferGeometry();
     filamentGeometry.setAttribute('position', filamentPositionAttribute);
     filamentGeometry.setAttribute('phase', new THREE.BufferAttribute(filamentPhases, 1));
+    let activeParticles = Math.max(1, Math.round(FILAMENT.count * quality.particles));
+    filamentGeometry.setDrawRange(0, activeParticles);
 
     const filamentMaterial = new THREE.PointsMaterial({
       color: 0xffffff,
@@ -3692,7 +3704,7 @@
       const cursorY = filamentMouse.y * FILAMENT.cursorY;
       const radiusSq = FILAMENT.cursorRadius * FILAMENT.cursorRadius;
 
-      for (let i = 0; i < FILAMENT.count; i++) {
+      for (let i = 0; i < activeParticles; i++) {
         const i3 = i * 3;
         const phaseSin = filamentPhaseSin[i];
         const phaseCos = filamentPhaseCos[i];
@@ -3750,8 +3762,42 @@
     let filamentOpacityTarget = 0;
     let filamentViewActive = false;
     let fxDirty = true;
+    let lastPaint = 0;
+    let lastFrame = started;
+    let slowFrameCount = 0;
+    const changeQuality = level => {
+      if(level <= qualityIndex || level >= qualityPresets.length) return;
+      qualityIndex = level;
+      quality = qualityPresets[level];
+      activeParticles = Math.max(1, Math.round(FILAMENT.count * quality.particles));
+      filamentGeometry.setDrawRange(0, activeParticles);
+      renderer.setPixelRatio(activeDpr());
+      renderer.setSize(innerWidth, innerHeight, false);
+      fxDirty = true;
+    };
     renderer.autoClear = false;
     const tick = now => {
+      const frameGap = now - lastFrame;
+      lastFrame = now;
+      // Do not compute or render the shader when the browser tab is hidden.
+      if(document.hidden){
+        previousTick = now;
+        lastPaint = 0;
+        requestAnimationFrame(tick);
+        return;
+      }
+      // Reduce quality after sustained missed frames, never due to a single navigation pause.
+      if(frameGap > 28 && frameGap < 250) slowFrameCount++;
+      else slowFrameCount = Math.max(0, slowFrameCount - 1);
+      if(slowFrameCount >= 24 && qualityIndex < qualityPresets.length - 1){
+        changeQuality(qualityIndex + 1);
+        slowFrameCount = 0;
+      }
+      if(!fxDirty && now - lastPaint < (1000 / quality.fps) * 0.94){
+        requestAnimationFrame(tick);
+        return;
+      }
+      lastPaint = now;
       /* Seconds-based time matches the supplied reference ticker time scale. */
       uniforms.uTime.value = (now - started) / 1000;
       const dt = Math.min(0.1, Math.max(0, (now - previousTick) / 1000));
@@ -3772,7 +3818,7 @@
       */
       uniforms.uMouse.value.lerp(
         uniforms.uMouseTarget.value,
-        reduceMotion ? 0.018 : 0.05
+        reduceMotion ? 0.018 : (quality.fps < 60 ? 1 - Math.pow(0.95, Math.max(0, dt * 60)) : 0.05)
       );
 
       // Preserve the original morph/fold render. Composite the filament on inner views.
