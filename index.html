@@ -647,14 +647,14 @@
       overflow: hidden;
       background: var(--gradient-card), var(--surface);
       box-shadow: 0 18px 46px rgb(var(--rgb-black) / .15);
-      transition: transform var(--slow) var(--ease), border-color var(--ui) ease, background var(--ui) ease;
+      transition: border-color var(--ui) ease, background var(--ui) ease;
     }
-    .project-card:hover { transform: translateY(-2px); border-color: rgb(var(--rgb-white) / .22); background: var(--surface-hover); }
+    .project-card:hover { border-color: rgb(var(--rgb-white) / .22); background: var(--surface-hover); }
 
     .project-preview {
       position: relative;
       margin: 0;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: 8 / 5;
       overflow: hidden;
       border-bottom: 1px solid var(--line);
       background:
@@ -663,32 +663,19 @@
       box-shadow: var(--shadow-preview);
     }
 
-    .project-preview iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: var(--color-bg);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity var(--ui) ease;
+    .project-card-link { display: block; height: 100%; color: inherit; text-decoration: none; }
+    .project-card-link:focus-visible { outline-offset: -3px; }
+    .project-card:focus-within { border-color: rgb(var(--rgb-warm) / .42); }
+    .project-preview img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+    .project-preview-visit { position: absolute; inset: 0; display: flex; gap: 12px; align-items: center; justify-content: center; color: var(--text-soft); font-size: .8rem; }
+    #builds .project-card { border-radius: 18px; }
+    #builds .project-grid { align-items: stretch; }
+    #builds .project-info { height: 120px; padding: 16px 18px; gap: 12px; align-items: start; }
+    #builds .project-open { align-self: center; }
+    #builds .project-name { font-size: clamp(1rem, 1.4vw, 1.16rem); line-height: 1.3; }
+    @media (min-width: 1100px) {
+      #builds .project-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
-    .project-preview iframe.loaded { opacity: 1; }
-
-    .preview-status {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      padding: var(--s4);
-      color: var(--text-faint);
-      font-size: .61rem;
-      font-weight: var(--weight-medium);
-      letter-spacing: .13em;
-      text-align: center;
-      text-transform: uppercase;
-      pointer-events: none;
-    }
-    .project-preview:has(iframe.loaded) .preview-status { opacity: 0; }
 
     .project-info {
       display: grid;
@@ -720,7 +707,7 @@
       font-size: .78rem;
       line-height: 1.45;
     }
-    .project-link {
+    .project-open {
       min-width: var(--touch);
       min-height: var(--touch);
       display: grid;
@@ -730,9 +717,9 @@
       color: var(--text-strong);
       text-decoration: none;
       font-size: 1rem;
-      transition: border-color var(--fast) ease, background var(--fast) ease, transform var(--fast) ease;
+      transition: border-color var(--fast) ease, background var(--fast) ease;
     }
-    .project-link:hover { border-color: rgb(var(--rgb-white) / .36); background: var(--surface-hover); transform: translate(1px, -1px); }
+    .project-card-link:hover .project-open { border-color: rgb(var(--rgb-white) / .36); background: var(--surface-hover); }
 
     /* MY BUILDS — neutral charcoal hierarchy + render containment */
     #builds {
@@ -751,16 +738,6 @@
         linear-gradient(180deg, rgb(22 24 26), rgb(10 11 12));
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
-    }
-
-    #builds .build-category {
-      content-visibility: auto;
-      contain-intrinsic-size: auto 760px;
-    }
-
-    #builds .project-card {
-      content-visibility: auto;
-      contain-intrinsic-size: auto 390px;
     }
 
     .offer-grid {
@@ -977,7 +954,7 @@
       line-height: 1.35;
     }
 
-    #website .quick-sequence {
+    #website .quick-payment-breakdown {
       display: grid;
       gap: 7px;
       margin: 0 0 var(--s5);
@@ -987,7 +964,7 @@
       background: rgb(var(--rgb-white) / .015);
     }
 
-    #website .quick-sequence-row {
+    #website .quick-payment-row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: var(--s3);
@@ -996,22 +973,17 @@
       line-height: 1.35;
     }
 
-    #website .quick-sequence-row strong {
+    #website .quick-payment-row strong {
       color: var(--text-nav);
       font-weight: var(--weight-medium);
-    }
-
-    #website .quick-sequence-row.is-current {
-      color: var(--text-strong);
-    }
-
-    #website .quick-sequence-row.is-current strong {
-      color: var(--text-strong);
     }
 
     #website .quick-plan-cta {
       position: relative;
       z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
       min-height: 50px;
       margin-top: auto;
@@ -1024,6 +996,9 @@
       cursor: pointer;
       font-size: .78rem;
       font-weight: var(--weight-semibold);
+      line-height: 1.3;
+      text-align: center;
+      text-decoration: none;
       box-shadow:
         inset 0 1px 0 rgb(var(--rgb-white) / .85),
         0 11px 26px rgb(var(--rgb-black) / .30);
@@ -1047,6 +1022,34 @@
       box-shadow:
         inset 0 3px 6px rgb(var(--rgb-black) / .20),
         0 7px 16px rgb(var(--rgb-black) / .25);
+    }
+
+    #website .quick-plan-detail-cta,
+    #website .quick-balance-link {
+      position: relative;
+      z-index: 1;
+      display: block;
+      width: 100%;
+      margin: 10px 0 0;
+      padding: 4px 0;
+      border: 0;
+      background: transparent;
+      color: var(--text-soft);
+      font: inherit;
+      font-size: .66rem;
+      line-height: 1.4;
+      text-align: center;
+      text-decoration: none;
+      text-underline-offset: 4px;
+    }
+
+    #website .quick-plan-detail-cta { cursor: pointer; }
+    #website .quick-plan-detail-cta:hover,
+    #website .quick-plan-detail-cta:focus-visible,
+    #website .quick-balance-link:hover,
+    #website .quick-balance-link:focus-visible {
+      color: #dfc7af;
+      text-decoration: underline;
     }
 
     #website .quick-terms {
@@ -1839,7 +1842,7 @@
     /* FAQ — isolated,
       editorial,
       #website accessible; no existing site geometry altered */
-    .website-faq {
+    #website .website-faq {
       display: grid;
       gap: var(--s5);
       margin-top: clamp(var(--s8), 7vw, var(--s10));
@@ -2086,384 +2089,155 @@
 
     /* Website view only. Shared view styles and the homepage remain unchanged. */
     #website {
-      --website-warm-border: rgb(219 185 154 / .48);
-      --website-warm-border-strong: rgb(230 195 161 / .62);
-      --website-warm-text: #f4e9de;
-      --website-tier-warm: #e6c5a7;
-      --website-muted-warm: #cbb29b;
+      --website-ink: #090a0b;
+      --website-paper: #eaded3;
+      --text-body: rgb(255 255 255 / .76);
+      --text-soft: rgb(255 255 255 / .63);
+      --text-faint: rgb(255 255 255 / .56);
+      --line: rgb(235 224 213 / .12);
+      --line-strong: rgb(235 224 213 / .26);
+      background: linear-gradient(135deg, #161718 0%, #101112 44%, #08090a 100%);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
       isolation: isolate;
-      background:
-        linear-gradient(118deg, transparent 8%, rgb(255 89 32 / .026) 49%, transparent 74%),
-        linear-gradient(135deg, #161718 0%, #101112 44%, #08090a 100%);
-      backdrop-filter: blur(20px) saturate(.92);
-      -webkit-backdrop-filter: blur(20px) saturate(.92);
     }
 
+    /* Upper-right warm light. Pinned to the viewport (no backdrop-filter on #website, which would
+       capture the fixed layer and scroll it away) and drifting only while the page is open. */
     #website::before {
       content: "";
       position: fixed;
-      inset: -6%;
-      z-index: 0;
+      inset: 0;
+      z-index: -1;
       pointer-events: none;
-      transform-origin: 100% 0%;
       background:
         radial-gradient(ellipse 62% 48% at 103% -4%, rgb(255 65 12 / .19), transparent 72%),
-        linear-gradient(132deg, transparent 56%, rgb(255 102 47 / .025) 72%, transparent 88%);
-      will-change: transform;
+        linear-gradient(152deg, transparent 38%, rgb(255 93 30 / .025) 62%, transparent 78%);
+      transform-origin: top right;
     }
 
-    #website.open::before {
-      animation: website-light-drift 18s ease-in-out infinite alternate;
-    }
+    #website.open::before { animation: website-light-drift 18s ease-in-out infinite alternate; }
 
-    #website .view-shell {
+    #website > #fx, #builds > #fx { z-index: 0; }
+    #website > .view-shell, #builds > .view-shell { position: relative; z-index: 1; }
+    #website:has(> #fx:not([hidden]))::before { content: none; animation: none; }
+
+    /* Header */
+    #website > .view-shell {
       position: relative;
-      z-index: 1;
-      padding-top: max(clamp(32px, 5vw, 64px), env(safe-area-inset-top));
+      padding-top: max(clamp(34px, 5vw, 72px), env(safe-area-inset-top));
+      padding-bottom: max(clamp(48px, 7vw, 96px), env(safe-area-inset-bottom));
     }
 
-    #website .view-header {
-      position: relative;
-      gap: clamp(24px, 4vw, 52px);
-      margin-bottom: clamp(52px, 7vw, 88px);
-    }
+    #website .view-header { margin-bottom: clamp(44px, 6vw, 80px); gap: 24px; }
+    #website .view-kicker { color: var(--website-paper); opacity: .72; letter-spacing: .19em; }
+    #website .view-title { max-width: none; }
+    #website .view-intro { max-width: 49ch; margin-top: 22px; line-height: 1.6; }
+    #website .back { border-color: transparent; background: rgb(255 255 255 / .035); border-radius: 14px; }
+    #website .back:hover { border-color: var(--line-strong); }
 
-    #website .view-intro {
-      max-width: 49ch;
-      margin-top: 18px;
-    }
+    /* Package section */
+    #website .quick-pick-pricing { gap: 28px; margin-bottom: 0; }
+    #website .quick-pick-head { padding-top: 0; border-top: 0; gap: 12px; }
+    #website .quick-pick-title { font-size: clamp(1.8rem, 3.3vw, 2.7rem); }
+    #website .quick-pick-lead { max-width: 65ch; }
+    #website .quick-pick-grid { gap: 22px; align-items: stretch; }
 
-    #website .view-kicker {
-      color: #eaded3;
-    }
-
-    #website .back {
-      min-height: 44px;
-      border: 1px solid rgb(255 255 255 / .09);
-      border-radius: 14px;
-      background: rgb(9 10 11 / .58);
-      color: rgb(244 233 222 / .76);
-      box-shadow: inset 0 1px 0 rgb(255 255 255 / .025);
-    }
-
-    #website .back:hover,
-    #website .back:focus-visible {
-      border-color: rgb(219 185 154 / .22);
-      background: rgb(18 18 18 / .76);
-    }
-
+    /* Package cards. --plan-light-x / --plan-light-y follow the cursor (pointermove handler in the __BNDR_WEBSITE_SURFACE__ script). */
     #website .quick-plan {
-      --plan-light-x: 84%;
+      --plan-light-x: 82%;
       --plan-light-y: 0%;
-      --plan-light-alpha: .115;
-      border: 1px solid rgb(255 255 255 / .105);
+      padding: clamp(24px, 2.5vw, 32px);
+      border-color: rgb(235 224 213 / .13);
       border-radius: 22px;
-      background:
-        radial-gradient(circle 260px at var(--plan-light-x) var(--plan-light-y), rgb(255 111 55 / var(--plan-light-alpha)), transparent 68%),
-        linear-gradient(146deg, #292725 0%, #1c1c1c 35%, #121415 100%);
+      background: linear-gradient(146deg, #292725 0%, #1c1c1c 35%, #121415 100%);
       box-shadow:
-        inset 0 1px 0 rgb(255 222 194 / .11),
-        inset 0 -1px 0 rgb(0 0 0 / .38),
-        0 30px 72px rgb(0 0 0 / .38);
-      transition:
-        transform var(--ui) var(--ease),
-        border-color var(--ui) ease,
-        box-shadow var(--ui) var(--ease),
-        background var(--ui) ease;
+        inset 0 1px 0 rgb(255 243 230 / .14),
+        inset -1px 0 0 rgb(255 243 230 / .025),
+        0 22px 44px -16px rgb(0 0 0 / .5);
+      transition: transform 380ms var(--ease), border-color 280ms ease, box-shadow 380ms ease;
     }
 
-    #website .quick-plan::after {
+    #website .quick-plan::before {
       content: "";
       position: absolute;
       inset: 0;
       pointer-events: none;
-      border-radius: inherit;
-      background: linear-gradient(180deg, rgb(255 232 211 / .035), transparent 22%);
-      transform: none;
-      transition: opacity var(--ui) ease;
-      opacity: .78;
+      background: radial-gradient(ellipse 85% 72% at var(--plan-light-x) var(--plan-light-y), rgb(230 199 168 / .075), transparent 78%);
+      opacity: .5;
+      transition: opacity 320ms ease;
     }
+
+    #website .quick-plan::after { content: none; }
+    #website .quick-plan > * { position: relative; z-index: 1; }
 
     #website .quick-plan:hover {
-      --plan-light-alpha: .18;
       transform: translateY(-3px);
-      border-color: rgb(230 195 161 / .34);
+      border-color: rgb(235 224 213 / .24);
       box-shadow:
-        inset 0 1px 0 rgb(255 225 201 / .16),
-        inset 0 -1px 0 rgb(0 0 0 / .42),
-        0 38px 86px rgb(0 0 0 / .48),
-        0 0 32px rgb(255 92 35 / .035);
+        inset 0 1px 0 rgb(255 243 230 / .19),
+        0 28px 52px -18px rgb(0 0 0 / .6);
     }
 
-    #website .quick-plan:hover::after {
-      transform: none;
-      opacity: 1;
-    }
-
-    #website .quick-plan:active {
-      transform: translateY(-1px);
-    }
+    #website .quick-plan:hover::before { opacity: 1; }
 
     #website .quick-plan.is-selected {
-      --plan-light-alpha: .19;
       border-color: rgb(219 185 154 / .48);
-      background:
-        radial-gradient(circle 280px at var(--plan-light-x) var(--plan-light-y), rgb(255 121 66 / var(--plan-light-alpha)), transparent 68%),
-        linear-gradient(146deg, #353029, #23201d 40%, #151617);
+      background: linear-gradient(146deg, #353029, #23201d 40%, #151617);
       box-shadow:
-        inset 0 1px 0 rgb(255 226 199 / .19),
-        inset 0 -1px 0 rgb(0 0 0 / .48),
-        0 36px 92px rgb(0 0 0 / .52),
-        0 0 36px rgb(230 170 119 / .085);
+        inset 0 1px 0 rgb(255 234 211 / .25),
+        0 26px 58px -16px rgb(0 0 0 / .6),
+        0 0 28px -16px rgb(221 137 77 / .25);
     }
 
-    #website .quick-plan h3 {
-      margin-bottom: 14px;
-      color: var(--website-warm-text);
-      font-size: clamp(1.65rem, 2.8vw, 2.25rem);
-      font-weight: var(--weight-book);
-      letter-spacing: -.052em;
-    }
+    #website .quick-plan-top { margin-bottom: 26px; gap: 12px; }
+    #website .quick-plan-badge { border: 0; padding: 0; border-radius: 0; background: transparent; color: var(--text-soft); font-size: .65rem; letter-spacing: .03em; text-transform: none; white-space: normal; text-align: right; }
+    #website .quick-plan h3 { margin: 0 0 12px; color: var(--text-strong); font-size: clamp(1.5rem, 2.3vw, 1.95rem); font-weight: var(--weight-book); letter-spacing: -.045em; line-height: 1.1; }
+    #website .quick-plan-spec { min-height: 3em; margin-bottom: 28px; line-height: 1.55; }
 
-    #website .quick-plan-spec {
-      min-height: 0;
-      margin-bottom: clamp(28px, 3.5vw, 40px);
-      color: rgb(255 255 255 / .61);
-    }
+    /* Package price, due-now deposit and balance stay together without customer-order sequencing. */
+    #website .quick-price { gap: 9px; margin-bottom: 24px; }
+    #website .quick-price-current { font-size: clamp(2.7rem, 4.2vw, 3.6rem); color: #f4e9de; font-variant-numeric: tabular-nums; text-shadow: 0 2px 24px rgb(222 178 131 / .09); }
+    #website .quick-price-caption { min-height: 2.7em; max-width: 31ch; line-height: 1.45; }
+    #website .quick-payment-breakdown { padding: 0; gap: 11px; border: 0; background: transparent; border-radius: 0; margin-bottom: 26px; }
+    #website .quick-payment-row { font-size: .72rem; font-weight: var(--weight-light); color: var(--text-soft); }
+    #website .quick-payment-row strong { font-weight: var(--weight-regular); }
 
-    #website .quick-price {
-      gap: 7px;
-      margin-bottom: 22px;
-    }
-
-    #website .quick-price-current {
-      color: #f4e9de;
-      font-size: clamp(2.7rem, 4.2vw, 3.6rem);
-      text-shadow: 0 0 24px rgb(232 186 145 / .075);
-    }
-
-    #website .quick-price-regular {
-      color: rgb(255 255 255 / .43);
-    }
-
-    #website .quick-price-caption {
-      color: rgb(230 197 167 / .62);
-    }
-
-    #website .quick-sequence {
-      gap: 0;
-      margin-bottom: 28px;
-      padding: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-    }
-
-    #website .quick-sequence-row {
-      min-height: 32px;
-      align-items: center;
-      padding: 7px 0;
-      border-top: 1px solid rgb(255 255 255 / .07);
-      color: rgb(255 255 255 / .48);
-      font-size: .72rem;
-      font-weight: var(--weight-light);
-    }
-
-    #website .quick-sequence-row:first-child {
-      border-top: 0;
-    }
-
-    #website .quick-sequence-row strong {
-      color: rgb(255 255 255 / .64);
-      font-weight: var(--weight-regular);
-    }
-
-    #website .quick-sequence-row.is-current,
-    #website .quick-sequence-row.is-current strong {
-      color: #e6c5a7;
-    }
-
-    #website .quick-sequence-row.is-consumed {
-      display: none;
-    }
-
-    #website .quick-terms {
-      gap: clamp(18px, 3vw, 36px);
-      margin-top: clamp(26px, 4vw, 46px);
-    }
-
-    #website .quick-term {
-      padding: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      box-shadow: none;
-    }
-
-    #website .quick-term strong {
-      color: rgb(244 233 222 / .86);
-    }
-
-    #website .quick-term p {
-      color: rgb(255 255 255 / .52);
-    }
-
-    #website .quick-care-list {
-      gap: 6px 14px;
-      margin-top: 12px;
-    }
-
-    #website .quick-care-list span {
-      padding: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      color: rgb(255 255 255 / .39);
-      font-size: .66rem;
-    }
-
-    #website .quick-sale-copy {
-      gap: clamp(30px, 4vw, 48px);
-      padding: clamp(58px, 8vw, 92px) 0 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      box-shadow: none;
-    }
-
-    #website .quick-sale-copy-group {
-      padding: 0;
-      border: 0;
-      border-radius: 0;
-      background: transparent;
-      box-shadow: none;
-    }
-
-    #website .quick-sale-copy-row {
-      color: rgb(255 255 255 / .57);
-      font-weight: var(--weight-light);
-    }
-
-    #website .quick-sale-copy-row strong {
-      color: rgb(244 233 222 / .82);
-      font-weight: var(--weight-regular);
-    }
-
-    #website .quick-pick-contact {
-      border: 1px solid rgb(219 185 154 / .30);
-      border-radius: 22px;
-      background: linear-gradient(140deg, #25211e, #121415 70%);
-      box-shadow:
-        inset 0 1px 0 rgb(255 225 198 / .11),
-        0 32px 82px rgb(0 0 0 / .46);
-    }
-
-    #website .quick-contact-field input,
-    #website .quick-contact-field textarea,
-    #website .estimate-field input,
-    #website .estimate-field textarea {
-      border-color: rgb(255 255 255 / .09);
-      background: rgb(4 5 6 / .52);
-      box-shadow:
-        inset 0 2px 8px rgb(0 0 0 / .38),
-        inset 0 1px 0 rgb(255 255 255 / .018);
-    }
-
-    #website .quick-contact-field input:focus,
-    #website .quick-contact-field textarea:focus,
-    #website .estimate-field input:focus,
-    #website .estimate-field textarea:focus {
-      border-color: rgb(219 185 154 / .34);
-      background: rgb(5 6 7 / .64);
-      box-shadow:
-        inset 0 2px 8px rgb(0 0 0 / .42),
-        0 0 0 3px rgb(219 185 154 / .045);
-    }
-
-    #website .custom-calculator-divider {
-      gap: 10px;
-      margin: clamp(52px, 8vw, 96px) 0 clamp(38px, 5vw, 62px);
-      padding-top: 0;
-      border-top: 0;
-    }
-
-    #website .custom-calculator-divider strong {
-      max-width: 30ch;
-      color: var(--website-warm-text);
-      font-size: clamp(1.7rem, 3.3vw, 2.75rem);
-      line-height: 1.04;
-      letter-spacing: -.047em;
-    }
-
-    #website .estimate-flow {
-      gap: 22px;
-      padding-top: 0;
-      border-top: 0;
-    }
-
-    #website .estimate-panel {
-      border: 1px solid rgb(219 185 154 / .18);
-      border-radius: 22px;
-      background: linear-gradient(145deg, #232323 0%, #151617 100%);
-      box-shadow:
-        inset 0 1px 0 rgb(255 226 202 / .10),
-        inset 0 -1px 0 rgb(0 0 0 / .38),
-        0 30px 78px rgb(0 0 0 / .44);
-    }
-
-    #website .estimate-option {
-      border-color: rgb(255 255 255 / .085);
-      background: rgb(7 8 9 / .42);
-      box-shadow: inset 0 1px 0 rgb(255 255 255 / .018);
-    }
-
-    #website .estimate-option:hover,
-    #website .estimate-option:focus-visible {
-      border-color: rgb(219 185 154 / .22);
-      background: rgb(99 70 50 / .12);
-    }
-
-    #website .estimate-option[aria-pressed="true"] {
-      border-color: rgb(219 185 154 / .42);
-      background: rgb(118 81 57 / .18);
-      box-shadow:
-        inset 3px 0 0 #e6c5a7,
-        inset 0 1px 0 rgb(255 226 202 / .05);
-    }
-
-    #website .estimate-progress-track {
-      background: rgb(255 255 255 / .09);
-    }
-
-    #website .estimate-progress-fill {
-      background: #cbb29b;
-      box-shadow: 0 0 14px rgb(203 178 155 / .28);
-    }
-
+    /* Primary buttons: package CTA, contact submit, estimate submit, next step and Stripe checkout (.website-checkout) */
     #website .quick-plan-cta,
     #website .quick-contact-submit,
     #website .estimate-submit,
     #website .estimate-control[data-estimate-next],
-    #website .quick-term-checkout {
+    #website .website-checkout {
       position: relative;
       overflow: hidden;
       min-height: 54px;
-      border: 1px solid rgb(219 185 154 / .52);
+      border: 1px solid rgb(var(--rgb-warm) / .40);
       border-radius: 18px;
       background: var(--gradient-primary);
-      color: rgb(17 14 12 / .94);
       box-shadow: var(--shadow-primary);
-      transition:
-        transform var(--fast) var(--ease),
-        box-shadow var(--fast) var(--ease),
-        filter var(--fast) ease,
-        opacity var(--fast) ease;
+      color: var(--color-ink);
+      font-size: .82rem;
+      font-weight: var(--weight-medium);
+      text-decoration: none;
+      transition: transform 280ms var(--ease), box-shadow 280ms ease, filter 280ms ease;
     }
 
-    #website .estimate-control[data-estimate-next] {
-      padding: 0 20px;
-      font-weight: var(--weight-semibold);
+    /* 680ms moving reflection on the package CTA and Stripe checkout */
+    #website .quick-plan-cta::before,
+    #website .website-checkout::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(112deg, transparent 28%, rgb(255 250 245 / .22) 49%, transparent 68%);
+      transform: translateX(-130%);
     }
+
+    #website .quick-plan-cta:hover::before,
+    #website .quick-plan-cta:focus-visible::before,
+    #website .website-checkout:hover::before,
+    #website .website-checkout:focus-visible::before { animation: website-reflection 680ms var(--ease); }
 
     #website .quick-plan-cta:hover,
     #website .quick-plan-cta:focus-visible,
@@ -2473,99 +2247,108 @@
     #website .estimate-submit:focus-visible,
     #website .estimate-control[data-estimate-next]:hover,
     #website .estimate-control[data-estimate-next]:focus-visible,
-    #website .quick-term-checkout:hover,
-    #website .quick-term-checkout:focus-visible {
+    #website .website-checkout:hover,
+    #website .website-checkout:focus-visible {
+      border-color: rgb(var(--rgb-warm) / .40);
+      background: var(--gradient-primary);
+      color: var(--color-ink);
+      filter: brightness(1.04);
       transform: translateY(-2px);
-      filter: brightness(1.035);
-      box-shadow:
-        inset 0 1px 0 rgb(255 255 255 / .62),
-        0 19px 42px rgb(0 0 0 / .34),
-        0 0 26px rgb(226 180 139 / .07);
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / .64), 0 17px 34px rgb(0 0 0 / .3);
     }
 
-    #website .quick-plan-cta::after,
-    #website .quick-term-checkout::after {
-      content: "";
-      position: absolute;
-      inset: -40% auto -40% -48%;
-      width: 34%;
-      pointer-events: none;
-      background: linear-gradient(100deg, transparent 0%, rgb(255 255 255 / .08) 34%, rgb(255 255 255 / .46) 50%, rgb(255 255 255 / .08) 66%, transparent 100%);
-      transform: skewX(-18deg) translateX(-220%);
-      opacity: 0;
+    #website .website-checkout { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 14px 24px; margin-top: 20px; }
+
+    /* Disabled controls (while sending / after success) stay put */
+    #website .quick-contact-submit:disabled:hover,
+    #website .estimate-submit:disabled:hover,
+    #website .estimate-control[data-estimate-next]:disabled:hover {
+      filter: none;
+      transform: none;
+      box-shadow: var(--shadow-primary);
     }
 
-    #website .quick-plan-cta:hover::after,
-    #website .quick-plan-cta:focus-visible::after,
-    #website .quick-term-checkout:hover::after,
-    #website .quick-term-checkout:focus-visible::after {
-      animation: website-button-sweep 680ms ease-out both;
+    /* Terms, hosting and additional work: quiet supporting information */
+    #website .quick-terms { margin: 14px 0 8px; gap: 24px 48px; }
+    #website .quick-term { padding: 8px 0; border: 0; background: transparent; box-shadow: none; border-radius: 0; }
+    #website .quick-term strong { font-size: .87rem; color: rgb(255 255 255 / .83); }
+    #website .quick-term p { color: var(--text-soft); max-width: 60ch; }
+    #website .quick-care-list { gap: 7px 14px; }
+    #website .quick-care-list span { padding: 0; border: 0; border-radius: 0; background: transparent; font-size: .64rem; color: var(--text-faint); }
+    #website .quick-term-checkout { padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; color: #dfc7af; text-underline-offset: 5px; }
+    #website .quick-term-checkout:hover { background: transparent; text-decoration: underline; }
+
+    /* Introductory pricing: no enclosing border or card */
+    #website .quick-sale-copy { margin-top: clamp(30px, 5vw, 64px); padding: 0; border: 0; gap: 32px; }
+    #website .quick-sale-copy-head { gap: 24px 56px; }
+    #website .quick-sale-copy h3 { font-size: clamp(1.65rem, 2.9vw, 2.3rem); text-shadow: none; }
+    #website .quick-sale-copy-lead { color: var(--text-body); }
+    #website .quick-sale-copy-grid { gap: 28px 56px; }
+    #website .quick-sale-copy-group { padding: 0; border: 0; background: transparent; box-shadow: none; border-radius: 0; gap: 16px; }
+    #website .quick-sale-copy-row { border-color: rgb(255 255 255 / .07); }
+    #website .quick-sale-copy-body { gap: 28px 56px; }
+    #website .quick-sale-copy-col { padding-top: 0; border: 0; gap: 12px; }
+
+    /* Contact form */
+    #website .quick-pick-contact {
+      margin-top: 24px;
+      border-color: rgb(227 200 175 / .28);
+      background: linear-gradient(140deg, #25211e, #121415 70%);
+      box-shadow: inset 0 1px 0 rgb(255 235 216 / .10), 0 24px 60px -24px rgb(0 0 0 / .6);
     }
 
-    #website .website-faq {
-      margin-top: clamp(72px, 9vw, 112px);
-      padding-top: 0;
-      border-top: 0;
+    #website .quick-contact-field input,
+    #website .quick-contact-field textarea,
+    #website .estimate-field input,
+    #website .estimate-field textarea {
+      background: rgb(0 0 0 / .2);
+      border-color: rgb(255 255 255 / .16);
+      box-shadow: inset 0 2px 5px rgb(0 0 0 / .12);
     }
 
-    #website .website-faq-list {
-      border-top: 0;
+    #website .quick-contact-field input:focus,
+    #website .quick-contact-field textarea:focus,
+    #website .estimate-field input:focus,
+    #website .estimate-field textarea:focus {
+      border-color: rgb(219 185 154 / .34);
+      background: rgb(0 0 0 / .26);
+      box-shadow: inset 0 2px 5px rgb(0 0 0 / .12), 0 0 0 3px rgb(219 185 154 / .06);
     }
 
-    #website .website-faq-item {
-      border-bottom-color: rgb(255 255 255 / .09);
-    }
+    /* Custom calculator divider + calculator */
+    #website .custom-calculator-divider { margin: clamp(52px, 8vw, 96px) 0 24px; padding-top: 0; border: 0; gap: 12px; }
+    #website .custom-calculator-divider strong { display: block; max-width: 30ch; margin: 0; color: var(--text-strong); font-size: clamp(1.65rem, 3vw, 2.45rem); font-weight: var(--weight-book); line-height: 1.15; letter-spacing: -.04em; }
+    #website .estimate-flow { border: 0; padding-top: 0; gap: 18px; }
+    #website .estimate-panel { background: linear-gradient(140deg, #232323, #151617 68%); border-color: rgb(255 244 231 / .12); border-radius: 22px; box-shadow: inset 0 1px 0 rgb(255 244 231 / .12), 0 24px 56px -20px rgb(0 0 0 / .55); }
+    #website .estimate-option { background: rgb(0 0 0 / .14); border-color: rgb(255 255 255 / .1); border-radius: 14px; }
+    #website .estimate-option:hover, #website .estimate-option:focus-visible { background: rgb(237 214 190 / .06); border-color: rgb(237 214 190 / .28); }
+    #website .estimate-option[aria-pressed="true"] { background: rgb(231 198 167 / .09); border-color: rgb(231 198 167 / .48); box-shadow: inset 3px 0 0 #baa38b; }
+    #website .estimate-progress-fill { background: #cbb29b; box-shadow: 0 0 12px rgb(211 173 138 / .20); }
+    #website .estimate-quote { border-color: rgb(255 255 255 / .09); }
 
-    #website .website-faq-item[open] .website-faq-answer {
-      animation: website-faq-answer-in 220ms ease-out both;
-      transform-origin: 50% 0%;
-    }
+    /* FAQ: no large top divider, subtle item separators, answer eases in */
+    #website .website-faq { margin-top: clamp(52px, 8vw, 96px); padding-top: 0; border-top: 0; }
+    #website .website-faq-item { border-color: rgb(255 255 255 / .10); }
+    #website .website-faq-item[open] .website-faq-answer { animation: website-answer-in 220ms ease-out; }
 
-    @keyframes website-light-drift {
-      from { transform: translate3d(0, 0, 0) scale(1); }
-      to { transform: translate3d(-1.8%, 1.2%, 0) scale(1.045); }
-    }
-
-    @keyframes website-button-sweep {
-      0% { transform: skewX(-18deg) translateX(-220%); opacity: 0; }
-      16% { opacity: .86; }
-      100% { transform: skewX(-18deg) translateX(520%); opacity: 0; }
-    }
-
-    @keyframes website-faq-answer-in {
-      from { opacity: 0; transform: translateY(-3px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes website-light-drift { from { opacity: .72; transform: scale(1); } to { opacity: 1; transform: scale(1.045); } }
+    @keyframes website-reflection { to { transform: translateX(130%); } }
+    @keyframes website-answer-in { from { opacity: .4; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
 
     @media (max-width: 720px) {
-      #website .view-header {
-        grid-template-columns: 1fr;
-        padding-top: 10px;
-        padding-right: 76px;
-        margin-bottom: 48px;
-      }
-
-      #website .back {
-        position: absolute;
-        top: 0;
-        right: 0;
-      }
-
-      #website .view-title {
-        font-size: clamp(2.65rem, 14vw, 4.35rem);
-      }
-
-      #website .quick-plan-spec {
-        min-height: 0 !important;
-      }
-
+      #website .view-header { grid-template-columns: minmax(0, 1fr); position: relative; padding-top: 48px; }
+      #website .view-header > .back { position: absolute; top: 0; right: 0; }
+      #website .view-title { font-size: clamp(2.7rem, 10.5vw, 4rem); }
+      #website .quick-pick-grid { gap: 20px; }
+      #website .quick-plan-spec { min-height: 0; }
+      #website .quick-price-caption { min-height: 0; max-width: none; }
       #website .quick-plan-cta,
+      #website .quick-plan-detail-cta,
       #website .quick-contact-submit,
       #website .estimate-submit,
       #website .estimate-control[data-estimate-next],
-      #website .quick-term-checkout {
-        border-radius: 14px;
-      }
+      #website .website-checkout { border-radius: 14px; }
+      #website .quick-terms { gap: 20px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -2577,23 +2360,25 @@
       #website *::after {
         animation: none !important;
         transition: none !important;
-        scroll-behavior: auto !important;
       }
 
-      #website::before,
-      #website.open::before,
       #website .quick-plan:hover,
       #website .quick-plan:active,
       #website .quick-plan-cta:hover,
       #website .quick-plan-cta:focus-visible,
+      #website .quick-plan-cta:active,
       #website .quick-contact-submit:hover,
       #website .quick-contact-submit:focus-visible,
+      #website .quick-contact-submit:active,
       #website .estimate-submit:hover,
       #website .estimate-submit:focus-visible,
       #website .estimate-control[data-estimate-next]:hover,
       #website .estimate-control[data-estimate-next]:focus-visible,
       #website .quick-term-checkout:hover,
-      #website .quick-term-checkout:focus-visible {
+      #website .quick-term-checkout:focus-visible,
+      #website .quick-term-checkout:active,
+      #website .website-checkout:hover,
+      #website .website-checkout:focus-visible {
         transform: none !important;
       }
     }
@@ -2697,7 +2482,7 @@
           "name": "How does payment work?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "The first three promotional spots are paid in full at checkout at the advertised discounted price. After those are gone, regular-price projects are 50% upfront to start and 50% before launch or handoff. Managed Hosting + Care is separate at $75/month."
+            "text": "Website projects are split into two payments: a 50% deposit at checkout and the remaining 50% before launch or handoff. Managed Hosting + Care is separate at $75/month."
           }
         },
         {
@@ -2836,11 +2621,11 @@
 
     <footer class="home-footer fade-up">
       <nav class="legal-line" aria-label="Legal">
-        <a class="footer-link" href="https://www.dropbox.com/scl/fi/kojw24oymxcuku5r2nupj/terms.html?rlkey=zlta95mcdxzqd9qjkbk38alhl&st=ugdtvjaf&dl=0" target="_blank" rel="noopener noreferrer">privacy</a>
+        <a class="footer-link" href="https://www.dropbox.com/scl/fi/um6xi0vfzj0w03kgxtrq2/privacy.html?rlkey=6ylhioa276mrynqylvxc19u7v&st=6fkv1uaf&dl=0" target="_blank" rel="noopener noreferrer">privacy</a>
         <span class="legal-separator" aria-hidden="true">|</span>
         <span class="copyright">© BNDR LLC</span>
         <span class="legal-separator" aria-hidden="true">|</span>
-        <a class="footer-link" href="https://www.dropbox.com/scl/fi/um6xi0vfzj0w03kgxtrq2/privacy.html?rlkey=6ylhioa276mrynqylvxc19u7v&st=6fkv1uaf&dl=0" target="_blank" rel="noopener noreferrer">terms</a>
+        <a class="footer-link" href="https://www.dropbox.com/scl/fi/kojw24oymxcuku5r2nupj/terms.html?rlkey=zlta95mcdxzqd9qjkbk38alhl&st=ugdtvjaf&dl=0" target="_blank" rel="noopener noreferrer">terms</a>
       </nav>
     </footer>
   </section>
@@ -2849,9 +2634,9 @@
     <section class="view-shell">
       <header class="view-header">
         <section>
-          <p class="view-kicker">Selected work / live previews</p>
+          <p class="view-kicker">Selected work / live projects</p>
           <h2 class="view-title" id="builds-title">My Builds</h2>
-          <p class="view-intro">Websites first, web apps and working systems next, games and interactive builds after — and what’s coming soon at the end. Live previews load only as needed.</p>
+          <p class="view-intro">Websites first, web apps and working systems next, games and interactive builds after — and what’s coming soon at the end. Choose a project to open its live site or app.</p>
         </section>
         <button class="back" type="button" data-close>← Back</button>
       </header>
@@ -2859,69 +2644,106 @@
       <section class="build-category" aria-labelledby="examples-title">
         <header class="category-head">
           <h3 class="category-title" id="examples-title">Website &amp; Design Examples</h3>
-          <span class="category-count">15 examples</span>
+          <span class="category-count">16 examples</span>
         </header>
         <section class="project-grid" aria-label="Website and design examples">
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Jackson's live preview" data-src="https://jacksons-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Jackson's</h4></section><a class="project-link" href="https://jacksons-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Jackson's live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Liquid Glass live preview" data-src="https://liquidglass-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Interaction Example</p><h4 class="project-name">Liquid Glass</h4></section><a class="project-link" href="https://liquidglass-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Liquid Glass live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Forma live preview" data-src="https://forma-production-8f79.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Design Example</p><h4 class="project-name">Forma</h4></section><a class="project-link" href="https://forma-production-8f79.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Forma live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Editorial Studio live preview" data-src="https://cecy7-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Editorial Studio</h4></section><a class="project-link" href="https://cecy7-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Editorial Studio live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Blackline Tattoo Co. live preview" data-src="https://blackline-production-6c6f.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Blackline Tattoo Co.</h4></section><a class="project-link" href="https://blackline-production-6c6f.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Blackline Tattoo Co. live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Form Studio live preview" data-src="https://immersion-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Form Studio</h4></section><a class="project-link" href="https://immersion-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Form Studio live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Obsidian Linx live preview" data-src="https://obsidian-linxtm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Obsidian Linx™</h4></section><a class="project-link" href="https://obsidian-linxtm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Obsidian Linx live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Evie's Cafe live preview" data-src="https://eviescafe-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Evie&rsquo;s Cafe</h4></section><a class="project-link" href="https://eviescafe-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Evie's Cafe live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Love &amp; Compassion live preview" data-src="https://loveandcompassion-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Love &amp; Compassion</h4></section><a class="project-link" href="https://loveandcompassion-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Love and Compassion live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Epoch &amp; Aura live preview" data-src="https://epochaura-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Epoch &amp; Aura</h4></section><a class="project-link" href="https://epochaura-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Epoch and Aura live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Display Engine live preview" data-src="https://controlled-style-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Design Example</p><h4 class="project-name">Display Engine</h4></section><a class="project-link" href="https://controlled-style-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Display Engine live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Reflex live preview" data-src="https://reflex-production-3af8.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Reflex™</h4></section><a class="project-link" href="https://reflex-production-3af8.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Reflex live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Desert Estates live preview" data-src="https://desertestates-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Desert Estates</h4></section><a class="project-link" href="https://desertestates-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Desert Estates live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Real Code live preview" data-src="https://demo-production-faf4.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Real Code</h4></section><a class="project-link" href="https://demo-production-faf4.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Real Code live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="PixelMelt live preview" data-src="https://pixelmelt-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">FX / Interaction Example</p><h4 class="project-name">PixelMelt</h4></section><a class="project-link" href="https://pixelmelt-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open PixelMelt live">↗</a></header>
-                    </article>
+          <article class="project-card"><a class="project-card-link" href="https://jacksons-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Carrington live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-01.jpg" width="1348" height="936" loading="lazy" decoding="async" alt="Carrington website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Carrington</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://liquidglass-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Liquid Glass live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-02.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Interaction Example</p><h4 class="project-name">Liquid Glass</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://forma-production-8f79.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Forma live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-03.jpg" width="1358" height="933" loading="lazy" decoding="async" alt="Forma website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Design Example</p><h4 class="project-name">Forma</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://cecy7-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Editorial Studio live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-04.jpg" width="1348" height="926" loading="lazy" decoding="async" alt="Editorial Studio website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Editorial Studio</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://blackline-production-6c6f.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Blackline Tattoo Co. live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-05.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="Blackline Tattoo Co. website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Blackline Tattoo Co.</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://immersion-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Form Studio live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-06.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Form Studio</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://obsidian-linxtm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Obsidian Linx™ live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-07.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Obsidian Linx™</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://eviescafe-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Evie’s Cafe live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-08.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="Evie’s Cafe website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Evie&rsquo;s Cafe</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://loveandcompassion-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Love & Compassion live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-09.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="Love & Compassion website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Love &amp; Compassion</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://epochaura-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Epoch & Aura live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-10.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Epoch &amp; Aura</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://controlled-style-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Display Engine live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-11.jpg" width="1348" height="926" loading="lazy" decoding="async" alt="Display Engine website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Design Example</p><h4 class="project-name">Display Engine</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://reflex-production-3af8.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Reflex™ live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-12.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Reflex™</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://desertestates-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Desert Estates live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-13.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Desert Estates</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://demo-production-faf4.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Real Code live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-14.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Real Code</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://pixelmelt-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open PixelMelt live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-15.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">FX / Interaction Example</p><h4 class="project-name">PixelMelt</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://hyperdrive-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Hyper Drive live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-24.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Hyper Drive</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <!-- Extra slots: fill href, data-preview-src, and project name to activate. -->
+          <article class="project-card"><a class="project-card-link" href="https://liquidscroll-production-0ccc.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Liquid Scroll Site live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-30.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Liquid Scroll Site</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Website 02 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Website 02</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Website 03 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Website 03</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Website 04 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Website 04</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Website 05 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Website 05</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Website 06 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Website 06</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Website 07 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Website 07</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Website 08 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Website Example</p><h4 class="project-name">Website 08</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
         </section>
       </section>
 
@@ -2931,51 +2753,105 @@
           <span class="category-count">06 builds</span>
         </header>
         <section class="project-grid" aria-label="Web apps and pilots">
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="MindCan live preview" data-src="https://mindcan-production-1ba2.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Web App / Interactive</p><h4 class="project-name">MindCan™</h4></section><a class="project-link" href="https://mindcan-production-1ba2.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open MindCan live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="BNDR LifeMatrix live preview" data-src="https://bndr-lifematrix-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Web App / System</p><h4 class="project-name">BNDR LifeMatrix</h4></section><a class="project-link" href="https://bndr-lifematrix-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BNDR LifeMatrix live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="QR Resets live preview" data-src="https://qr-resets-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Web App / Pilot</p><h4 class="project-name">QR Resets</h4><p class="project-note">Pilot concept — not an active program.</p></section><a class="project-link" href="https://qr-resets-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open QR Resets live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Solar Expanse live preview" data-src="https://acousticshockwave-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Web App / Interactive</p><h4 class="project-name">Solar Expanse</h4></section><a class="project-link" href="https://acousticshockwave-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Solar Expanse live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="JSON Splitter live preview" data-src="https://json-file-splitter-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Web App / Utility</p><h4 class="project-name">JSON Splitter</h4></section><a class="project-link" href="https://json-file-splitter-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open JSON Splitter live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="SiteScan Pro live preview" data-src="https://ss-production-f357.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">App / Lead Scanner</p><h4 class="project-name">SiteScan Pro</h4></section><a class="project-link" href="https://ss-production-f357.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open SiteScan Pro live">↗</a></header>
-                    </article>
+          <article class="project-card"><a class="project-card-link" href="https://mindcan-production-1ba2.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open MindCan™ live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-16.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="MindCan™ website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / Interactive</p><h4 class="project-name">MindCan™</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://bndr-lifematrix-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BNDR LifeMatrix live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-17.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="BNDR LifeMatrix website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / System</p><h4 class="project-name">BNDR LifeMatrix</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://qr-resets-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open QR Resets live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-18.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="QR Resets website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / Pilot</p><h4 class="project-name">QR Resets</h4><p class="project-note">Pilot concept — not an active program.</p></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://acousticshockwave-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Solar Expanse live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-19.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="Solar Expanse website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / Interactive</p><h4 class="project-name">Solar Expanse</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://json-file-splitter-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open JSON Splitter live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-20.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="JSON Splitter website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / Utility</p><h4 class="project-name">JSON Splitter</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://ss-production-f357.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open SiteScan Pro live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-21.jpg" width="1348" height="926" loading="lazy" decoding="async" alt="SiteScan Pro website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">App / Lead Scanner</p><h4 class="project-name">SiteScan Pro</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <!-- Extra slots: fill href, data-preview-src, and project name to activate. -->
+          <article class="project-card"><a class="project-card-link" href="https://colorslct-production-84f4.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open ColorSLCT live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-27.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / System</p><h4 class="project-name">ColorSLCT</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Web App 04 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / System</p><h4 class="project-name">Web App 04</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Web App 05 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / System</p><h4 class="project-name">Web App 05</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Web App 06 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / System</p><h4 class="project-name">Web App 06</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Web App 07 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / System</p><h4 class="project-name">Web App 07</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Web App 08 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Web App / System</p><h4 class="project-name">Web App 08</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
         </section>
       </section>
 
       <section class="build-category" aria-labelledby="games-title">
         <header class="category-head">
           <h3 class="category-title" id="games-title">Games &amp; Interactive</h3>
-          <span class="category-count">03 builds</span>
+          <span class="category-count">02 builds</span>
         </header>
         <section class="project-grid" aria-label="Games and interactive builds">
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="BMDR live preview" data-src="https://bmdrtm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">BMDR™</h4></section><a class="project-link" href="https://bmdrtm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BMDR live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Rogue Rita live preview" data-src="https://rogue-ritatm-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Rogue Rita™</h4></section><a class="project-link" href="https://rogue-ritatm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Rogue Rita live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Hyper Drive live preview" data-src="https://hyperdrive-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Interactive / Game-adjacent</p><h4 class="project-name">Hyper Drive</h4></section><a class="project-link" href="https://hyperdrive-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Hyper Drive live">↗</a></header>
-                    </article>
+          <article class="project-card"><a class="project-card-link" href="https://bmdrtm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BMDR™ live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-22.jpg" width="1353" height="929" loading="lazy" decoding="async" alt="BMDR™ website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">BMDR™</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://rogue-ritatm-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Rogue Rita™ live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-23.jpg" width="1348" height="926" loading="lazy" decoding="async" alt="Rogue Rita™ website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Rogue Rita™</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <!-- Extra slots: fill href, data-preview-src, and project name to activate. -->
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Game 01 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Game 01</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Game 02 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Game 02</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Game 03 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Game 03</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Game 04 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Game 04</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Game 05 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Game 05</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Game 06 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Game 06</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Game 07 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Game 07</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Game 08 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Game / Interactive</p><h4 class="project-name">Game 08</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
         </section>
       </section>
 
@@ -2985,14 +2861,55 @@
           <span class="category-count">02 builds</span>
         </header>
         <section class="project-grid" aria-label="Coming soon and in-progress builds">
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="KlusterPhuchr Field Terminal live preview" data-src="https://klusterfieldterminal-production.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">KlusterPhuchr™ Field Terminal</h4></section><a class="project-link" href="https://klusterfieldterminal-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open KlusterPhuchr Field Terminal live">↗</a></header>
-                    </article>
-          <article class="project-card">
-                      <figure class="project-preview"><span class="preview-status">Live preview</span><iframe title="Enforced Answer Engine live preview" data-src="https://wrapper-production-8b0e.up.railway.app/" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe></figure>
-                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Enforced Answer Engine</h4></section><a class="project-link" href="https://wrapper-production-8b0e.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Enforced Answer Engine live">↗</a></header>
-                    </article>
+          <article class="project-card"><a class="project-card-link" href="https://klusterfieldterminal-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open KlusterPhuchr™ Field Terminal live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-25.jpg" width="1348" height="840" loading="lazy" decoding="async" alt="KlusterPhuchr™ Field Terminal website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">KlusterPhuchr™ Field Terminal</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://wrapper-production-8b0e.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Enforced Answer Engine live in a new tab">
+                      <figure class="project-preview"><img data-src="assets/project-previews/project-26.jpg" width="1348" height="926" loading="lazy" decoding="async" alt="Enforced Answer Engine website screenshot"></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Enforced Answer Engine</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://bndrvoice-production.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open BNDR Voice live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-28.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">BNDR Voice</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card"><a class="project-card-link" href="https://dream-machine-production-626c.up.railway.app/" target="_blank" rel="noopener noreferrer" aria-label="Open Dream Machine live in a new tab">
+                      <figure class="project-preview" data-preview-src="assets/project-previews/project-29.jpg"><span class="project-preview-visit">Open live <span aria-hidden="true">↗</span></span></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Dream Machine</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <!-- Extra slots: fill href, data-preview-src, and project name to activate. -->
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Upcoming Project 01 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Upcoming Project 01</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Upcoming Project 02 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Upcoming Project 02</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Upcoming Project 03 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Upcoming Project 03</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Upcoming Project 04 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Upcoming Project 04</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Upcoming Project 05 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Upcoming Project 05</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Upcoming Project 06 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Upcoming Project 06</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Upcoming Project 07 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Upcoming Project 07</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
+          <article class="project-card" data-project-slot hidden><a class="project-card-link" href="" target="_blank" rel="noopener noreferrer" aria-label="Open Upcoming Project 08 in a new tab">
+                      <figure class="project-preview" data-preview-src=""></figure>
+                      <header class="project-info"><section><p class="project-type">Coming Soon</p><h4 class="project-name">Upcoming Project 08</h4></section><span class="project-open" aria-hidden="true">↗</span></header>
+                    </a></article>
         </section>
       </section>
     </section>
@@ -3016,8 +2933,8 @@
           <p class="quick-pick-lead">Three fixed-scope options for straightforward builds. If your project needs something outside these packages, the full custom calculator stays right below them.</p>
         </header>
 
-        <div class="quick-pick-grid" role="group" aria-label="Quick-pick website plans">
-          <article class="quick-plan" data-quick-plan="BNDR Lander" data-pages="1" data-revisions="1" data-regular="2500" data-c1="750" data-c2="1000" data-c3="1500"
+        <div class="quick-pick-grid" role="group" aria-label="Fixed-scope website plans">
+          <article class="quick-plan" data-quick-plan="BNDR Lander" data-pages="1" data-revisions="1" data-total="1500" data-deposit="750" data-balance="750"
             data-stripe-product="prod_VARDTC10BAGL7I"
             data-stripe-c1-price="price_1UA6MAGuY1oGAyYSYTGCH0xf"
             data-stripe-c1-link="https://buy.stripe.com/aFacN560340ackkgze0oM0y"
@@ -3025,8 +2942,8 @@
             data-stripe-c2-link="https://buy.stripe.com/6oU6oH4VZ54e8445UA0oM0z"
             data-stripe-c3-price="price_1UA6MLGuY1oGAyYSh6wQSvxR"
             data-stripe-c3-link="https://buy.stripe.com/00wbJ188bgMWesser60oM0A"
-            data-deposit="1250"
-            data-stripe-deposit-link="https://buy.stripe.com/4gM28rgEHcwGgAAdn20oM0M">
+            data-stripe-deposit-link="https://buy.stripe.com/dRm3cv6038gqckkgze0oM1h"
+            data-stripe-balance-link="https://buy.stripe.com/6oUcN5cor40afwwfva0oM1k">
             <div class="quick-plan-top">
               <span class="quick-plan-index">01</span>
               <span class="quick-plan-badge">1 page · 1 revision</span>
@@ -3034,20 +2951,20 @@
             <h3>BNDR Lander</h3>
             <p class="quick-plan-spec">1 page · Included revisions: 1</p>
             <div class="quick-price">
-              <span class="quick-price-regular">Regular <s>$2,500</s></span>
-              <strong class="quick-price-current">$750</strong>
-              <span class="quick-price-caption">Customer 1 · 70% off</span>
+              <span class="quick-price-regular">Project total</span>
+              <strong class="quick-price-current">$1,500</strong>
+              <span class="quick-price-caption">50% deposit at checkout · $750</span>
             </div>
-            <div class="quick-sequence" aria-label="BNDR Lander promotional sequence">
-              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$750</strong></div>
-              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$1,000</strong></div>
-              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$1,500</strong></div>
-              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$1,250</strong></div>
+            <div class="quick-payment-breakdown" aria-label="BNDR Lander payment breakdown">
+              <div class="quick-payment-row"><span>Deposit at checkout · 50%</span><strong>$750</strong></div>
+              <div class="quick-payment-row"><span>Balance before launch/handoff · 50%</span><strong>$750</strong></div>
             </div>
-            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Lander →</button>
+            <a class="quick-plan-cta" data-quick-checkout href="https://buy.stripe.com/dRm3cv6038gqckkgze0oM1h" target="_blank" rel="noopener noreferrer" aria-label="Pay the $750 BNDR Lander deposit with Stripe">Pay 50% deposit · $750 →</a>
+            <button class="quick-plan-detail-cta" type="button" data-quick-select aria-pressed="false">Add contact details (optional) →</button>
+            <a class="quick-balance-link" href="https://buy.stripe.com/6oUcN5cor40afwwfva0oM1k" target="_blank" rel="noopener noreferrer">Already paid the deposit? Pay Lander balance →</a>
           </article>
 
-          <article class="quick-plan" data-quick-plan="BNDR Standard" data-pages="3" data-revisions="2" data-regular="5000" data-c1="1500" data-c2="2000" data-c3="3000"
+          <article class="quick-plan" data-quick-plan="BNDR Standard" data-pages="3" data-revisions="2" data-total="3000" data-deposit="1500" data-balance="1500"
             data-stripe-product="prod_VAREbYCe0EnD4s"
             data-stripe-c1-price="price_1UA6MRGuY1oGAyYS3JwOmg9G"
             data-stripe-c1-link="https://buy.stripe.com/3cI6oH3RVgMW1FGgze0oM0C"
@@ -3055,8 +2972,8 @@
             data-stripe-c2-link="https://buy.stripe.com/cNi28rdsv40adoo82I0oM0D"
             data-stripe-c3-price="price_1UA6MeGuY1oGAyYS5egsbpqp"
             data-stripe-c3-link="https://buy.stripe.com/aFa6oHfADeEO3NOer60oM0E"
-            data-deposit="2500"
-            data-stripe-deposit-link="https://buy.stripe.com/5kQ28r2NR1S2gAA4Qw0oM0O">
+            data-stripe-deposit-link="https://buy.stripe.com/00w4gzagj9kuacc5UA0oM1i"
+            data-stripe-balance-link="https://buy.stripe.com/fZu6oHcor7cm988beU0oM1l">
             <div class="quick-plan-top">
               <span class="quick-plan-index">02</span>
               <span class="quick-plan-badge">3 pages · 2 revisions</span>
@@ -3064,20 +2981,20 @@
             <h3>BNDR Standard</h3>
             <p class="quick-plan-spec">3 pages · Included revisions: 2</p>
             <div class="quick-price">
-              <span class="quick-price-regular">Regular <s>$5,000</s></span>
-              <strong class="quick-price-current">$1,500</strong>
-              <span class="quick-price-caption">Customer 1 · 70% off</span>
+              <span class="quick-price-regular">Project total</span>
+              <strong class="quick-price-current">$3,000</strong>
+              <span class="quick-price-caption">50% deposit at checkout · $1,500</span>
             </div>
-            <div class="quick-sequence" aria-label="BNDR Standard promotional sequence">
-              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$1,500</strong></div>
-              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$2,000</strong></div>
-              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$3,000</strong></div>
-              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$2,500</strong></div>
+            <div class="quick-payment-breakdown" aria-label="BNDR Standard payment breakdown">
+              <div class="quick-payment-row"><span>Deposit at checkout · 50%</span><strong>$1,500</strong></div>
+              <div class="quick-payment-row"><span>Balance before launch/handoff · 50%</span><strong>$1,500</strong></div>
             </div>
-            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Standard →</button>
+            <a class="quick-plan-cta" data-quick-checkout href="https://buy.stripe.com/00w4gzagj9kuacc5UA0oM1i" target="_blank" rel="noopener noreferrer" aria-label="Pay the $1,500 BNDR Standard deposit with Stripe">Pay 50% deposit · $1,500 →</a>
+            <button class="quick-plan-detail-cta" type="button" data-quick-select aria-pressed="false">Add contact details (optional) →</button>
+            <a class="quick-balance-link" href="https://buy.stripe.com/fZu6oHcor7cm988beU0oM1l" target="_blank" rel="noopener noreferrer">Already paid the deposit? Pay Standard balance →</a>
           </article>
 
-          <article class="quick-plan" data-quick-plan="BNDR Expanded" data-pages="5" data-revisions="3" data-regular="7500" data-c1="2250" data-c2="3000" data-c3="4500"
+          <article class="quick-plan" data-quick-plan="BNDR Expanded" data-pages="5" data-revisions="3" data-total="4500" data-deposit="2250" data-balance="2250"
             data-stripe-product="prod_VAREvmRTYNRwQi"
             data-stripe-c1-price="price_1UA6MkGuY1oGAyYSrSMJ4EJu"
             data-stripe-c1-link="https://buy.stripe.com/bJefZh9cf2W61FGgze0oM0G"
@@ -3085,8 +3002,8 @@
             data-stripe-c2-link="https://buy.stripe.com/4gM28rdsvfIS7003Ms0oM0H"
             data-stripe-c3-price="price_1UA6N2GuY1oGAyYS6kTB4ip3"
             data-stripe-c3-link="https://buy.stripe.com/dRm5kD7471S2doo5UA0oM0I"
-            data-deposit="3750"
-            data-stripe-deposit-link="https://buy.stripe.com/00w28r1JN68i4RS82I0oM0Q">
+            data-stripe-deposit-link="https://buy.stripe.com/cNibJ12NR7cm4RSciY0oM1j"
+            data-stripe-balance-link="https://buy.stripe.com/bJe4gzagj2W60BC82I0oM1m">
             <div class="quick-plan-top">
               <span class="quick-plan-index">03</span>
               <span class="quick-plan-badge">5 pages · 3 revisions</span>
@@ -3094,17 +3011,17 @@
             <h3>BNDR Expanded</h3>
             <p class="quick-plan-spec">5 pages · Included revisions: 3</p>
             <div class="quick-price">
-              <span class="quick-price-regular">Regular <s>$7,500</s></span>
-              <strong class="quick-price-current">$2,250</strong>
-              <span class="quick-price-caption">Customer 1 · 70% off</span>
+              <span class="quick-price-regular">Project total</span>
+              <strong class="quick-price-current">$4,500</strong>
+              <span class="quick-price-caption">50% deposit at checkout · $2,250</span>
             </div>
-            <div class="quick-sequence" aria-label="BNDR Expanded promotional sequence">
-              <div class="quick-sequence-row is-current"><span>Customer 1 · 70% off</span><strong>$2,250</strong></div>
-              <div class="quick-sequence-row"><span>Customer 2 · 60% off</span><strong>$3,000</strong></div>
-              <div class="quick-sequence-row"><span>Customer 3 · 40% off</span><strong>$4,500</strong></div>
-              <div class="quick-sequence-row"><span>After first 3 · 50% deposit</span><strong>$3,750</strong></div>
+            <div class="quick-payment-breakdown" aria-label="BNDR Expanded payment breakdown">
+              <div class="quick-payment-row"><span>Deposit at checkout · 50%</span><strong>$2,250</strong></div>
+              <div class="quick-payment-row"><span>Balance before launch/handoff · 50%</span><strong>$2,250</strong></div>
             </div>
-            <button class="quick-plan-cta" type="button" data-quick-select aria-pressed="false">Select BNDR Expanded →</button>
+            <a class="quick-plan-cta" data-quick-checkout href="https://buy.stripe.com/cNibJ12NR7cm4RSciY0oM1j" target="_blank" rel="noopener noreferrer" aria-label="Pay the $2,250 BNDR Expanded deposit with Stripe">Pay 50% deposit · $2,250 →</a>
+            <button class="quick-plan-detail-cta" type="button" data-quick-select aria-pressed="false">Add contact details (optional) →</button>
+            <a class="quick-balance-link" href="https://buy.stripe.com/bJe4gzagj2W60BC82I0oM1m" target="_blank" rel="noopener noreferrer">Already paid the deposit? Pay Expanded balance →</a>
           </article>
         </div>
 
@@ -3126,51 +3043,6 @@
           </article>
         </section>
 
-        <section class="quick-sale-copy" aria-labelledby="sale-copy-title">
-          <header class="quick-sale-copy-head">
-            <section>
-              <p class="quick-sale-copy-kicker">Launch Pricing</p>
-              <h3 id="sale-copy-title">Three spots.<br>Then back to normal.</h3>
-            </section>
-            <p class="quick-sale-copy-lead">I’m opening three custom website spots at stupid-low prices to get some fresh builds out the door.</p>
-          </header>
-
-          <div class="quick-sale-copy-grid">
-            <article class="quick-sale-copy-group">
-              <h4>Regular pricing</h4>
-              <div class="quick-sale-copy-rows">
-                <div class="quick-sale-copy-row"><span>One-page custom site</span><strong>$2,500</strong></div>
-                <div class="quick-sale-copy-row"><span>Three-page custom site</span><strong>$5,000</strong></div>
-                <div class="quick-sale-copy-row"><span>Five-page custom site</span><strong>$7,500</strong></div>
-              </div>
-              <p class="quick-sale-copy-note">50% upfront · 50% before launch or handoff.</p>
-            </article>
-            <article class="quick-sale-copy-group">
-              <h4>First three customers</h4>
-              <div class="quick-sale-copy-rows">
-                <div class="quick-sale-copy-row"><span>First customer</span><strong>70% off</strong></div>
-                <div class="quick-sale-copy-row"><span>Second customer</span><strong>60% off</strong></div>
-                <div class="quick-sale-copy-row"><span>Third customer</span><strong>40% off</strong></div>
-              </div>
-              <p class="quick-sale-copy-note">On every package.</p>
-            </article>
-          </div>
-
-          <div class="quick-sale-copy-body">
-            <section class="quick-sale-copy-col">
-              <p class="quick-sale-copy-label">How the spots work</p>
-              <p>Once the three spots are gone, pricing goes back to normal. Regular builds run 50% upfront, with the balance due before launch or handoff. Each discount link only works while its spot is still open — if the link works, the spot is yours.</p>
-            </section>
-            <section class="quick-sale-copy-col">
-              <p class="quick-sale-copy-label">How I build</p>
-              <p>Every site is a custom build around your business — mobile-ready, handled by me from the first design conversation to the finished build. No agency handoff. I keep the project count low so each site gets the time it deserves.</p>
-              <p>I take pride in the work, and most of it comes through referrals. I pay for referrals too.</p>
-            </section>
-          </div>
-
-          <p class="quick-sale-copy-closer">If price is the reason you’ve been putting off your site, this is probably the cheapest I’m ever going to do it.</p>
-        </section>
-
         <form class="quick-pick-contact" id="quick-pick-contact-form" novalidate aria-label="Quick-pick website request">
           <div class="quick-pick-summary">
             <span class="quick-pick-summary-label">Selected quick-pick</span>
@@ -3185,8 +3057,8 @@
             <div class="quick-contact-field is-wide"><label for="quick-notes">Anything else? (optional)</label><textarea id="quick-notes" name="notes" rows="3" maxlength="900"></textarea></div>
           </div>
           <div class="quick-honeypot" aria-hidden="true"><label for="quick-hp">Leave this field empty</label><input id="quick-hp" name="_honey" type="text" tabindex="-1" autocomplete="off"></div>
-          <button class="quick-contact-submit" type="submit">Claim this plan →</button>
-          <p class="quick-contact-note">This sends the selected plan and your contact details directly to bndr.labs@gmail.com so the current promotional spot can be confirmed.</p>
+          <a class="website-checkout" id="quick-checkout-link" href="https://buy.stripe.com/dRm3cv6038gqckkgze0oM1h" target="_blank" rel="noopener noreferrer">Continue to Stripe checkout · $750 deposit →</a>
+          <p class="quick-contact-note">Contact delivery is best-effort, never required for checkout. Stripe collects your email; a checkout visit is not payment confirmation.</p>
           <div class="quick-contact-status" id="quick-contact-status" role="status" aria-live="polite"></div>
         </form>
 
@@ -3238,12 +3110,12 @@
             <header class="estimate-step-head">
               <span class="estimate-step-index">03</span>
               <h3>Pick a size</h3>
-              <p class="estimate-step-sub">Flat prices — the number you see is the number you pay.</p>
+              <p class="estimate-step-sub">Prices update live. Calculator submissions are estimate requests, not Stripe checkout.</p>
             </header>
             <div class="estimate-options" role="group" aria-label="Website size">
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Launch Site Special" data-price="599"><span class="estimate-option-main">Launch Site Special<span class="estimate-option-detail">One sharp page, fast</span></span><span class="estimate-option-meta">$599</span></button>
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="One-Page Lander™" data-price="2500"><span class="estimate-option-main">One-Page Lander™<span class="estimate-option-detail">A single page engineered to convert</span></span><span class="estimate-option-meta">$2,500</span></button>
-              <button class="estimate-option" type="button" data-estimate-key="size" data-label="Three-Page Custom™" data-price="4500"><span class="estimate-option-main">Three-Page Custom™<span class="estimate-option-detail">Home, work, contact — the full pitch</span></span><span class="estimate-option-meta">$4,500</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="BNDR Lander" data-price="1500" data-pages="1" data-revisions="1"><span class="estimate-option-main">BNDR Lander<span class="estimate-option-detail">1 page · 1 revision</span></span><span class="estimate-option-meta">$1,500</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="BNDR Standard" data-price="3000" data-pages="3" data-revisions="2"><span class="estimate-option-main">BNDR Standard<span class="estimate-option-detail">3 pages · 2 revisions</span></span><span class="estimate-option-meta">$3,000</span></button>
+              <button class="estimate-option" type="button" data-estimate-key="size" data-label="BNDR Expanded" data-price="4500" data-pages="5" data-revisions="3"><span class="estimate-option-main">BNDR Expanded<span class="estimate-option-detail">5 pages · 3 revisions</span></span><span class="estimate-option-meta">$4,500</span></button>
               <button class="estimate-option" type="button" data-estimate-key="size" data-label="Small Business Site™" data-price="6500"><span class="estimate-option-main">Small Business Site™<span class="estimate-option-detail">The complete presence</span></span><span class="estimate-option-meta">$6,500</span></button>
             </div>
           </section>
@@ -3315,9 +3187,10 @@
         </section>
 
         <aside class="estimate-quote" aria-live="polite">
-          <span class="estimate-quote-label">Your flat price</span>
+          <span class="estimate-quote-label">Estimated build total</span>
           <strong class="estimate-quote-value" id="estimate-total">Choose a size</strong>
-          <p class="estimate-quote-note">Flat build price. Managed Hosting + Care is $75/month separate — see the FAQ below.</p>
+          <p class="estimate-quote-note" id="estimate-subtotals">Choose a size to see the base price and add-ons subtotal.</p>
+          <p class="estimate-quote-note">Calculator submissions stay quote requests; no Stripe checkout is started here. Managed Hosting + Care is $75/month separate.</p>
         </aside>
       </form>
 
@@ -3338,7 +3211,7 @@
           <details class="website-faq-item">
             <summary>How does payment work?</summary>
             <div class="website-faq-answer">
-              <p>The first three promotional spots are paid in full at checkout at the advertised discounted price. After those are gone, regular-price projects are <strong>50% upfront to start and 50% before launch or handoff</strong>. Managed Hosting + Care is separate at <strong>$75/month</strong>.</p>
+              <p>Website projects are split into two payments: a <strong>50% deposit at checkout</strong> and the remaining <strong>50% before launch or handoff</strong>. Managed Hosting + Care is separate at <strong>$75/month</strong>.</p>
             </div>
           </details>
 
@@ -3449,9 +3322,26 @@
     if (logo?.complete && !logo.naturalWidth) markLogoFailed();
 
     const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const setFxView = (() => {
     const canvas = document.getElementById('fx');
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance' });
-    const activeDpr = () => Math.min(devicePixelRatio || 1, innerWidth < CONFIG.fx.mobileBreakpoint ? CONFIG.fx.dprMobile : CONFIG.fx.dprDesktop);
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance' });
+    } catch {
+      canvas.hidden = true;
+      return () => {};
+    }
+    // Retain the original full-quality ceiling; scale only when device capacity requires it.
+    const constrainedHardware = (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+      (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+    const qualityPresets = [
+      { fps: 60, mobileDpr: CONFIG.fx.dprMobile, desktopDpr: CONFIG.fx.dprDesktop, particles: 1 },
+      { fps: 60, mobileDpr: 1.0, desktopDpr: 1.3, particles: 0.65 },
+      { fps: 30, mobileDpr: 0.85, desktopDpr: 1.0, particles: 0.4 }
+    ];
+    let qualityIndex = constrainedHardware ? 1 : 0;
+    let quality = qualityPresets[qualityIndex];
+    const activeDpr = () => Math.min(devicePixelRatio || 1, innerWidth < CONFIG.fx.mobileBreakpoint ? quality.mobileDpr : quality.desktopDpr);
     renderer.setPixelRatio(activeDpr());
     renderer.setSize(innerWidth, innerHeight, false);
 
@@ -3474,7 +3364,13 @@
       uColorBg: { value: new THREE.Color('#050505') },
       uColorBase: { value: new THREE.Color('#111111') },
       uColorHeat: { value: new THREE.Color('#ff3300') },
-      uReveal: { value: 1.0 }
+      uReveal: { value: 1.0 },
+      uMorph: { value: 0 },
+      uPage: { value: 0 },
+      uFoldTime: { value: 0 },
+      uFoldPointer: { value: new THREE.Vector2(0, 0) },
+      uPointerActive: { value: 0 },
+      uColorWarm: { value: new THREE.Color('#d8c9b9') }
     };
 
     const material = new THREE.ShaderMaterial({
@@ -3499,6 +3395,12 @@
         uniform vec3 uColorBase;
         uniform vec3 uColorHeat;
         uniform float uReveal;
+        uniform float uMorph;
+        uniform float uPage;
+        uniform float uFoldTime;
+        uniform vec2 uFoldPointer;
+        uniform float uPointerActive;
+        uniform vec3 uColorWarm;
 
         varying vec2 vUv;
 
@@ -3514,7 +3416,7 @@
           smin 1.4
           displacement amplitudes/frequencies/timing .5 / .4 / .15
         */
-        float map(vec3 p) {
+        float homeMap(vec3 p) {
           float d1 = length(p) - 1.2;
 
           vec3 mousePos = vec3(uMouse.x * 6.0, uMouse.y * 6.0, 0.0);
@@ -3528,6 +3430,50 @@
             sin(p.z * 2.0) * 0.15;
 
           return d + disp;
+        }
+
+        // A raymarched sheet with a rounded fold, sharing the Home material.
+        // Website: a broad right-hand fold. Builds: a narrow seam at the margin.
+        float foldCurve(float y) {
+          float aspect = uResolution.x / uResolution.y;
+          float portrait = 1.0 - smoothstep(0.95, 1.28, aspect);
+          float xShift = mix(0.50, 0.18, portrait);
+          float yShift = mix(0.02, -0.18, portrait);
+          float phase = uFoldTime * 6.2831853 / 16.0;
+          float margin = (aspect - xShift) * 4.7 / 2.32 - 0.30;
+          float center = mix(0.45, margin, uPage);
+          float bend = mix(0.32, 0.10, uPage);
+          return center + bend * sin(y * 0.85 + phase)
+            + bend * 0.55 * cos(y * 0.42 - phase);
+        }
+
+        float foldProximity(vec2 point) {
+          float aspect = uResolution.x / uResolution.y;
+          float portrait = 1.0 - smoothstep(0.95, 1.28, aspect);
+          float xShift = mix(0.50, 0.18, portrait);
+          float yShift = mix(0.02, -0.18, portrait);
+          float radius = (2.0 * 4.7 / 2.32) / uResolution.y * 180.0;
+          vec2 pointer = vec2(uFoldPointer.x * aspect - xShift, uFoldPointer.y - yShift) * 4.7 / 2.32;
+          float nearFold = pow(max(0.0, 1.0 - abs(pointer.x - foldCurve(pointer.y)) / radius), 2.0);
+          return pow(max(0.0, 1.0 - length(point - pointer) / radius), 2.0) * nearFold * uPointerActive;
+        }
+
+        float foldMap(vec3 p) {
+          float pixel = (2.0 * 4.7 / 2.32) / uResolution.y;
+          float phase = uFoldTime * 6.2831853 / 16.0;
+          float width = mix(0.46, 0.20, uPage);
+          float across = (p.x - foldCurve(p.y)) / width;
+          float height = mix(0.58, 0.30, uPage) * exp(-across * across)
+            + 0.025 * sin(p.y * 1.15 + phase) * sin(p.x * 0.75 - phase)
+            + 12.0 * pixel * foldProximity(p.xy);
+          float sheet = (abs(p.z - height) - 0.035) / 2.4;
+          return sheet;
+        }
+
+        float map(vec3 p) {
+          if (uMorph <= 0.0) return homeMap(p);
+          if (uMorph >= 1.0) return foldMap(p);
+          return mix(homeMap(p), foldMap(p), uMorph);
         }
 
         vec3 calcNormal(vec3 p) {
@@ -3647,6 +3593,16 @@
             col *= mix(0.88, 1.03, depthFade);
 
             alpha = clamp(0.82 + fresnel * 0.13 + rim * 0.035, 0.82, 0.985);
+
+            if (uMorph > 0.0) {
+              float nearby = foldProximity(p.xy);
+              vec3 cement = mix(uColorBase, uColorWarm, diff * 0.14);
+              cement *= (0.70 + diff * 0.24 + fill * 0.12) * ao;
+              cement += uColorWarm * (spec * 0.14 + rim * 0.05);
+              cement += uColorHeat * nearby * 0.035;
+              col = mix(col, cement, uMorph);
+              alpha = mix(alpha, clamp(0.26 + fresnel * 0.22 + rim * 0.06, 0.26, 0.55), uMorph);
+            }
           }
 
           col = mix(uColorBg, col, uReveal);
@@ -3664,22 +3620,197 @@
 
     scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
 
+    /* FORM STUDIO's filament runs beside the untouched Home shader in the shared renderer. */
+    const filamentIsMobile = matchMedia('(max-width: 767px)').matches;
+    const FILAMENT = Object.freeze({
+      count: filamentIsMobile ? 12000 : 28000,
+      size: filamentIsMobile ? 0.6 : 0.45,
+      opacity: 0.15,
+      positionEase: 0.07,
+      interactionEase: 0.11,
+      cursorRadius: 52,
+      cursorStrength: 1.75,
+      cursorX: 120,
+      cursorY: 60,
+      fadeRate: Math.log(20) / 1.8,
+      frameInterval: 1000 / 60
+    });
+
+    const filamentScene = new THREE.Scene();
+    const filamentCamera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 1000);
+    filamentCamera.position.z = 100;
+
+    const filamentPositions = new Float32Array(FILAMENT.count * 3);
+    const filamentPhases = new Float32Array(FILAMENT.count);
+    const filamentPhaseSin = new Float32Array(FILAMENT.count);
+    const filamentPhaseCos = new Float32Array(FILAMENT.count);
+
+    for (let i = 0; i < FILAMENT.count; i++) {
+      filamentPhases[i] = Math.random() * Math.PI * 2;
+      const phase = filamentPhases[i];
+      filamentPhaseSin[i] = Math.sin(phase);
+      filamentPhaseCos[i] = Math.cos(phase);
+    }
+
+    const filamentPositionAttribute = new THREE.BufferAttribute(filamentPositions, 3);
+    const filamentGeometry = new THREE.BufferGeometry();
+    filamentGeometry.setAttribute('position', filamentPositionAttribute);
+    filamentGeometry.setAttribute('phase', new THREE.BufferAttribute(filamentPhases, 1));
+    let activeParticles = Math.max(1, Math.round(FILAMENT.count * quality.particles));
+    filamentGeometry.setDrawRange(0, activeParticles);
+
+    const filamentMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: FILAMENT.size,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      opacity: 0,
+      depthWrite: false
+    });
+    const filament = new THREE.Points(filamentGeometry, filamentMaterial);
+    filamentScene.add(filament);
+
+    const filamentMouse = new THREE.Vector2(-999, -999);
+    const placeFilament = time => {
+      const sinX = Math.sin(time * 0.10);
+      const cosX = Math.cos(time * 0.10);
+      const sinY = Math.sin(time * 0.12);
+      const cosY = Math.cos(time * 0.12);
+      const sinZ = Math.sin(time * 0.08);
+      const cosZ = Math.cos(time * 0.08);
+
+      for (let i = 0; i < FILAMENT.count; i++) {
+        const i3 = i * 3;
+        const phaseSin = filamentPhaseSin[i];
+        const phaseCos = filamentPhaseCos[i];
+        filamentPositions[i3] = (sinX * phaseCos + cosX * phaseSin) * 180;
+        filamentPositions[i3 + 1] = (cosY * phaseCos - sinY * phaseSin) * 120;
+        filamentPositions[i3 + 2] = (sinZ * phaseCos + cosZ * phaseSin) * 150;
+      }
+      filamentPositionAttribute.needsUpdate = true;
+    };
+    placeFilament(performance.now() * 0.001);
+
+    const animateFilament = (time, frameScale) => {
+      const positionEase = 1 - Math.pow(1 - FILAMENT.positionEase, frameScale);
+      const interactionEase = 1 - Math.pow(1 - FILAMENT.interactionEase, frameScale);
+      const sinX = Math.sin(time * 0.10);
+      const cosX = Math.cos(time * 0.10);
+      const sinY = Math.sin(time * 0.12);
+      const cosY = Math.cos(time * 0.12);
+      const sinZ = Math.sin(time * 0.08);
+      const cosZ = Math.cos(time * 0.08);
+      const cursorX = filamentMouse.x * FILAMENT.cursorX;
+      const cursorY = filamentMouse.y * FILAMENT.cursorY;
+      const radiusSq = FILAMENT.cursorRadius * FILAMENT.cursorRadius;
+
+      for (let i = 0; i < activeParticles; i++) {
+        const i3 = i * 3;
+        const phaseSin = filamentPhaseSin[i];
+        const phaseCos = filamentPhaseCos[i];
+        let tx = (sinX * phaseCos + cosX * phaseSin) * 180;
+        let ty = (cosY * phaseCos - sinY * phaseSin) * 120;
+        const tz = (sinZ * phaseCos + cosZ * phaseSin) * 150;
+        const dx = cursorX - filamentPositions[i3];
+        const dy = cursorY - filamentPositions[i3 + 1];
+        const distSq = dx * dx + dy * dy;
+        let particleEase = positionEase;
+
+        if (distSq < radiusSq) {
+          const proximity = 1 - Math.sqrt(distSq) / FILAMENT.cursorRadius;
+          const force = proximity * proximity * (3 - 2 * proximity);
+          tx -= dx * force * FILAMENT.cursorStrength;
+          ty -= dy * force * FILAMENT.cursorStrength;
+          particleEase += (interactionEase - particleEase) * force;
+        }
+
+        filamentPositions[i3] += (tx - filamentPositions[i3]) * particleEase;
+        filamentPositions[i3 + 1] += (ty - filamentPositions[i3 + 1]) * particleEase;
+        filamentPositions[i3 + 2] += (tz - filamentPositions[i3 + 2]) * positionEase;
+      }
+
+      filamentPositionAttribute.needsUpdate = true;
+      filament.rotation.y += 0.0005 * frameScale;
+    };
+
+    let pointerActiveTarget = 0;
     const updatePointer = (clientX, clientY) => {
+      pointerActiveTarget = 1;
       uniforms.uMouseTarget.value.set(
         (clientX / innerWidth) * 2 - 1,
         -((clientY / innerHeight) * 2 - 1)
       );
+      filamentMouse.copy(uniforms.uMouseTarget.value);
     };
 
     addEventListener('mousemove', e => updatePointer(e.clientX, e.clientY), { passive: true });
     addEventListener('touchmove', e => {
       if (e.touches[0]) updatePointer(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: true });
+    document.addEventListener('mouseleave', () => {
+      pointerActiveTarget = 0;
+      filamentMouse.set(-999, -999);
+    });
 
     const started = performance.now();
+    let previousTick = started;
+    let morphFrom = 0;
+    let morphTarget = 0;
+    let morphStarted = started;
+    let pageTarget = 0;
+    let lastFilamentTick = started - FILAMENT.frameInterval;
+    let filamentOpacityTarget = 0;
+    let filamentViewActive = false;
+    let fxDirty = true;
+    let lastPaint = 0;
+    let lastFrame = started;
+    let slowFrameCount = 0;
+    const changeQuality = level => {
+      if(level <= qualityIndex || level >= qualityPresets.length) return;
+      qualityIndex = level;
+      quality = qualityPresets[level];
+      activeParticles = Math.max(1, Math.round(FILAMENT.count * quality.particles));
+      filamentGeometry.setDrawRange(0, activeParticles);
+      renderer.setPixelRatio(activeDpr());
+      renderer.setSize(innerWidth, innerHeight, false);
+      fxDirty = true;
+    };
+    renderer.autoClear = false;
     const tick = now => {
+      const frameGap = now - lastFrame;
+      lastFrame = now;
+      // Do not compute or render the shader when the browser tab is hidden.
+      if(document.hidden){
+        previousTick = now;
+        lastPaint = 0;
+        requestAnimationFrame(tick);
+        return;
+      }
+      // Reduce quality after sustained missed frames, never due to a single navigation pause.
+      if(frameGap > 28 && frameGap < 250) slowFrameCount++;
+      else slowFrameCount = Math.max(0, slowFrameCount - 1);
+      if(slowFrameCount >= 24 && qualityIndex < qualityPresets.length - 1){
+        changeQuality(qualityIndex + 1);
+        slowFrameCount = 0;
+      }
+      if(!fxDirty && now - lastPaint < (1000 / quality.fps) * 0.94){
+        requestAnimationFrame(tick);
+        return;
+      }
+      lastPaint = now;
       /* Seconds-based time matches the supplied reference ticker time scale. */
       uniforms.uTime.value = (now - started) / 1000;
+      const dt = Math.min(0.1, Math.max(0, (now - previousTick) / 1000));
+      previousTick = now;
+      const response = 1 - Math.exp(-dt * Math.log(10) / 0.18);
+      const progress = reduceMotion ? 1 : Math.min(1, (now - morphStarted) / 800);
+      uniforms.uMorph.value = morphFrom + (morphTarget - morphFrom) * progress * progress * (3 - 2 * progress);
+      uniforms.uPage.value = reduceMotion ? pageTarget : uniforms.uPage.value + (pageTarget - uniforms.uPage.value) * response;
+      uniforms.uFoldTime.value = reduceMotion ? 0 : uniforms.uTime.value;
+      if (!reduceMotion) {
+        uniforms.uFoldPointer.value.lerp(uniforms.uMouseTarget.value, response);
+        uniforms.uPointerActive.value += (pointerActiveTarget - uniforms.uPointerActive.value) * response;
+      }
 
       /*
         Exact supplied cursor interpolation coefficient: 0.05.
@@ -3687,10 +3818,29 @@
       */
       uniforms.uMouse.value.lerp(
         uniforms.uMouseTarget.value,
-        reduceMotion ? 0.018 : 0.05
+        reduceMotion ? 0.018 : (quality.fps < 60 ? 1 - Math.pow(0.95, Math.max(0, dt * 60)) : 0.05)
       );
 
-      renderer.render(scene, camera);
+      // Preserve the original morph/fold render. Composite the filament on inner views.
+      if (reduceMotion) {
+        filamentMaterial.opacity = filamentOpacityTarget;
+      } else {
+        const fadeResponse = 1 - Math.exp(-dt * FILAMENT.fadeRate);
+        filamentMaterial.opacity += (filamentOpacityTarget - filamentMaterial.opacity) * fadeResponse;
+        const filamentVisible = filamentOpacityTarget > 0 || filamentMaterial.opacity > 0.0001;
+        const filamentElapsed = now - lastFilamentTick;
+        if (filamentVisible && !document.hidden && filamentElapsed >= FILAMENT.frameInterval * 0.9) {
+          animateFilament(now * 0.001, Math.min(2, filamentElapsed / FILAMENT.frameInterval));
+          lastFilamentTick = now;
+        }
+      }
+
+      if (!reduceMotion || uniforms.uMorph.value < 1 || fxDirty || filamentMaterial.opacity > 0.0001) {
+        renderer.clear();
+        renderer.render(scene, camera);
+        if (filamentMaterial.opacity > 0.0001) renderer.render(filamentScene, filamentCamera);
+      }
+      fxDirty = false;
       requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
@@ -3699,7 +3849,27 @@
       renderer.setPixelRatio(activeDpr());
       renderer.setSize(innerWidth, innerHeight, false);
       uniforms.uResolution.value.set(innerWidth, innerHeight);
+      filamentCamera.aspect = innerWidth / innerHeight;
+      filamentCamera.updateProjectionMatrix();
+      fxDirty = true;
     }, { passive: true });
+
+    return name => {
+      const inner = name === 'website' || name === 'builds';
+      (inner ? document.getElementById(name) : document.body).prepend(canvas);
+      morphFrom = uniforms.uMorph.value;
+      morphTarget = inner ? 1 : 0;
+      morphStarted = performance.now();
+      pageTarget = name === 'builds' ? 1 : 0;
+      pointerActiveTarget = 0;
+      if (inner && !filamentViewActive && filamentMaterial.opacity <= 0.0001) {
+        placeFilament(reduceMotion ? 0 : performance.now() * 0.001);
+      }
+      filamentOpacityTarget = inner ? FILAMENT.opacity : 0;
+      filamentViewActive = inner;
+      fxDirty = true;
+    };
+    })();
 
     document.querySelectorAll('.action').forEach(action=>{
       action.addEventListener('pointermove',e=>{
@@ -3718,209 +3888,57 @@
     let activeView=null;
     let lastTrigger=null;
 
-    /*
-      Live-preview budget:
-      - desktop/tablet: max 2 app runtimes alive
-      - mobile: max 1
-      - only ONE heavy cross-origin app is allowed to boot at a time
-      - frames load only when actually near/inside the Builds viewport
-      - offscreen frames unload quickly and all frames unload when Builds closes
-      - future project cards are observed automatically
-      Direct project links remain the authoritative fallback for apps that disallow iframe embedding.
-    */
-    const previewLimit=matchMedia('(max-width: 720px)').matches ? 1 : 2;
-    const previewBootLimit=1;
-    const activePreviews=[];
-    const visiblePreviews=new Set();
-    const queuedPreviews=[];
-    const loadingFrames=new Set();
-    const unloadTimers=new WeakMap();
-    const previewVersions=new WeakMap();
-
-    const statusFor=card=>card.querySelector('.preview-status');
-    const frameFor=card=>card.querySelector('iframe[data-src]');
-
-    const removeActivePreview=card=>{
-      const index=activePreviews.indexOf(card);
-      if(index>=0) activePreviews.splice(index,1);
-    };
-
-    const removeQueuedPreview=card=>{
-      const index=queuedPreviews.indexOf(card);
-      if(index>=0) queuedPreviews.splice(index,1);
-    };
-
-    const nextPreviewVersion=frame=>{
-      const version=(previewVersions.get(frame) || 0) + 1;
-      previewVersions.set(frame,version);
-      return version;
-    };
-
-    let drainPreviewQueue=()=>{};
-
-    const releaseBootSlot=frame=>{
-      if(!loadingFrames.delete(frame)) return;
-      queueMicrotask(drainPreviewQueue);
-    };
-
-    const unloadPreview=card=>{
-      const timer=unloadTimers.get(card);
-      if(timer){ clearTimeout(timer); unloadTimers.delete(card); }
-
-      removeQueuedPreview(card);
-
-      const frame=frameFor(card);
-      if(!frame) return;
-
-      nextPreviewVersion(frame);
-      releaseBootSlot(frame);
-      frame.classList.remove('loaded');
-
-      if(frame.hasAttribute('src')){
-        frame.src='about:blank';
-        frame.removeAttribute('src');
-      }
-
-      const status=statusFor(card);
-      if(status) status.textContent='Live preview';
-      removeActivePreview(card);
-      queueMicrotask(drainPreviewQueue);
-    };
-
-    const loadPreviewNow=card=>{
-      const frame=frameFor(card);
-      if(
-        !frame ||
-        frame.hasAttribute('src') ||
-        !visiblePreviews.has(card) ||
-        activePreviews.length>=previewLimit ||
-        loadingFrames.size>=previewBootLimit
-      ) return false;
-
-      const timer=unloadTimers.get(card);
-      if(timer){ clearTimeout(timer); unloadTimers.delete(card); }
-
-      const status=statusFor(card);
-      if(status) status.textContent='Loading live preview';
-
-      frame.classList.remove('loaded');
-      frame.loading='lazy';
-      frame.setAttribute('fetchpriority','low');
-
-      const expectedURL=frame.dataset.src;
-      const version=nextPreviewVersion(frame);
-      let settled=false;
-
-      loadingFrames.add(frame);
-      activePreviews.push(card);
-
-      const timeout=setTimeout(()=>{
-        if(
-          settled ||
-          previewVersions.get(frame)!==version ||
-          !frame.hasAttribute('src')
-        ) return;
-        if(status) status.textContent='Open live ↗';
-        releaseBootSlot(frame);
-      },8000);
-
-      frame.addEventListener('load',()=>{
-        if(
-          previewVersions.get(frame)!==version ||
-          !frame.hasAttribute('src') ||
-          frame.getAttribute('src')!==expectedURL
-        ) return;
-
-        settled=true;
-        clearTimeout(timeout);
-        frame.classList.add('loaded');
-        releaseBootSlot(frame);
-      },{once:true});
-
-      frame.src=expectedURL;
-      return true;
-    };
-
-    drainPreviewQueue=()=>{
-      if(loadingFrames.size>=previewBootLimit || activePreviews.length>=previewLimit) return;
-
-      while(queuedPreviews.length){
-        const card=queuedPreviews.shift();
-        if(!visiblePreviews.has(card)) continue;
-        if(loadPreviewNow(card)) return;
-      }
-    };
-
-    const queuePreview=card=>{
-      if(!card || !visiblePreviews.has(card)) return;
-      const frame=frameFor(card);
-      if(!frame || frame.hasAttribute('src') || queuedPreviews.includes(card)) return;
-      queuedPreviews.push(card);
-      drainPreviewQueue();
-    };
-
-    const previewObserver=new IntersectionObserver(entries=>{
-      entries.forEach(entry=>{
-        const card=entry.target;
-
-        if(entry.isIntersecting){
-          visiblePreviews.add(card);
-          const timer=unloadTimers.get(card);
-          if(timer){ clearTimeout(timer); unloadTimers.delete(card); }
-          queuePreview(card);
-          return;
+    // Existing published cards retain their fallback; reserved slots need a working preview and link.
+    const loadBuildPreviews=()=>{
+      views.builds.querySelectorAll('.project-preview[data-preview-src]').forEach(preview=>{
+        const card=preview.closest('.project-card');
+        const slot=card.hasAttribute('data-project-slot');
+        const src=preview.dataset.previewSrc.trim();
+        if(slot){
+          const url=card.querySelector('.project-card-link')?.getAttribute('href')?.trim() || '';
+          if(!src || !/^https?:\/\//i.test(url)) return;
         }
-
-        visiblePreviews.delete(card);
-        removeQueuedPreview(card);
-
-        if(!frameFor(card)?.hasAttribute('src')) return;
-        const timer=setTimeout(()=>unloadPreview(card),450);
-        unloadTimers.set(card,timer);
+        const image=document.createElement('img');
+        image.loading=slot?'eager':'lazy';
+        image.decoding='async';
+        image.alt=`${card.querySelector('.project-name').textContent} preview`;
+        image.style.opacity='0';
+        image.addEventListener('load',()=>{
+          image.style.removeProperty('opacity');
+          preview.querySelector('.project-preview-visit')?.remove();
+          if(slot){
+            preview.append(image);
+            card.querySelector('.project-card-link').setAttribute('aria-label',`Open ${card.querySelector('.project-name').textContent} in a new tab`);
+            card.hidden=false;
+            updateBuildCounts();
+          }
+        },{once:true});
+        image.addEventListener('error',()=>image.remove(),{once:true});
+        image.src=src;
+        preview.removeAttribute('data-preview-src');
+        if(!slot) preview.append(image);
       });
-    },{root:views.builds,rootMargin:'200px 0px',threshold:.08});
-
+      views.builds.querySelectorAll('.project-preview img[data-src]').forEach(image=>{
+        image.src=image.dataset.src;
+        image.removeAttribute('data-src');
+      });
+    };
     const updateBuildCounts=()=>{
       views.builds.querySelectorAll('.build-category').forEach(category=>{
-        const count=category.querySelectorAll(':scope > .project-grid > .project-card').length;
+        const count=category.querySelectorAll(':scope > .project-grid > .project-card:not([hidden])').length;
         const output=category.querySelector('.category-count');
-        if(!output) return;
-        const label=category.getAttribute('aria-labelledby')==='examples-title'
-          ? `${String(count).padStart(2,'0')} ${count===1?'example':'examples'}`
-          : `${String(count).padStart(2,'0')} ${count===1?'build':'builds'}`;
-        output.textContent=label;
+        if(output) output.textContent=`${String(count).padStart(2,'0')} ${category.getAttribute('aria-labelledby')==='examples-title' ? (count===1?'example':'examples') : (count===1?'build':'builds')}`;
       });
     };
-
-    const registerProjectCard=card=>{
-      if(!(card instanceof Element) || !card.matches('.project-card')) return;
-      previewObserver.observe(card);
-    };
-
-    views.builds.querySelectorAll('.project-card').forEach(registerProjectCard);
     updateBuildCounts();
-
-    const buildMutationObserver=new MutationObserver(mutations=>{
-      let changed=false;
-      mutations.forEach(mutation=>{
-        mutation.addedNodes.forEach(node=>{
-          if(!(node instanceof Element)) return;
-          if(node.matches('.project-card')){ registerProjectCard(node); changed=true; }
-          node.querySelectorAll?.('.project-card').forEach(card=>{
-            registerProjectCard(card);
-            changed=true;
-          });
-        });
-      });
-      if(changed) updateBuildCounts();
-    });
-    buildMutationObserver.observe(views.builds,{childList:true,subtree:true});
-
-    const unloadAllPreviews=()=>{
-      queuedPreviews.splice(0);
-      visiblePreviews.clear();
-      [...activePreviews].forEach(unloadPreview);
-    };
+    new MutationObserver(mutations=>{
+      const cardsChanged=mutations.some(m=>m.target.matches?.('.project-grid') ||
+        [...m.addedNodes,...m.removedNodes].some(node=>node instanceof Element &&
+          (node.matches('.project-card, .project-grid') || node.querySelector('.project-card'))));
+      if(!cardsChanged) return;
+      updateBuildCounts();
+      if(activeView===views.builds) loadBuildPreviews();
+    }).observe(views.builds,{childList:true,subtree:true});
 
     /* Minimal safe Markdown renderer for the future About copy. */
     const escapeHTML=value=>value.replace(/[&<>"']/g,char=>({
@@ -3984,7 +4002,8 @@
       });
       activeView=name==='home' ? null : views[name];
       home.inert=name!=='home';
-      if(name!=='builds') unloadAllPreviews();
+      setFxView(name);
+      if(name==='builds') loadBuildPreviews();
       if(activeView){
         activeView.scrollTop=0;
         if(focus) requestAnimationFrame(()=>activeView.querySelector('[data-close]')?.focus());
@@ -4011,8 +4030,6 @@
     document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>navigate('home')));
     addEventListener('keydown',event=>{ if(event.key==='Escape' && activeView) navigate('home'); });
     addEventListener('popstate',()=>renderRoute(routeFromLocation(),{focus:false}));
-    addEventListener('pagehide',unloadAllPreviews);
-    document.addEventListener('visibilitychange',()=>{ if(document.hidden) unloadAllPreviews(); });
 
     const initialRoute=routeFromLocation();
     history.replaceState({view:initialRoute},'',routeURL(initialRoute));
@@ -4033,29 +4050,22 @@
     if (!website) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const cards = Array.from(website.querySelectorAll(".quick-plan"));
 
-    const resetCardLight = card => {
-      card.style.removeProperty("--plan-light-x");
-      card.style.removeProperty("--plan-light-y");
-    };
+    /* Each package card carries its own warm light. On desktop pointers it follows the cursor
+       through --plan-light-x / --plan-light-y; touch input and reduced motion leave it at rest. */
+    const percent = (offset, size) => `${Math.max(0, Math.min(100, offset / size * 100)).toFixed(1)}%`;
 
-    const updateCardLight = (card, event) => {
-      if (!finePointer.matches || reducedMotion.matches) return;
+    const trackPlanLight = (card, event) => {
+      if (reducedMotion.matches || event.pointerType === "touch") return;
       const rect = card.getBoundingClientRect();
-      card.style.setProperty("--plan-light-x", `${event.clientX - rect.left}px`);
-      card.style.setProperty("--plan-light-y", `${event.clientY - rect.top}px`);
+      if (!rect.width || !rect.height) return;
+      card.style.setProperty("--plan-light-x", percent(event.clientX - rect.left, rect.width));
+      card.style.setProperty("--plan-light-y", percent(event.clientY - rect.top, rect.height));
     };
 
-    cards.forEach(card => {
-      card.addEventListener("pointermove", event => updateCardLight(card, event), { passive: true });
-      card.addEventListener("pointerleave", () => resetCardLight(card), { passive: true });
+    website.querySelectorAll(".quick-plan").forEach(card => {
+      card.addEventListener("pointermove", event => trackPlanLight(card, event), { passive: true });
     });
-
-    const resetAllLights = () => cards.forEach(resetCardLight);
-    finePointer.addEventListener?.("change", resetAllLights);
-    reducedMotion.addEventListener?.("change", resetAllLights);
   })();
   </script>
 
@@ -4066,126 +4076,150 @@
     window.__BNDR_QUICK_PICK__ = true;
 
     const OWNER_EMAIL = "bndr.labs@gmail.com";
-    const CURRENT_PROMO_CUSTOMER = 1;
+    const FORM_TIMEOUT_MS = 5000;
     const form = document.getElementById("quick-pick-contact-form");
     const cards = Array.from(document.querySelectorAll(".quick-plan"));
     const summaryName = document.getElementById("quick-pick-summary-name");
     const summaryDetail = document.getElementById("quick-pick-summary-detail");
     const statusNode = document.getElementById("quick-contact-status");
-    if (!form || !cards.length) return;
+    if (!form || !cards.length || !statusNode) return;
 
-    const startedAt = Date.now();
     let selected = null;
     let sending = false;
-
+    const checkoutLink = form.querySelector("#quick-checkout-link");
+    const submit = checkoutLink;
     const money = value => "$" + Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
-
-    cards.forEach(card => {
-      const rows = Array.from(card.querySelectorAll(".quick-sequence-row"));
-      rows.forEach((row, index) => {
-        const promoTier = index < 3 ? index + 1 : 0;
-        const consumed = CURRENT_PROMO_CUSTOMER === 0 ? promoTier > 0 : promoTier > 0 && promoTier < CURRENT_PROMO_CUSTOMER;
-        const current = CURRENT_PROMO_CUSTOMER === 0 ? promoTier === 0 : promoTier === CURRENT_PROMO_CUSTOMER;
-        row.classList.toggle("is-consumed", consumed);
-        row.classList.toggle("is-current", current);
-      });
-
-      const currentPrice = card.querySelector(".quick-price-current");
-      const currentCaption = card.querySelector(".quick-price-caption");
-      if (CURRENT_PROMO_CUSTOMER === 0) {
-        if (currentPrice) currentPrice.textContent = money(Number(card.dataset.deposit));
-        if (currentCaption) currentCaption.textContent = "Regular pricing · 50% deposit";
-      } else {
-        const charge = Number(card.dataset["c" + CURRENT_PROMO_CUSTOMER]);
-        if (currentPrice) currentPrice.textContent = money(charge);
-        if (currentCaption) {
-          const discount = CURRENT_PROMO_CUSTOMER === 1 ? "70% off" : CURRENT_PROMO_CUSTOMER === 2 ? "60% off" : "40% off";
-          currentCaption.textContent = `Customer ${CURRENT_PROMO_CUSTOMER} · ${discount}`;
-        }
-      }
-    });
-
-    function selectCard(card) {
-      const isRegularFallback = CURRENT_PROMO_CUSTOMER === 0;
-      const stripeSlot = `c${CURRENT_PROMO_CUSTOMER}`;
-      selected = {
-        name: card.dataset.quickPlan,
-        pages: Number(card.dataset.pages),
-        revisions: Number(card.dataset.revisions),
-        regular: Number(card.dataset.regular),
-        charge: isRegularFallback
-          ? Number(card.dataset.deposit)
-          : Number(card.dataset["c" + CURRENT_PROMO_CUSTOMER]),
-        paymentType: isRegularFallback ? "50% project deposit" : `Customer ${CURRENT_PROMO_CUSTOMER} promotional payment`,
-        stripeProductId: card.dataset.stripeProduct,
-        stripePriceId: isRegularFallback
-          ? ""
-          : card.dataset[`stripe${stripeSlot.charAt(0).toUpperCase() + stripeSlot.slice(1)}Price`],
-        stripeCheckoutUrl: isRegularFallback
-          ? card.dataset.stripeDepositLink
-          : card.dataset[`stripe${stripeSlot.charAt(0).toUpperCase() + stripeSlot.slice(1)}Link`]
-      };
-
-      cards.forEach(item => {
-        const active = item === card;
-        item.classList.toggle("is-selected", active);
-        const button = item.querySelector("[data-quick-select]");
-        button.setAttribute("aria-pressed", String(active));
-        button.textContent = active ? "Selected ✓" : `Select ${item.dataset.quickPlan} →`;
-      });
-
-      summaryName.textContent = selected.name;
-      summaryDetail.textContent =
-        `${selected.pages} page${selected.pages === 1 ? "" : "s"} · ${selected.revisions} included revision${selected.revisions === 1 ? "" : "s"} · ` +
-        (CURRENT_PROMO_CUSTOMER === 0
-          ? `Regular ${money(selected.regular)} total · 50% deposit ${money(selected.charge)} · remaining 50% due before launch/handoff · Managed Hosting + Care $75/month`
-          : `Customer ${CURRENT_PROMO_CUSTOMER}: ${money(selected.charge)} · Regular ${money(selected.regular)} · Managed Hosting + Care $75/month`);
-
-      form.classList.add("is-open");
-      form.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      requestAnimationFrame(() => form.querySelector("#quick-name")?.focus({ preventScroll: true }));
-    }
-
-    cards.forEach(card => {
-      card.querySelector("[data-quick-select]").addEventListener("click", () => selectCard(card));
-    });
+    const validStripeLink = url => /^https:\/\/buy\.stripe\.com\/[A-Za-z0-9]+$/.test(url || "");
 
     function setStatus(message, state = "") {
       statusNode.dataset.state = state;
       statusNode.innerHTML = message;
     }
 
-    form.addEventListener("submit", event => {
+    function restoreSubmit() {
+      sending = false;
+      if (submit) {
+        submit.removeAttribute("aria-disabled");
+        submit.textContent = `Continue to Stripe checkout · ${money(selected?.deposit || 750)} deposit →`;
+      }
+    }
+
+    function continueToCheckout(message, state = "", plan = selected) {
+      if (!plan || !validStripeLink(plan.depositUrl)) {
+        setStatus("The selected Stripe link is unavailable. Use the direct deposit link on the package card above.");
+        restoreSubmit();
+        return;
+      }
+      setStatus(message, state);
+      window.setTimeout(() => window.location.assign(plan.depositUrl), 350);
+    }
+
+    function selectCard(card) {
+      selected = {
+        name: card.dataset.quickPlan,
+        pages: Number(card.dataset.pages),
+        revisions: Number(card.dataset.revisions),
+        total: Number(card.dataset.total),
+        deposit: Number(card.dataset.deposit),
+        balance: Number(card.dataset.balance),
+        depositUrl: card.dataset.stripeDepositLink,
+        balanceUrl: card.dataset.stripeBalanceLink
+      };
+
+      cards.forEach(item => {
+        const active = item === card;
+        item.classList.toggle("is-selected", active);
+        const button = item.querySelector("[data-quick-select]");
+        if (button) {
+          button.setAttribute("aria-pressed", String(active));
+          button.textContent = active ? "Details selected ✓" : "Add contact details (optional) →";
+        }
+      });
+
+      summaryName.textContent = selected.name;
+      summaryDetail.textContent =
+        `${selected.pages} page${selected.pages === 1 ? "" : "s"} · ${selected.revisions} included revision${selected.revisions === 1 ? "" : "s"} · ` +
+        `${money(selected.total)} project total · ${money(selected.deposit)} deposit at checkout · ` +
+        `${money(selected.balance)} balance before launch/handoff · Managed Hosting + Care $75/month separate`;
+
+      if (checkoutLink && validStripeLink(selected.depositUrl)) {
+        checkoutLink.href = selected.depositUrl;
+        checkoutLink.textContent = `Continue to Stripe checkout · ${money(selected.deposit)} deposit →`;
+        checkoutLink.setAttribute("aria-label", `Pay the ${money(selected.deposit)} ${selected.name} deposit with Stripe`);
+      }
+
+      form.classList.add("is-open");
+      form.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+      requestAnimationFrame(() => form.querySelector("#quick-name")?.focus({ preventScroll: true }));
+    }
+
+    cards.forEach(card => {
+      card.querySelector("[data-quick-select]")?.addEventListener("click", () => selectCard(card));
+    });
+
+    checkoutLink?.addEventListener("click", event => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      if (!sending) form.requestSubmit();
+    });
+
+    function sendContact(payload) {
+      const controller = typeof AbortController === "function" ? new AbortController() : null;
+      let timeoutId = 0;
+      const request = fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload),
+        ...(controller ? { signal: controller.signal } : {})
+      }).then(async response => {
+        const result = await response.json();
+        const accepted = result && (result.success === true || result.success === "true");
+        if (!response.ok || !accepted) throw new Error("FormSubmit rejected the request");
+        return result;
+      });
+      const timeout = new Promise((_, reject) => {
+        timeoutId = window.setTimeout(() => {
+          try { controller?.abort(); } catch (_) {}
+          reject(new Error("FormSubmit timed out"));
+        }, FORM_TIMEOUT_MS);
+      });
+      return Promise.race([request, timeout]).finally(() => window.clearTimeout(timeoutId));
+    }
+
+    form.addEventListener("submit", async event => {
       event.preventDefault();
       if (sending) return;
 
       if (!selected) {
-        setStatus("Choose BNDR Lander, BNDR Standard, or BNDR Expanded first.");
+        setStatus("Choose a package above, or use one of its direct Stripe links.");
+        return;
+      }
+
+      if (!validStripeLink(selected.depositUrl)) {
+        setStatus("The selected Stripe link is unavailable. Use the direct deposit link on the package card above.");
+        return;
+      }
+      const checkoutPlan = selected;
+
+      if (form.querySelector("#quick-hp").value) {
+        setStatus("The contact request was not sent. Customers can use the direct Stripe deposit link on the package card.");
         return;
       }
 
       const name = form.querySelector("#quick-name").value.trim();
       const email = form.querySelector("#quick-email").value.trim();
-
-      if (form.querySelector("#quick-hp").value) {
-        setStatus("<strong>Got it — it's in my inbox.</strong>", "ok");
-        return;
-      }
-
-      if (Date.now() - startedAt < 4000) {
-        setStatus("That was superhumanly fast — take one more look, then hit send again.");
-        return;
-      }
-
-      if (!name) {
-        setStatus("Add your name, then hit send.");
-        form.querySelector("#quick-name").focus();
-        return;
-      }
-
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-        setStatus("Double-check the email address, then hit send.");
-        form.querySelector("#quick-email").focus();
+      const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+      if (!name || !emailIsValid) {
+        sending = true;
+        if (submit) {
+          submit.setAttribute("aria-disabled", "true");
+          submit.textContent = "Opening Stripe checkout…";
+        }
+        continueToCheckout(
+          "No contact request was sent because the name or email is incomplete. Continuing to Stripe, which collects your email. Payment is not confirmed until Stripe confirms it.",
+          "",
+          checkoutPlan
+        );
         return;
       }
 
@@ -4193,24 +4227,22 @@
       const phone = form.querySelector("#quick-phone").value.trim();
       const notes = form.querySelector("#quick-notes").value.trim();
       const summary = [
-        `Quick-pick plan: ${selected.name}`,
+        `Plan: ${selected.name}`,
         `Pages: ${selected.pages}`,
         `Included revisions: ${selected.revisions}`,
-        `Regular total: ${money(selected.regular)}`,
-        `Payment type: ${selected.paymentType}`,
-        `Amount due now: ${money(selected.charge)}`,
-        ...(CURRENT_PROMO_CUSTOMER === 0 ? [`Remaining balance: ${money(selected.regular - selected.charge)} due before launch or handoff`] : []),
-        `Managed Hosting + Care: $75/month`,
-        `Additional work outside included scope: $75/hour`,
+        `Project total: ${money(selected.total)}`,
+        `50% deposit due at checkout: ${money(selected.deposit)}`,
+        `50% balance due before launch or handoff: ${money(selected.balance)}`,
+        "Managed Hosting + Care: $75/month, separate",
+        "Additional approved work: $75/hour",
         `Business: ${business || "—"}`,
         `Name: ${name}`,
         `Email: ${email}`,
         `Phone: ${phone || "—"}`,
         `Notes: ${notes || "—"}`
       ].join("\n");
-
       const payload = {
-        _subject: `[BNDR QUICK-PICK] ${selected.name} — ${selected.paymentType} — ${money(selected.charge)}`,
+        _subject: `[BNDR WEBSITE] ${selected.name} — ${money(selected.deposit)} deposit`,
         _template: "table",
         _captcha: "false",
         name,
@@ -4220,72 +4252,43 @@
         plan: selected.name,
         pages: String(selected.pages),
         included_revisions: String(selected.revisions),
-        regular_total: money(selected.regular),
-        payment_type: selected.paymentType,
-        amount_due_now: money(selected.charge),
-        promotional_customer: CURRENT_PROMO_CUSTOMER === 0 ? "none — regular 50% deposit" : String(CURRENT_PROMO_CUSTOMER),
-        remaining_balance: CURRENT_PROMO_CUSTOMER === 0 ? money(selected.regular - selected.charge) : "—",
-        managed_hosting_care: "$75/month",
-        additional_work: "$75/hour",
-        stripe_product_id: selected.stripeProductId,
-        stripe_price_id: selected.stripePriceId,
-        stripe_checkout_url: selected.stripeCheckoutUrl,
+        project_total: money(selected.total),
+        deposit_due_at_checkout: money(selected.deposit),
+        balance_due_before_launch_or_handoff: money(selected.balance),
+        payment_terms: "50% deposit at checkout; remaining 50% before launch or handoff",
+        managed_hosting_care: "$75/month, separate",
+        additional_work: "$75/hour, approved work only",
+        stripe_deposit_link: selected.depositUrl,
+        stripe_balance_link: selected.balanceUrl,
         notes,
         page: location.href.split("?")[0]
       };
 
-      const submit = form.querySelector(".quick-contact-submit");
-
-      function restore() {
-        sending = false;
-        submit.disabled = false;
-        submit.textContent = "Claim this plan →";
-      }
-
-      function fallback() {
-        const mail =
-          `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(payload._subject)}` +
-          `&body=${encodeURIComponent(summary)}`;
-        setStatus(`The form service didn't answer, but nothing is lost — <a href="${mail}">send the same request by email in one tap →</a>`);
-        restore();
-      }
-
       sending = true;
-      submit.disabled = true;
-      submit.textContent = "Sending…";
-      setStatus("");
+      if (submit) {
+        submit.setAttribute("aria-disabled", "true");
+        submit.textContent = "Sending details…";
+      }
+      setStatus("Trying to send your contact details; checkout stays available regardless.");
 
+      let contactSent = false;
       try {
-        fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Accept": "application/json" },
-          body: JSON.stringify(payload)
-        })
-          .then(response => {
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json().catch(() => ({}));
-          })
-          .then(() => {
-            setStatus("<strong>Sent.</strong> Opening secure Stripe checkout…", "ok");
-            form.querySelectorAll("input,textarea,button").forEach(node => { node.disabled = true; });
-            if (window.gtag) {
-              try {
-                window.gtag("event", "generate_lead", {
-                  currency: "USD",
-                  value: selected.charge
-                });
-              } catch (_) {}
-            }
-            if (!/^https:\/\/buy\.stripe\.com\//.test(selected.stripeCheckoutUrl || "")) {
-              throw new Error("Missing Stripe checkout URL");
-            }
-            window.setTimeout(() => {
-              window.location.assign(selected.stripeCheckoutUrl);
-            }, 300);
-          })
-          .catch(fallback);
+        await sendContact(payload);
+        contactSent = true;
       } catch (_) {
-        fallback();
+        contactSent = false;
+      }
+
+      if (contactSent && window.gtag) {
+        try {
+          window.gtag("event", "generate_lead", { currency: "USD", value: checkoutPlan.total });
+        } catch (_) {}
+      }
+
+      if (contactSent) {
+        continueToCheckout("<strong>Contact request sent.</strong> Opening Stripe checkout. This is not payment confirmation.", "ok", checkoutPlan);
+      } else {
+        continueToCheckout("Contact request was not delivered. Continuing directly to Stripe checkout; Stripe will collect your email. Payment is not confirmed until Stripe confirms it.", "", checkoutPlan);
       }
     });
   })();
@@ -4304,9 +4307,11 @@
     const progressLabel = document.getElementById("estimate-progress-label");
     const progressFill = document.getElementById("estimate-progress-fill");
     const totalNode = document.getElementById("estimate-total");
+    const subtotalsNode = document.getElementById("estimate-subtotals");
     const statusNode = document.getElementById("estimate-status");
     const startedAt = Date.now();
     const OWNER_EMAIL = "bndr.labs@gmail.com";
+    const FORM_TIMEOUT_MS = 5000;
 
     const pick = {
       biz: null,
@@ -4321,11 +4326,24 @@
     let sending = false;
     let advanceTimer = 0;
 
-    const money = value => "$" + Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 0 });
-    const total = () => (pick.size?.price || 0) + pick.addons.reduce((sum, item) => sum + item.price, 0);
+    const money = value => {
+      const amount = Number(value || 0);
+      return "$" + amount.toLocaleString("en-US", {
+        minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+        maximumFractionDigits: 2
+      });
+    };
+    const baseTotal = () => pick.size?.price || 0;
+    const addonsTotal = () => pick.addons.reduce((sum, item) => sum + item.price, 0);
+    const total = () => baseTotal() + addonsTotal();
+    const deposit = () => total() / 2;
+    const balance = () => total() - deposit();
 
     function updateQuote() {
       totalNode.textContent = pick.size ? money(total()) : "Choose a size";
+      subtotalsNode.textContent = pick.size
+        ? `Base price: ${money(baseTotal())} · Add-ons subtotal: ${money(addonsTotal())} · Estimated 50% deposit: ${money(deposit())} · Balance before launch/handoff: ${money(balance())}`
+        : "Choose a size to see the base price and add-ons subtotal.";
     }
 
     function showStep(index, { focus = true } = {}) {
@@ -4349,7 +4367,12 @@
       button.setAttribute("aria-pressed", "true");
 
       if (key === "size") {
-        pick.size = { label: button.dataset.label, price: Number(button.dataset.price) || 0 };
+        pick.size = {
+          label: button.dataset.label,
+          price: Number(button.dataset.price) || 0,
+          pages: Number(button.dataset.pages) || null,
+          revisions: Number(button.dataset.revisions) || null
+        };
         updateQuote();
       } else {
         pick[key] = button.dataset.value;
@@ -4384,11 +4407,20 @@
       return [
         "Business type: " + (pick.biz || "—"),
         "Need: " + (pick.need || "—"),
-        "Size: " + (pick.size ? `${pick.size.label} (${money(pick.size.price)})` : "—"),
+        "Size: " + (pick.size ? `${pick.size.label} (${money(baseTotal())})` : "—"),
+        ...(pick.size?.pages ? [`Pages: ${pick.size.pages}`, `Included revisions: ${pick.size.revisions}`] : []),
+        "Build subtotal: " + (pick.size ? money(baseTotal()) : "—"),
         "Add-ons: " + (pick.addons.length ? pick.addons.map(item => `${item.label} (+${money(item.price)})`).join(", ") : "none"),
+        "Add-ons subtotal: " + money(addonsTotal()),
         "Timeline: " + (pick.timeline || "—"),
         "Budget comfort: " + (pick.budget || "—"),
-        "Estimate shown: " + (pick.size ? money(total()) : "not locked")
+        "Estimate shown (total): " + (pick.size ? money(total()) : "not locked"),
+        "Estimated 50% deposit: " + (pick.size ? money(deposit()) : "not locked"),
+        "Estimated balance before launch or handoff: " + (pick.size ? money(balance()) : "not locked"),
+        "Payment terms: 50% deposit at checkout; remaining 50% before launch or handoff (confirmed in the quote).",
+        "Managed Hosting + Care: $75/month, separate.",
+        "Additional approved work: $75/hour.",
+        "Next step: quote request only; no Stripe checkout is initiated by this calculator."
       ].join("\n");
     }
 
@@ -4397,7 +4429,30 @@
       statusNode.innerHTML = message;
     }
 
-    form.addEventListener("submit", event => {
+    function sendEstimate(payload) {
+      const controller = typeof AbortController === "function" ? new AbortController() : null;
+      let timeoutId = 0;
+      const request = fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload),
+        ...(controller ? { signal: controller.signal } : {})
+      }).then(async response => {
+        const result = await response.json();
+        const accepted = result && (result.success === true || result.success === "true");
+        if (!response.ok || !accepted) throw new Error("FormSubmit rejected the estimate request");
+        return result;
+      });
+      const timeout = new Promise((_, reject) => {
+        timeoutId = window.setTimeout(() => {
+          try { controller?.abort(); } catch (_) {}
+          reject(new Error("FormSubmit timed out"));
+        }, FORM_TIMEOUT_MS);
+      });
+      return Promise.race([request, timeout]).finally(() => window.clearTimeout(timeoutId));
+    }
+
+    form.addEventListener("submit", async event => {
       event.preventDefault();
       if (sending) return;
 
@@ -4405,7 +4460,7 @@
       const email = form.querySelector("#estimate-email").value.trim();
 
       if (form.querySelector("#estimate-hp").value) {
-        setStatus("<strong>Got it — it's in my inbox.</strong> You'll hear back from me directly, usually same day.", "ok");
+        setStatus("The estimate request was not sent.");
         return;
       }
       if (Date.now() - startedAt < 4000) {
@@ -4424,16 +4479,32 @@
       }
 
       const submit = form.querySelector(".estimate-submit");
+      const business = form.querySelector("#estimate-business").value.trim();
+      const phone = form.querySelector("#estimate-phone").value.trim();
+      const notes = form.querySelector("#estimate-notes").value.trim();
+      const estimateSummary = summaryText();
+      const estimateTotal = pick.size ? total() : null;
+      const estimateBaseSubtotal = pick.size ? baseTotal() : null;
+      const estimateAddonsSubtotal = addonsTotal();
       const payload = {
-        _subject: `[BNDR ESTIMATE] ${name} — ${pick.size ? money(total()) : "no size picked"}`,
+        _subject: `[BNDR ESTIMATE] ${name} — ${estimateTotal === null ? "no size picked" : money(estimateTotal)}`,
         _template: "table",
         _captcha: "false",
         name,
-        business: form.querySelector("#estimate-business").value.trim(),
+        business,
         email,
-        phone: form.querySelector("#estimate-phone").value.trim(),
-        project: summaryText(),
-        notes: form.querySelector("#estimate-notes").value.trim(),
+        phone,
+        project: estimateSummary,
+        build_subtotal: estimateBaseSubtotal === null ? "—" : money(estimateBaseSubtotal),
+        addons_subtotal: money(estimateAddonsSubtotal),
+        estimate_total: estimateTotal === null ? "not locked" : money(estimateTotal),
+        estimated_deposit: estimateTotal === null ? "not locked" : money(deposit()),
+        estimated_balance: estimateTotal === null ? "not locked" : money(balance()),
+        payment_terms: "50% deposit at checkout; remaining 50% before launch or handoff (confirmed in quote)",
+        managed_hosting_care: "$75/month, separate",
+        additional_work: "$75/hour, approved work only",
+        request_type: "Quote request only — no Stripe checkout initiated",
+        notes,
         page: location.href.split("?")[0]
       };
 
@@ -4442,10 +4513,10 @@
         submit.disabled = false;
         submit.textContent = "Send it — get your reply direct →";
       };
-
       const fallback = () => {
-        const mail = `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(payload._subject)}&body=${encodeURIComponent(summaryText() + `\n\nName: ${name}\nBusiness: ${payload.business}\nEmail: ${email}\nPhone: ${payload.phone}\nNotes: ${payload.notes}`)}`;
-        setStatus(`The form service didn't answer, but nothing is lost — <a href="${mail}">send the same details by email in one tap →</a>`);
+        const body = estimateSummary + `\n\nName: ${name}\nBusiness: ${business}\nEmail: ${email}\nPhone: ${phone}\nNotes: ${notes}`;
+        const mail = `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(payload._subject)}&body=${encodeURIComponent(body)}`;
+        setStatus(`Estimate request was not delivered by the form service. <a href="${mail}">Send the same details by email →</a>`);
         restore();
       };
 
@@ -4455,23 +4526,12 @@
       setStatus("");
 
       try {
-        fetch(`https://formsubmit.co/ajax/${OWNER_EMAIL}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Accept": "application/json" },
-          body: JSON.stringify(payload)
-        })
-          .then(response => {
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            return response.json().catch(() => ({}));
-          })
-          .then(() => {
-            setStatus("<strong>Got it — it's in my inbox.</strong> You'll hear back from me directly, usually same day. No secretary, no queue, no drip campaign.", "ok");
-            form.querySelectorAll("input,textarea,button").forEach(node => { node.disabled = true; });
-            if (window.gtag) {
-              try { window.gtag("event", "generate_lead", { currency: "USD", value: pick.size ? total() : 0 }); } catch (_) {}
-            }
-          })
-          .catch(fallback);
+        await sendEstimate(payload);
+        setStatus("<strong>Estimate request sent.</strong> This is not a payment confirmation.", "ok");
+        form.querySelectorAll("input,textarea,button").forEach(node => { node.disabled = true; });
+        if (window.gtag) {
+          try { window.gtag("event", "generate_lead", { currency: "USD", value: estimateTotal || 0 }); } catch (_) {}
+        }
       } catch (_) {
         fallback();
       }

@@ -15,32 +15,31 @@ BNDR LLC builds custom digital work around the individual business rather than d
 ### BNDR Lander
 - 1 custom page
 - 1 included revision
-- Regular price: $2,500
-- Customer 1 promotional price: $750
-- Customer 2 promotional price: $1,000
-- Customer 3 promotional price: $1,500
+- Project total: $1,500
+- 50% deposit at checkout: $750
+- Remaining 50% before launch or handoff: $750
+- [Pay the deposit](<https://buy.stripe.com/dRm3cv6038gqckkgze0oM1h>)
+- [Pay the remaining balance](<https://buy.stripe.com/6oUcN5cor40afwwfva0oM1k>)
 
 ### BNDR Standard
 - 3 custom pages
 - 2 included revisions
-- Regular price: $5,000
-- Customer 1 promotional price: $1,500
-- Customer 2 promotional price: $2,000
-- Customer 3 promotional price: $3,000
+- Project total: $3,000
+- 50% deposit at checkout: $1,500
+- Remaining 50% before launch or handoff: $1,500
+- [Pay the deposit](<https://buy.stripe.com/00w4gzagj9kuacc5UA0oM1i>)
+- [Pay the remaining balance](<https://buy.stripe.com/fZu6oHcor7cm988beU0oM1l>)
 
 ### BNDR Expanded
 - 5 custom pages
 - 3 included revisions
-- Regular price: $7,500
-- Customer 1 promotional price: $2,250
-- Customer 2 promotional price: $3,000
-- Customer 3 promotional price: $4,500
+- Project total: $4,500
+- 50% deposit at checkout: $2,250
+- Remaining 50% before launch or handoff: $2,250
+- [Pay the deposit](<https://buy.stripe.com/cNibJ12NR7cm4RSciY0oM1j>)
+- [Pay the remaining balance](<https://buy.stripe.com/bJe4gzagj2W60BC82I0oM1m>)
 
-The first three promotional customers pay the advertised promotional price in full at checkout. After those promotional spots are gone, regular-price projects use a 50% deposit to start and the remaining 50% is due before launch or handoff.
-
-Managed Hosting + Care is $75/month.
-
-Additional work outside the approved project scope is $75/hour. Additional work and hours are discussed and approved before billing.
+All regular website projects use a 50% deposit at checkout, with the remaining 50% due before launch or handoff. Managed Hosting + Care is separate at $75/month. Additional approved work is $75/hour.
 
 ## Managed Hosting and Care
 
@@ -83,7 +82,7 @@ Coded sites can also include interactive and engaging experiences where they mak
 A custom website built around your business, not a recycled template with your logo dropped into it. Your package includes the listed number of pages, mobile-first design, the listed revision rounds, deployment, and direct communication with me throughout the build. I’m very particular about the work I put my name on. I don’t like handing over something I think you might be even slightly disappointed with.
 
 ### How does payment work?
-The first three promotional spots are paid in full at checkout at the advertised discounted price. After those are gone, regular-price projects are 50% upfront to start and 50% before launch or handoff. Managed Hosting + Care is separate at $75/month.
+Website projects are split into two payments: a 50% deposit at checkout and the remaining 50% before launch or handoff. Managed Hosting + Care is separate at $75/month.
 
 ### How long does a website take?
 Website timelines vary based on what you need and how clearly you already know what you want. I aim for 1–3 days for one-page sites, 1–2 weeks for three-page sites, usually closer to one week, and larger builds within about a month. If you know exactly what you want and we nail it quickly, it can be finished sooner.
