@@ -3842,23 +3842,35 @@
     let activeView=null;
     let lastTrigger=null;
 
-    // Local screenshots load when the Builds view opens; no external app runtimes boot here.
+    // Existing published cards retain their fallback; reserved slots need a working preview and link.
     const loadBuildPreviews=()=>{
-      // Drop replacement JPEGs into assets/project-previews; missing files keep the live link.
       views.builds.querySelectorAll('.project-preview[data-preview-src]').forEach(preview=>{
+        const card=preview.closest('.project-card');
+        const slot=card.hasAttribute('data-project-slot');
+        const src=preview.dataset.previewSrc.trim();
+        if(slot){
+          const url=card.querySelector('.project-card-link')?.getAttribute('href')?.trim() || '';
+          if(!src || !/^https?:\/\//i.test(url)) return;
+        }
         const image=document.createElement('img');
-        image.loading='lazy';
+        image.loading=slot?'eager':'lazy';
         image.decoding='async';
-        image.alt=`${preview.closest('.project-card').querySelector('.project-name').textContent} preview`;
+        image.alt=`${card.querySelector('.project-name').textContent} preview`;
         image.style.opacity='0';
         image.addEventListener('load',()=>{
           image.style.removeProperty('opacity');
           preview.querySelector('.project-preview-visit')?.remove();
+          if(slot){
+            preview.append(image);
+            card.querySelector('.project-card-link').setAttribute('aria-label',`Open ${card.querySelector('.project-name').textContent} in a new tab`);
+            card.hidden=false;
+            updateBuildCounts();
+          }
         },{once:true});
         image.addEventListener('error',()=>image.remove(),{once:true});
-        image.src=preview.dataset.previewSrc;
+        image.src=src;
         preview.removeAttribute('data-preview-src');
-        preview.append(image);
+        if(!slot) preview.append(image);
       });
       views.builds.querySelectorAll('.project-preview img[data-src]').forEach(image=>{
         image.src=image.dataset.src;
@@ -3867,7 +3879,7 @@
     };
     const updateBuildCounts=()=>{
       views.builds.querySelectorAll('.build-category').forEach(category=>{
-        const count=category.querySelectorAll(':scope > .project-grid > .project-card').length;
+        const count=category.querySelectorAll(':scope > .project-grid > .project-card:not([hidden])').length;
         const output=category.querySelector('.category-count');
         if(output) output.textContent=`${String(count).padStart(2,'0')} ${category.getAttribute('aria-labelledby')==='examples-title' ? (count===1?'example':'examples') : (count===1?'build':'builds')}`;
       });
